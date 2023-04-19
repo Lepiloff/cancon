@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Canna Strains{% endblock title %}</title>
+    <!-- Import Materialize CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    {% load static %}
+    <!-- Import custom styles -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <!-- Import Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    {% block extra_head %}{% endblock extra_head %}
+</head>
+<body>
+    <header>
+        <!-- Здесь можно добавить логотип, навигацию и т.д. -->
+    </header>
+
+    <main>
+        {% block content %}
+        <!-- Содержимое страницы будет подставляться здесь -->
+        {% endblock content %}
+    </main>
+
+    <footer>
+        <!-- Здесь можно добавить информацию об авторских правах, контактные данные и т.д. -->
+    </footer>
+    <!-- Import Materialize JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    {% block extra_scripts %}{% endblock extra_scripts %}
+</body>
+</html>
