@@ -3,7 +3,7 @@ version: '3.10'
 services:
   web:
     build: .
-    command: gunicorn canna.wsgi:application --bind 0.0.0.0:8000
+    command: sh -c "python manage.py migrate && gunicorn canna.wsgi:application --bind 0.0.0.0:8000"
     volumes:
       - .:/app
       - static_volume:/app/staticfiles
