@@ -5,8 +5,8 @@ services:
     build: .
     command: sh -c "python manage.py migrate && gunicorn canna.wsgi:application --bind 0.0.0.0:8000"
     volumes:
-      - .:/app
-      - static_volume:/app/staticfiles
+      - .:/apps
+      - static_volume:/apps/staticfiles
     depends_on:
       - db
     env_file:
