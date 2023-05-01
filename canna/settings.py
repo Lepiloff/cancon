@@ -26,6 +26,8 @@ SECRET_KEY = 'django-insecure-f%&=l7d$u6(26su99+1db(2g0qv(@9nzv(je^4@l^&94b(^jgb
 DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'cannamente.com', '3.78.2.71']
+CSRF_TRUSTED_ORIGINS = ['https://cannamente.com', 'https://*.127.0.0.1']
+
 
 # Application definition
 
