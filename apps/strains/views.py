@@ -10,7 +10,7 @@ def strain_detail(request, slug):
 
 
 def strain_list(request):
-    strains = Strain.objects.all().order_by('name')
+    strains = Strain.objects.filter(active=True).order_by('name')
     paginator = Paginator(strains, 9)
 
     page = request.GET.get('page')
