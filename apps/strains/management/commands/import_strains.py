@@ -110,41 +110,53 @@ class Command(BaseCommand):
             strains_data = json.load(f)
 
         for strain_data in strains_data.values():
+            defaults = {
+                'title': f"{strain_data['strain_name']} | Variedad de cannabis",
+                'description': f"Obtén más información sobre la variedad de cannabis {strain_data['strain_name']} , sus efectos y sabores.",
+                'keywords': f"{strain_data['strain_name']} , cannabis, variedad, efectos, sabores",
+                'rating': float(strain_data['rating']),
+                'category': strain_data['category'],
+                'thc': float(strain_data['thc']),
+                'text_content': strain_data['text_content'],
+            }
+
+            if 'cbd' in strain_data:
+                defaults['cbd'] = float(strain_data['cbd'])
+
+            if 'cbg' in strain_data:
+                defaults['cbg'] = float(strain_data['cbg'])
+
             strain, _ = Strain.objects.get_or_create(
-                name=strain_data["strain_name"],
-                defaults={
-                    "rating": float(strain_data["rating"]),
-                    "category": strain_data["category"],
-                    "thc": float(strain_data["thc"]),
-                    "cbg": float(strain_data["cbg"]),
-                    "text_content": strain_data["text_content"],
-                },
+                name=strain_data['strain_name'],
+                defaults=defaults,
             )
 
-            for feeling_name in strain_data["feelings"]:
+            for feeling_name in strain_data['feelings']:
                 feeling, _ = Feeling.objects.get_or_create(name=feeling_name)
                 strain.feelings.add(feeling)
 
-            for negative_name in strain_data["negatives"]:
+            for negative_name in strain_data['negatives']:
                 negative, _ = Negative.objects.get_or_create(name=negative_name)
                 strain.negatives.add(negative)
 
-            for helps_with_name in strain_data["helps_with"]:
+            for helps_with_name in strain_data['helps_with']:
                 helps_with, _ = HelpsWith.objects.get_or_create(name=helps_with_name)
                 strain.helps_with.add(helps_with)
 
-            for flavor_name in strain_data["flavors"]:
+            for flavor_name in strain_data['flavors']:
                 flavor, _ = Flavor.objects.get_or_create(name=flavor_name)
                 strain.flavors.add(flavor)
 
             # Download and save the image
-            if strain_data["img_url"]:
-                response = requests.get(strain_data["img_url"])
+            if strain_data['img_url']:
+                response = requests.get(strain_data['img_url'])
                 if response.status_code == 200:
                     img_content = ContentFile(response.content)
-                    file_name = f"{strain.slug}.png"
+                    file_name = f'{strain.slug}.png'
                     strain.img.save(file_name, img_content)
-                    strain.img_alt_text = f"{strain.name} image"
+                    strain.img_alt_text = f'{strain.name} image'
                     strain.save()
 
-            self.stdout.write(self.style.SUCCESS(f"Imported {strain.name}"))
+            self.stdout.write(self.style.SUCCESS(f'Imported {strain.name}'))
+
+
