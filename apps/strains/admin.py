@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Strain, Feeling, Negative, HelpsWith, Flavor
+from .models import Article, Strain, Feeling, Negative, HelpsWith, Flavor
 
 
 class StrainAdmin(admin.ModelAdmin):
@@ -10,7 +10,14 @@ class StrainAdmin(admin.ModelAdmin):
     list_editable = ('active',)
 
 
+class ArticleAdmin(admin.ModelAdmin):
+    list_display = ('title',)
+    search_fields = ('title', 'category')
+    list_filter = ('category', )
+
+
 admin.site.register(Strain, StrainAdmin)
+admin.site.register(Article, ArticleAdmin)
 admin.site.register(Feeling)
 admin.site.register(Negative)
 admin.site.register(HelpsWith)
