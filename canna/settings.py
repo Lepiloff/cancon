@@ -25,8 +25,8 @@ SECRET_KEY = 'django-insecure-f%&=l7d$u6(26su99+1db(2g0qv(@9nzv(je^4@l^&94b(^jgb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'cannamente.com', '3.78.2.71']
-CSRF_TRUSTED_ORIGINS = ['https://cannamente.com', 'https://*.127.0.0.1']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').split(',')
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS').split(',')
 
 
 # Application definition
@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'users',
     'apps.strains',
     'storages',
+    'tinymce',
 ]
 
 MIDDLEWARE = [
@@ -153,3 +154,4 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "users.CustomUser"
+

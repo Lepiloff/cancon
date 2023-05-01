@@ -1,5 +1,6 @@
 from django.db import models
 from django.template.defaultfilters import slugify
+from tinymce.models import HTMLField
 
 
 CATEGORY_CHOICES = [
@@ -8,43 +9,10 @@ CATEGORY_CHOICES = [
     ('Indica', 'Indica'),
 ]
 
-FEELING_CHOICES = [
-    ('Uplifted', 'Uplifted'),
-    ('Euphoric', 'Euphoric'),
-    ('Energetic', 'Energetic'),
-]
-
-NEGATIVE_CHOICES = [
-    ('Dizzy', 'Dizzy'),
-    ('Anxious', 'Anxious'),
-    ('Paranoid', 'Paranoid'),
-]
-
-HELPS_WITH_CHOICES = [
-    ('Anxiety', 'Anxiety'),
-    ('Depression', 'Depression'),
-    ('Stress', 'Stress'),
-]
-
-
-FLAVOR_CHOICES = [
-    ('Butter', 'Butter'),
-    ('Vanilla', 'Vanilla'),
-    ('Citrus', 'Citrus'),
-]
-
-
-ARTICLE_CATEGORY_CHOICES = [
-    ('news', 'News'),
-    ('info', 'Information'),
-    ('how-to', 'How-To'),
-    ('other', 'Other'),
-]
-
 
 class BaseText(models.Model):
     title = models.CharField(max_length=255)
-    text_content = models.TextField()
+    text_content = HTMLField()
     description = models.CharField(max_length=255)
     keywords = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)

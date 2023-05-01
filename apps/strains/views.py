@@ -4,9 +4,10 @@ from django.core.paginator import Paginator
 
 
 def strain_detail(request, slug):
-    strain = get_object_or_404(Strain, slug=slug)
+    strain = get_object_or_404(Strain, slug=slug, active=True)
     context = {'strain': strain}
     return render(request, 'strain_detail.html', context)
+
 
 
 def strain_list(request):
