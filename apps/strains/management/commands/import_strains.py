@@ -98,6 +98,38 @@ from apps.strains.models import (
     Flavor,
 )
 
+from PIL import Image, ImageEnhance, ImageFilter
+from io import BytesIO
+
+
+angle = 45
+brightness_factor = 1.1
+contrast_factor = 1.1
+blur_radius = 2
+
+
+def process_image(image, angle, brightness_factor, contrast_factor, blur_radius):
+    # Конвертируем изображение в формат RGB
+    image = image.convert('RGB')
+
+    # Поворачиваем изображение
+    # rotated_image = image.rotate(angle)
+
+    # Изменяем яркость изображения
+    enhancer_brightness = ImageEnhance.Brightness(image)
+    bright_image = enhancer_brightness.enhance(brightness_factor)
+
+    # Изменяем контраст изображения
+    enhancer_contrast = ImageEnhance.Contrast(bright_image)
+    contrast_image = enhancer_contrast.enhance(contrast_factor)
+
+    # Накладываем фильтр размытия
+    # blurred_image = contrast_image.filter(ImageFilter.GaussianBlur(blur_radius))
+
+    return contrast_image
+
+
+
 
 class Command(BaseCommand):
     help = "Import strains from JSON file"
@@ -153,10 +185,16 @@ class Command(BaseCommand):
                 if response.status_code == 200:
                     img_content = ContentFile(response.content)
                     file_name = f'{strain.slug}.png'
+
+                    # Обработка изображения с использованием process_image
+                    image = Image.open(BytesIO(response.content))
+                    modified_image = process_image(image, angle, brightness_factor, contrast_factor, blur_radius)
+                    image_io = BytesIO()
+                    modified_image.save(image_io, format='PNG')
+                    img_content = ContentFile(image_io.getvalue())
+
                     strain.img.save(file_name, img_content)
                     strain.img_alt_text = f'{strain.name} image'
                     strain.save()
 
             self.stdout.write(self.style.SUCCESS(f'Imported {strain.name}'))
-
-
