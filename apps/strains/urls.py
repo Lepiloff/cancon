@@ -1,7 +1,9 @@
 from django.urls import path
-from . import views
+from apps.strains import views
 
 urlpatterns = [
+    path('', views.main_page, name='main_page'),
     path('strains/', views.strain_list, name='strain_list'),
     path('strain/<slug:slug>/', views.strain_detail, name='strain_detail'),
+    path('search/', views.search, name='search'),
 ]
