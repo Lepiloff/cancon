@@ -1,34 +1,127 @@
 <!DOCTYPE html>
-<html lang="en">
+<!--[if IE 6]>
+<html id="ie6" dir="ltr" lang="es">
+<![endif]-->
+<!--[if IE 7]>
+<html id="ie7" dir="ltr" lang="es">
+<![endif]-->
+<!--[if IE 8]>
+<html id="ie8" dir="ltr" lang="es">
+<![endif]-->
+<!--[if IE 9]>
+<html id="ie9" dir="ltr" lang="es">
+<![endif]-->
+<!--[if !(IE 6) | !(IE 7) | !(IE 8) | !(IE 9) ]><!-->
+<html dir="ltr" lang="es">
+<!--<![endif]-->
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Canna Strains{% endblock title %}</title>
-    <!-- Import Materialize CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <meta charset="utf-8" />
+    <title>{% block title %}{% endblock %}</title>
+    <meta name="keywords" content="{% block keywords %}{% endblock %}" />
+    <meta name="description" content="{% block description %}{% endblock %}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     {% load static %}
-    <!-- Import custom styles -->
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <!-- Import Google Fonts -->
-    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
-    {% block extra_head %}{% endblock extra_head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}" />
 </head>
 <body>
-    <header>
-        <!-- Здесь можно добавить логотип, навигацию и т.д. -->
+    {% block header_block %}
+        	<header class="header container">
+        <a href="/" class="logo">
+            <img src="{% static 'img/logo.svg' %}" alt="" width="195" height="18" loading="lazy" decoding="async" class="logo_img">
+        </a>
+        <div class="menu-btn">
+            <img src="{% static 'img/menu-btn.svg' %}" alt="" width="24" height="24" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="menu-btn-ico">
+           	<img src="{% static 'img/close.svg' %}" alt="" width="24" height="24" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="menu-btn-close">
+        </div>
+        <div class="header-menu-wrapper">
+            <form action="{% url 'search' %}" method="get" id="searchForm" class="header__search">
+                <input type="text" name="q" class="header__search_input form-control" placeholder="Search">
+                <button type="submit" class="header__search_submit" data-toggle="modal" data-target="#exampleModal">
+                    <img src="{% static 'img/search.svg' %}" alt="" width="15" height="15" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="img_center">
+                </button>
+            </form>
+            <nav class="menu">
+                <div class="menu_caption">Menu</div>
+                <ul class="menu_ul">
+                    <li class="menu_li">
+                        <a href="{% url 'strain_list' %}" class="menu_a">Variedades</a>
+                    </li>
+                    <li class="menu_li">
+                        <a href="#" class="menu_a">Blog</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
     </header>
+        <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Resultado de la búsqueda</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <img src="{% static 'img/close.svg' %}" alt="" width="24" height="24" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="menu-btn-close">
+            </button>
+          </div>
+          <div class="modal-body">
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endblock header_block %}
 
-    <main>
-        {% block content %}
-        <!-- Содержимое страницы будет подставляться здесь -->
-        {% endblock content %}
-    </main>
+    {% block content %} {% endblock content %}
 
-    <footer>
-        <!-- Здесь можно добавить информацию об авторских правах, контактные данные и т.д. -->
-    </footer>
-    <!-- Import Materialize JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    {% block extra_scripts %}{% endblock extra_scripts %}
+    {% block footer %}
+            <footer class="footer"><div class="container">
+    	<div class="footer_row">
+	    	<div class="footer_col footer_col--1 ">
+	    		<a href="{% url 'strain_list' %}" class="footer_a">Variedades</a><br>
+	    		<a href="#" class="footer_a">Blog</a>
+	    	</div>
+	    	<div class="footer_col footer_col--2">
+                Descubre la variedad de cepas de marihuana con nuestro catálogo integral. Nuestra plataforma proporciona descripciones detalladas y características únicas de cada cepa, incluyendo sensaciones, beneficios terapéuticos, sabores y niveles de THC. Explora y encuentra la cepa perfecta para tus necesidades con nosotros.
+            </div>
+	    	<div class="footer_col footer_col--3">
+	    		<div class="text-left inline-block">
+		    		<a href="#" class="logo footer--logo">
+			            <img src="{% static 'img/logo.svg' %}" alt="" width="195" height="18" loading="lazy" decoding="async" class="logo_img">
+			        </a><br>
+		    		<a href="mailto:Gmail@gmail.com">
+		    			Gmail@gmail.com
+		    		</a>
+	    		</div>
+	    	</div>
+	    	<div class="footer_col footer_col--4">
+	    		<img src="{% static 'img/footer.svg' %}" alt="" width="" height="" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="footer_img">
+	    	</div>
+    	</div>
+    	<div class="footer_copyright">Copyright 2023</div>
+    </div></footer>
+    {% endblock footer %}
+
+    {% block common_scripts %}
+        <script src="{% static 'js/jquery-3.2.0.min.js' %}"></script>
+        <script src="{% static 'js/popper.min.js' %}"></script>
+        <script src="{% static 'js/dropdown.js' %}"></script>
+        <script src="{% static 'js/sticky-kit.min.js' %}"></script>
+        <script src="{% static 'js/jquery.raty.js' %}"></script>
+        <script src="{% static 'js/util.js' %}"></script>
+        <script src="{% static 'js/collapse.js' %}"></script>
+        <script src="{% static 'js/modal.js' %}"></script>
+        <script src="{% static 'js/owl.carousel.min.js' %}"></script>
+        <script src="{% static 'js/strains_download.js' %}"></script>
+        <script src="{% static 'js/strains_search.js' %}"></script>
+
+        <script type="text/javascript">
+            var starOnUrl = "{% static 'img/raty_on.svg' %}";
+            var starOffUrl = "{% static 'img/raty_off.svg' %}";
+            var starHalfUrl = "{% static 'img/raty_half.svg' %}";
+        </script>
+
+        <script src="{% static 'js/script.js' %}"></script>
+    {% endblock common_scripts %}
+
+    {% block page_scripts %} {% endblock page_scripts %}
 </body>
 </html>
