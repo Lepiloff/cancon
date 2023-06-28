@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% load static %}
+{% load translate from translate %}
+{% block title %}
+Catálogo de Variedades de Marihuana | Tu Guía Completa
+{% endblock %}
+
+{% block keywords %}
+Catálogo de marihuana, variedades de marihuana, cepas de cannabis, guía de marihuana, cannabis medicinal, cannabis recreativa, índica, sativa, híbrida
+{% endblock %}
+
+{% block description %}
+Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos de cepas de cannabis para uso medicinal y recreativo. Encuentra la variedad perfecta de índica, sativa o híbrida para tus necesidades. Actualizado y detallado para tu conveniencia.
+{% endblock %}
+
+{% block content %}
+<body class="">
+<main class="page">
+    <div class="container flex-grow">
+    	<div class="h2">FILTROS</div>
+
+       <form method="get" id="filterForm">
+        <div class="filter_row">
+            <div class="filter_col">
+            <a class="filter_btn" data-toggle="collapse" href="#collapseExample0" role="button" aria-expanded="false" aria-controls="collapseExample0">
+                Tipo
+            </a>
+            <div class="collapse" id="collapseExample0">
+                <div class="card card-body checkbox_row">
+                    {% for choice in form.category.field.choices %}
+                        <label class="checkbox checkbox_col">
+                            <input type="checkbox" class="checkbox_input" name="{{ form.category.html_name }}" value="{{ choice.0 }}">
+                            <span class="checkbox_ico"></span>
+                            {{ choice.1 }}
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+            <div class="filter_col">
+            <a class="filter_btn" data-toggle="collapse" href="#collapseExample1" role="button" aria-expanded="false" aria-controls="collapseExample1">
+                Sensaciones
+            </a>
+            <div class="collapse" id="collapseExample1">
+                <div class="card card-body checkbox_row">
+                    {% load translate from translate %}
+                    {% for choice in form.feelings.field.choices %}
+                        <label class="checkbox checkbox_col">
+                            <input type="checkbox" class="checkbox_input" name="{{ form.feelings.html_name }}" value="{{ choice.0 }}">
+                            <span class="checkbox_ico"></span>
+                            {{ choice.1|translate:feelings_translation }}
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+            <div class="filter_col">
+            <a class="filter_btn" data-toggle="collapse" href="#collapseExample2" role="button" aria-expanded="false" aria-controls="collapseExample2">
+                Ayuda con
+            </a>
+            <div class="collapse" id="collapseExample2">
+                <div class="card card-body checkbox_row">
+                    {% for choice in form.helps_with.field.choices %}
+                        <label class="checkbox checkbox_col">
+                            <input type="checkbox" class="checkbox_input" name="{{ form.helps_with.html_name }}" value="{{ choice.0 }}">
+                            <span class="checkbox_ico"></span>
+                            {{ choice.1|translate:helps_with_translation }}
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+            <div class="filter_col">
+            <a class="filter_btn" data-toggle="collapse" href="#collapseExample3" role="button" aria-expanded="false" aria-controls="collapseExample3">
+                Sabores
+            </a>
+            <div class="collapse" id="collapseExample3">
+                <div class="card card-body checkbox_row">
+                    {% for choice in form.flavors.field.choices %}
+                        <label class="checkbox checkbox_col">
+                            <input type="checkbox" class="checkbox_input" name="{{ form.flavors.html_name }}" value="{{ choice.0 }}">
+                            <span class="checkbox_ico"></span>
+                            {{ choice.1|translate:flavors_translation }}
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+            <div class="filter_col">
+    <a class="filter_btn" data-toggle="collapse" href="#collapseExample4" role="button" aria-expanded="false" aria-controls="collapseExample4">
+        Nivel de THC
+    </a>
+    <div class="collapse" id="collapseExample4">
+        <div class="card card-body checkbox_row">
+            {% for choice in form.thc.field.choices %}
+                <label class="checkbox checkbox_col">
+                    <input type="checkbox" class="checkbox_input" name="{{ form.thc.html_name }}" value="{{ choice.0 }}">
+                    <span class="checkbox_ico"></span>
+                    {{ choice.1 }}
+                </label>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+        </div>
+        </form>
+    {% if no_matches %}
+    <p>No hay cepas que coincidan. Nos encanta tu imaginación, pero ninguna variedad coincide con la descripción. Prueba a simplificar tus opciones o empieza de cero borrando los filtros.</p>
+{% else %}
+    	<section class="ctg" id="strainsContainer">
+            {% for strain in strains %}
+            <div class="ctg__item">
+    {% if strain.top %}
+      <div class="ctg__item_top">Top</div>
+    {% endif %}
+    <div class="ctg__item_img">
+      <img src="{{ strain.img.url }}" alt="{{ strain.name }}" width="380" height="267" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="object_fit">
+    </div>
+    <div class="ctg__item_descript">
+      <a href="{% url 'strain_detail' slug=strain.slug %}">
+        <span class="ctg__item_h2">{{ strain.name }}</span>
+      </a>
+      <a href="#">
+        <span class="ctg__item_h3">{{ strain.category }}</span>
+      </a>
+      <div class="raty" data-score="{{ strain.rating }}" data-readonly="true"></div>
+      <div class="ctg__param_row">
+        <div class="ctg__param_col ctg__param_col--yellow">
+          <div class="ctg__param_ico">
+            <img src="{% static 'img/ctg_thc.svg' %}" alt="" width="15" height="15" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="ctg__param_img">
+          </div>
+          THC {{ strain.thc|floatformat:0  }}%
+        </div>
+        {% if strain.cbd is not none %}
+          <div class="ctg__param_col ctg__param_col--green">
+            <div class="ctg__param_ico">
+              <img src="{% static 'img/ctg_cbd.svg' %}" alt="" width="15" height="15" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="ctg__param_img">
+            </div>
+            CBD {{ strain.cbd|floatformat:0  }}%
+          </div>
+        {% elif strain.cbg is not none %}
+          <div class="ctg__param_col ctg__param_col--green">
+            <div class="ctg__param_ico">
+              <img src="{% static 'img/ctg_cbg.svg' %}" alt="" width="15" height="15" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="ctg__param_img">
+            </div>
+            CBG {{ strain.cbg|floatformat:0  }}%
+          </div>
+        {% endif %}
+      </div>
+      <a href="{% url 'strain_detail' slug=strain.slug %}" class="btn">Más información</a>
+    </div>
+  </div>
+            {% endfor %}
+    	</section>
+    	<div class="text-center">
+    		<a href="#" class="btn btn--outline">Ver todos</a>
+    	</div>
+{% endif %}
+    </div>
+</main><!-- end page -->
+{% endblock content %}
+
+{% block page_scripts %}
+    <script type="text/javascript">
+    var crossUrl = "{% static 'img/filter_close.svg' %}";
+</script>
+<script src="{% static 'js/strains_filter.js' %}"></script>
+{% endblock page_scripts %}
+
+    
+

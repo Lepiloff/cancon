@@ -22,6 +22,7 @@ class BaseText(models.Model):
     class Meta:
         abstract = True
 
+
 class Strain(BaseText):
     name = models.CharField(max_length=255)
     cbd = models.DecimalField(max_digits=5, decimal_places=2, null=True)
@@ -38,6 +39,8 @@ class Strain(BaseText):
     terpenes = models.ManyToManyField('Terpene', blank=True)
     slug = models.SlugField(unique=True, default='')
     active = models.BooleanField(default=False)
+    top = models.BooleanField(default=False)
+    main = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -67,11 +70,13 @@ class ArticleImage(models.Model):
     def __str__(self):
         return f"{self.article.title} - {self.img_alt_text}"
 
+
 class ArticleCategory(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
+
 
 class Feeling(models.Model):
     name = models.CharField(max_length=50, unique=True)

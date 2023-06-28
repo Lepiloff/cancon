@@ -3,11 +3,11 @@ from .models import Article, Strain, Feeling, Negative, HelpsWith, Flavor
 
 
 class StrainAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'rating', 'thc', 'cbd', 'cbg', 'active')
+    list_display = ('name', 'category', 'rating', 'thc', 'cbd', 'cbg', 'active', 'main', 'top')
     search_fields = ('name', 'category')
     list_filter = ('category', )
     filter_horizontal = ('feelings', 'negatives', 'helps_with', 'flavors')
-    list_editable = ('active',)
+    list_editable = ('active', 'main', 'top')
 
 
 class ArticleAdmin(admin.ModelAdmin):
