@@ -142,14 +142,13 @@ class Command(BaseCommand):
             strains_data = json.load(f)
 
         for strain_data in strains_data.values():
-            print(strain_data['strain_name'])
             defaults = {
                 'title': f"{strain_data['strain_name']} | Variedad de cannabis",
                 'description': f"Obtén más información sobre la variedad de cannabis {strain_data['strain_name']} , sus efectos y sabores.",
                 'keywords': f"{strain_data['strain_name']} , cannabis, variedad, efectos, sabores",
                 'rating': float(strain_data['rating']),
                 'category': strain_data['category'],
-                'thc': float(strain_data.get('thc')),
+                'thc': float(strain_data.get('thc')) if strain_data.get('thc') is not None else None,
                 'text_content': strain_data['text_content'],
             }
 
