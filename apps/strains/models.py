@@ -26,7 +26,7 @@ class BaseText(models.Model):
 class Strain(BaseText):
     name = models.CharField(max_length=255)
     cbd = models.DecimalField(max_digits=5, decimal_places=2, null=True)
-    thc = models.DecimalField(max_digits=5, decimal_places=2)
+    thc = models.DecimalField(max_digits=5, decimal_places=2, null=True)
     cbg = models.DecimalField(max_digits=5, decimal_places=2, null=True)
     rating = models.DecimalField(max_digits=3, decimal_places=1)
     img = models.ImageField(upload_to='strains/images', blank=True, null=True)
