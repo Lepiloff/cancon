@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="article">
+    <h2>{{ article.title }}</h2>
+    <p>{{ article.description }}</p>
+    {% for image in article.images.all %}
+        <img src="{{ image.img.url }}" alt="{{ image.img_alt_text }}">
+    {% endfor %}
+    <div>{{ article.text_content|safe }}</div>
+    <div>Categories:
+        {% for category in article.category.all %}
+            <a href="#" class="category-tag" data-category="{{ category.name }}">{{ category.name }}</a>
+        {% endfor %}
+    </div>
+</div>
+
+
+{% endblock content %}
+

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<div id="articles">
+    {% for article in articles %}
+        <div class="article">
+            <h2><a href="{% url 'blog:article_detail' slug=article.slug %}">{{ article.title }}</a></h2>
+            <p>{{ article.description }}</p>
+            {% for image in article.images.all %}
+                {% if image.is_preview %}
+                    <img src="{{ image.img.url }}" alt="{{ image.img_alt_text }}">
+                {% endif %}
+            {% endfor %}
+            <div>Categories:
+                {% for category in article.category.all %}
+                    <a href="#" class="category-tag" data-category="{{ category.name }}">{{ category.name }}</a>
+                {% endfor %}
+            </div>
+        </div>
+    {% empty %}
+        <p>No articles found</p>
+    {% endfor %}
+</div>
+
+{% endblock content %}
+{% block page_scripts %}
+    <script>
+$(document).on('click', '.category-tag', function(e) {
+    e.preventDefault();
+    const category = $(this).data('category');
+
+    $.ajax({
+        url: '/articles/',
+        data: {
+            'category': category,
+        },
+        dataType: 'html',
+        success: function(data) {
+            $('#articles').html(data);
+        }
+    });
+});
+
+</script>
+{% endblock page_scripts %}
