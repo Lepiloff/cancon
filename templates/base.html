@@ -23,7 +23,8 @@
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}" />
 </head>
-<body>
+<body class="">
+<main class="page">
     {% block header_block %}
         	<header class="header container">
         <a href="/" class="logo">
@@ -47,27 +48,12 @@
                         <a href="{% url 'strain_list' %}" class="menu_a">Variedades</a>
                     </li>
                     <li class="menu_li">
-                        <a href="#" class="menu_a">Blog</a>
+                        <a href="{% url 'article_list' %}" class="menu_a">Blog</a>
                     </li>
                 </ul>
             </nav>
         </div>
     </header>
-        <!-- Modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Resultado de la búsqueda</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <img src="{% static 'img/close.svg' %}" alt="" width="24" height="24" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="menu-btn-close">
-            </button>
-          </div>
-          <div class="modal-body">
-          </div>
-        </div>
-      </div>
-    </div>
     {% endblock header_block %}
 
     {% block content %} {% endblock content %}
@@ -100,6 +86,22 @@
     </div></footer>
     {% endblock footer %}
 
+</main>
+        <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Resultado de la búsqueda</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <img src="{% static 'img/close.svg' %}" alt="" width="24" height="24" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="menu-btn-close">
+            </button>
+          </div>
+          <div class="modal-body">
+          </div>
+        </div>
+      </div>
+    </div>
     {% block common_scripts %}
         <script src="{% static 'js/jquery-3.2.0.min.js' %}"></script>
         <script src="{% static 'js/jquery.raty.js' %}"></script>

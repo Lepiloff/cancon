@@ -10,7 +10,7 @@ from apps.strains.localizations import (
     flavors_translation,
 )
 from apps.strains.forms import StrainFilterForm
-from apps.strains.models import Strain
+from apps.strains.models import Article, Strain
 
 
 def main_page(request):
@@ -119,3 +119,22 @@ def search(request):
             return redirect('/')
     else:
         return HttpResponse("No query provided")
+
+
+def article_list(request):
+    category = request.GET.get('category')
+    articles = Article.objects.all()
+
+    if category:
+        articles = articles.filter(category__name=category)
+
+    if 'HTTP_X_REQUESTED_WITH' in request.META and request.META['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest':
+        html_articles = render_to_string('articles.html', {'articles': articles})
+        return HttpResponse(html_articles)
+
+    return render(request, 'articles.html', {'articles': articles})
+
+
+def article_detail(request, slug):
+    article = get_object_or_404(Article, slug=slug)
+    return render(request, 'article_detail.html', {'article': article})
