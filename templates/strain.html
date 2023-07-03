@@ -13,11 +13,9 @@
 {% endblock %}
 
 {% block content %}
-<body class="">
-<main class="page">
-    <div class="container flex-grow">
-<h1>{{ strain.name }}</h1>
-<div class="tovar tavar--section">
+<div class="container flex-grow">
+    <h1>{{ strain.name }}</h1>
+    <div class="tovar tavar--section">
     <div class="tovar_col tovar_col--l">
         <a href="{{ strain.img.url }}" data-fancybox="gallery1" class="tovar_imgwrap">
             <img src="{{ strain.img.url }}" alt="{{ strain.img_alt_text }}" width="500" height="500" class="tovar_img">
@@ -74,63 +72,63 @@
             <span>Ayuda con:&nbsp;<span class="color-grey">{% for help in strain.helps_with.all %}{{ help.name|lower }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
         </div>
     </div>
-</div>
-<div class="tovar--section">
+    </div>
+
+    <div class="tovar--section">
     <h2>Text</h2>
     <div class="tovar_text">{{ strain.text_content }}</div>
-</div>
+    </div>
 
-        <div class="h2">Parámetros similares</div>
-    	<section class="ctg">
-            {% for strain in related_strains %}
-            <div class="ctg__item">
+    <div class="h2">Parámetros similares</div>
+    <section class="ctg">
+    {% for strain in related_strains %}
+    <div class="ctg__item">
     {% if strain.top %}
-      <div class="ctg__item_top">Top</div>
+    <div class="ctg__item_top">Top</div>
     {% endif %}
     <div class="ctg__item_img">
-      <img src="{{ strain.img.url }}" alt="{{ strain.name }}" width="380" height="267" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="object_fit">
+    <img src="{{ strain.img.url }}" alt="{{ strain.name }}" width="380" height="267" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="object_fit">
     </div>
     <div class="ctg__item_descript">
-      <a href="{% url 'strain_detail' slug=strain.slug %}">
-        <span class="ctg__item_h2">{{ strain.name }}</span>
-      </a>
-      <a href="#">
-        <span class="ctg__item_h3">{{ strain.category }}</span>
-      </a>
-      <div class="raty" data-score="{{ strain.rating }}" data-readonly="true"></div>
-      <div class="ctg__param_row">
-        <div class="ctg__param_col ctg__param_col--yellow">
-          <div class="ctg__param_ico">
-            <img src="{% static 'img/ctg_thc.svg' %}" alt="" width="15" height="15" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="ctg__param_img">
-          </div>
-          THC {{ strain.thc|floatformat:0  }}%
-        </div>
-        {% if strain.cbd is not none %}
-          <div class="ctg__param_col ctg__param_col--green">
-            <div class="ctg__param_ico">
-              <img src="{% static 'img/ctg_cbd.svg' %}" alt="" width="15" height="15" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="ctg__param_img">
-            </div>
-            CBD {{ strain.cbd|floatformat:0  }}%
-          </div>
-        {% elif strain.cbg is not none %}
-          <div class="ctg__param_col ctg__param_col--green">
-            <div class="ctg__param_ico">
-              <img src="{% static 'img/ctg_cbg.svg' %}" alt="" width="15" height="15" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="ctg__param_img">
-            </div>
-            CBG {{ strain.cbg|floatformat:0  }}%
-          </div>
-        {% endif %}
-      </div>
-      <a href="{% url 'strain_detail' slug=strain.slug %}" class="btn">Más información</a>
+    <a href="{% url 'strain_detail' slug=strain.slug %}">
+    <span class="ctg__item_h2">{{ strain.name }}</span>
+    </a>
+    <a href="#">
+    <span class="ctg__item_h3">{{ strain.category }}</span>
+    </a>
+    <div class="raty" data-score="{{ strain.rating }}" data-readonly="true"></div>
+    <div class="ctg__param_row">
+    <div class="ctg__param_col ctg__param_col--yellow">
+    <div class="ctg__param_ico">
+    <img src="{% static 'img/ctg_thc.svg' %}" alt="" width="15" height="15" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="ctg__param_img">
     </div>
-  </div>
-            {% endfor %}
-    	</section>
-    	<div class="text-center">
-    		<a href="{% url 'strain_list' %}" class="btn btn--outline_с">Ver todos</a>
-    	</div>
+    THC {{ strain.thc|floatformat:0  }}%
     </div>
-</main>
+    {% if strain.cbd is not none %}
+    <div class="ctg__param_col ctg__param_col--green">
+    <div class="ctg__param_ico">
+      <img src="{% static 'img/ctg_cbd.svg' %}" alt="" width="15" height="15" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="ctg__param_img">
+    </div>
+    CBD {{ strain.cbd|floatformat:0  }}%
+    </div>
+    {% elif strain.cbg is not none %}
+    <div class="ctg__param_col ctg__param_col--green">
+    <div class="ctg__param_ico">
+      <img src="{% static 'img/ctg_cbg.svg' %}" alt="" width="15" height="15" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="ctg__param_img">
+    </div>
+    CBG {{ strain.cbg|floatformat:0  }}%
+    </div>
+    {% endif %}
+    </div>
+    <a href="{% url 'strain_detail' slug=strain.slug %}" class="btn">Más información</a>
+    </div>
+    </div>
+    {% endfor %}
+    </section>
+    <div class="text-center">
+    <a href="{% url 'strain_list' %}" class="btn btn--outline_с">Ver todos</a>
+    </div>
+</div>
 
   {% endblock content %}
 
