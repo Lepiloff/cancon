@@ -105,49 +105,9 @@ Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos 
     <p>No hay cepas que coincidan. Nos encanta tu imaginación, pero ninguna variedad coincide con la descripción. Prueba a simplificar tus opciones o empieza de cero borrando los filtros.</p>
 {% else %}
     	<section class="ctg" id="strainsContainer">
-            {% for strain in strains %}
-            <div class="ctg__item">
-    {% if strain.top %}
-      <div class="ctg__item_top">Top</div>
-    {% endif %}
-    <div class="ctg__item_img">
-      <img src="{{ strain.img.url }}" alt="{{ strain.name }}" width="380" height="267" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="object_fit">
-    </div>
-    <div class="ctg__item_descript">
-      <a href="{% url 'strain_detail' slug=strain.slug %}">
-        <span class="ctg__item_h2">{{ strain.name }}</span>
-      </a>
-      <a href="#">
-        <span class="ctg__item_h3">{{ strain.category }}</span>
-      </a>
-      <div class="raty" data-score="{{ strain.rating }}" data-readonly="true"></div>
-      <div class="ctg__param_row">
-        <div class="ctg__param_col ctg__param_col--yellow">
-          <div class="ctg__param_ico">
-            <img src="{% static 'img/ctg_thc.svg' %}" alt="" width="15" height="15" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="ctg__param_img">
-          </div>
-          THC {{ strain.thc|floatformat:0  }}%
-        </div>
-        {% if strain.cbd is not none %}
-          <div class="ctg__param_col ctg__param_col--green">
-            <div class="ctg__param_ico">
-              <img src="{% static 'img/ctg_cbd.svg' %}" alt="" width="15" height="15" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="ctg__param_img">
-            </div>
-            CBD {{ strain.cbd|floatformat:0  }}%
-          </div>
-        {% elif strain.cbg is not none %}
-          <div class="ctg__param_col ctg__param_col--green">
-            <div class="ctg__param_ico">
-              <img src="{% static 'img/ctg_cbg.svg' %}" alt="" width="15" height="15" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="ctg__param_img">
-            </div>
-            CBG {{ strain.cbg|floatformat:0  }}%
-          </div>
-        {% endif %}
-      </div>
-      <a href="{% url 'strain_detail' slug=strain.slug %}" class="btn">Más información</a>
-    </div>
-  </div>
-            {% endfor %}
+    {% for strain in strains %}
+        {% include "strain_items.html" %}
+    {% endfor %}
     	</section>
     	<div class="text-center">
     		<a href="#" class="btn btn--outline">Ver todos</a>
