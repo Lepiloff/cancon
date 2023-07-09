@@ -1,28 +1,29 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
+<div class="container flex-grow">
+    <div id="articles">
+        {% for article in articles %}
+            <div class="article">
+                <h2><a href="{% url 'article_detail' slug=article.slug %}">{{ article.title }}</a></h2>
 
-<div id="articles">
-    {% for article in articles %}
-        <div class="article">
-            <h2><a href="{% url 'blog:article_detail' slug=article.slug %}">{{ article.title }}</a></h2>
-            <p>{{ article.description }}</p>
-            {% for image in article.images.all %}
-                {% if image.is_preview %}
-                    <img src="{{ image.img.url }}" alt="{{ image.img_alt_text }}">
-                {% endif %}
-            {% endfor %}
-            <div>Categories:
-                {% for category in article.category.all %}
-                    <a href="#" class="category-tag" data-category="{{ category.name }}">{{ category.name }}</a>
+                {% for image in article.images.all %}
+                    {% if image.is_preview %}
+                        <img src="{{ image.img.url }}" alt="{{ image.img_alt_text }}">
+                    {% endif %}
+                    <div>{{ article.description }}</div>
                 {% endfor %}
+                <div>Categories:
+                    {% for category in article.category.all %}
+                        <a href="#" class="category-tag" data-category="{{ category.name }}">{{ category.name }}</a>
+                    {% endfor %}
+                </div>
             </div>
-        </div>
-    {% empty %}
-        <p>No articles found</p>
-    {% endfor %}
+        {% empty %}
+            <p>No articles found</p>
+        {% endfor %}
+    </div>
 </div>
-
 {% endblock content %}
 {% block page_scripts %}
     <script>
