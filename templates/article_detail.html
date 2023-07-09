@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-
+<div class="container flex-grow">
 <div class="article">
     <h2>{{ article.title }}</h2>
     <p>{{ article.description }}</p>
@@ -15,7 +15,7 @@
         {% endfor %}
     </div>
 </div>
-
+</div>
 
 {% endblock content %}
 
