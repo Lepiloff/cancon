@@ -10,9 +10,7 @@
       <a href="{% url 'strain_detail' slug=strain.slug %}">
         <span class="ctg__item_h2">{{ strain.name }}</span>
       </a>
-      <a href="#">
         <span class="ctg__item_h3">{{ strain.category }}</span>
-      </a>
       <div class="raty" data-score="{{ strain.rating }}" data-readonly="true"></div>
       <div class="ctg__param_row">
         <div class="ctg__param_col ctg__param_col--yellow">
