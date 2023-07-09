@@ -22,7 +22,7 @@
           THC {{ strain.thc|floatformat:0  }}%
         </div>
         {% if strain.cbd is not none %}
-          <div class="ctg__param_col ctg__param_col--green">
+          <div class="ctg__param_col ctg__param_col--blue">
             <div class="ctg__param_ico">
               <img src="{% static 'img/ctg_cbd.svg' %}" alt="" width="15" height="15" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="ctg__param_img">
             </div>
@@ -36,7 +36,7 @@
             CBG {{ strain.cbg|floatformat:0  }}%
           </div>
         {% else %}
-          <div class="ctg__param_col ctg__param_col--green">
+          <div class="ctg__param_col ctg__param_col--blue">
             <div class="ctg__param_ico">
               <img src="{% static 'img/ctg_cbd.svg' %}" alt="" width="15" height="15" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="ctg__param_img">
             </div>
