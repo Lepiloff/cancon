@@ -106,9 +106,7 @@ Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos 
     <p>No hay cepas que coincidan. Nos encanta tu imaginación, pero ninguna variedad coincide con la descripción. Prueba a simplificar tus opciones o empieza de cero borrando los filtros.</p>
 {% else %}
     	<section class="ctg" id="strainsContainer">
-            {% for strain in strains %}
-                {% include "strain_items.html" %}
-            {% endfor %}
+            {% include "strain_items.html" %}
     	</section>
     	<div class="text-center">
     		<a href="#" class="btn btn--outline">Ver todos</a>
