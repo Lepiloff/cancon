@@ -93,7 +93,7 @@ def strain_list(request):
     if 'HTTP_X_REQUESTED_WITH' in request.META and request.META['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest':
         if not strains:
             return HttpResponse(status=204)
-        html_strains = render_to_string('strains.html', {'strains': strains})
+        html_strains = render_to_string('strain_items.html', {'strains': strains})
         return HttpResponse(html_strains)
 
     return render(request, 'strains.html', {
