@@ -51,12 +51,19 @@ def strain_list(request):
     page = request.GET.get('page', 1)
     offset = (int(page) - 1) * 20
 
-    form = StrainFilterForm(request.GET or None)
+    # Создание изменяемого QueryDict объекта
+    mutable_params = request.GET.copy()
+
+    for key in mutable_params.keys():
+        if ',' in mutable_params[key]:
+            mutable_params.setlist(key, mutable_params[key].split(','))
+
+    form = StrainFilterForm(mutable_params or None)
     strains = Strain.objects.filter(active=True)
 
     # Проверяем, содержит ли запрос параметры, которые мы не ожидаем
     expected_params = ['category', 'thc', 'feelings', 'helps_with', 'flavors', 'page']
-    if any(param not in expected_params for param in request.GET):
+    if any(param not in expected_params for param in mutable_params):
         return render(request, 'strains.html', {'form': form, 'no_matches': True})
 
     if form.is_valid():
