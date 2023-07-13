@@ -5,7 +5,11 @@
       <div class="ctg__item_top">Top</div>
     {% endif %}
     <div class="ctg__item_img">
+        {% if strain.img %}
       <img src="{{ strain.img.url }}" alt="{{ strain.name }}" width="380" height="267" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="object_fit">
+        {% else %}
+        <img src="{% static 'img/no_img.png' %}" alt="{{ strain.name }}" width="380" height="267" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="object_fit">
+        {% endif %}
     </div>
     <div class="ctg__item_descript">
       <a href="{% url 'strain_detail' slug=strain.slug %}">
