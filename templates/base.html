@@ -67,9 +67,11 @@
 	    		<a href="{% url 'strain_list' %}" class="footer_a">Variedades</a><br>
 	    		<a href="{% url 'article_list' %}" class="footer_a">Blog</a>
 	    	</div>
-	    	<div class="footer_col footer_col--2">
-                Descubre la variedad de cepas de marihuana con nuestro catálogo integral. Nuestra plataforma proporciona descripciones detalladas y características únicas de cada cepa, incluyendo sensaciones, beneficios terapéuticos, sabores y niveles de THC. Explora y encuentra la cepa perfecta para tus necesidades con nosotros.
-            </div>
+            {% block footer_col_2 %}
+                <div class="footer_col footer_col--2">
+                    Descubre la variedad de cepas de marihuana con nuestro catálogo integral. Nuestra plataforma proporciona descripciones detalladas y características únicas de cada cepa, incluyendo sensaciones, beneficios terapéuticos, sabores y niveles de THC. Explora y encuentra la cepa perfecta para tus necesidades con nosotros.
+                </div>
+            {% endblock footer_col_2 %}
 	    	<div class="footer_col footer_col--3">
 	    		<div class="text-left inline-block">
 		    		<a href="#" class="logo footer--logo">
