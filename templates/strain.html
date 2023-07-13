@@ -17,9 +17,15 @@
     <h1>{{ strain.name }}</h1>
     <div class="tovar tavar--section">
     <div class="tovar_col tovar_col--l">
-        <a href="{{ strain.img.url }}" data-fancybox="gallery1" class="tovar_imgwrap">
+         {% if strain.img %}
+        <a href="#" data-fancybox="gallery1" class="tovar_imgwrap">
             <img src="{{ strain.img.url }}" alt="{{ strain.img_alt_text }}" width="500" height="500" class="tovar_img">
         </a>
+        {% else %}
+         <a href="#" data-fancybox="gallery1" class="tovar_imgwrap">
+            <img src="{% static 'img/no_img.png' %}" alt="{{ strain.name }}" width="380" height="267" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="object_fit">
+        </a>
+        {% endif %}
     </div>
     <div class="tovar_col tovar_col--r">
         <table class="tovar__info">
