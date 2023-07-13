@@ -41,7 +41,7 @@ def strain_detail(request, slug):
 
     context = {
         'strain': strain,
-        'related_strains': related_strains[:8],  # Ограничиваем до 8, на случай если набралось больше
+        'strains': related_strains[:8],  # Ограничиваем до 8, на случай если набралось больше
     }
 
     return render(request, 'strain.html', context)
