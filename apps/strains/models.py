@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.template.defaultfilters import slugify
 from tinymce.models import HTMLField
 
@@ -111,3 +113,14 @@ class Terpene(models.Model):
 
     def __str__(self):
         return self.name
+
+
+@receiver(post_delete, sender=Strain)
+def delete_strain_image(sender, instance, **kwargs):
+    if instance.img:
+        instance.img.delete(False)
+
+@receiver(post_delete, sender=ArticleImage)
+def delete_article_image(sender, instance, **kwargs):
+    if instance.img:
+        instance.img.delete(False)
