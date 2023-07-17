@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}
-    Cepas de Marihuana: Catálogo Exhaustivo y Recursos Informativos
+    Cepas de Marihuana: Catálogo Exhaustivo y Recursos Informativos en Cannamente
 {% endblock %}
 
 {% block keywords %}
@@ -9,11 +9,23 @@
 {% endblock %}
 
 {% block description %}
-    Descubre la riqueza del mundo de la marihuana con nuestro exhaustivo catálogo de cepas. Sumérgete en artículos educativos y amplía tus conocimientos. Únete a nosotros en este viaje de exploración
-{% endblock %}
-
+   Descubre el mundo de la marihuana con Cannamente: un catálogo exhaustivo de cepas y artículos educativos para expandir tus conocimientos. Únete a nosotros en esta exploración.{% endblock %}
 {% block content %}
     <div class="container flex-grow">
+       {% block intro %}
+        <section class="intro-section">
+            <div class="text-content">
+                <h1>Cannamente: Tu Guía Completa de Cepas de Marihuana</h1>
+                <h2>Explora nuestra extensa colección de cepas de marihuana y sumérgete en nuestro recurso informativo para expandir tus conocimientos. Con Cannamente, podrás encontrar la cepa perfecta según tus necesidades y gustos. Comienza tu viaje ahora.</h2>
+                <div class="text-center">
+                    <a href="{% url 'strain_list' %}" class="btn">Ver todas las cepas</a>
+                </div>
+            </div>
+            <div class="image-container">
+                <img src="{% static 'img/footer.svg' %}" alt="">
+            </div>
+        </section>
+        {% endblock intro %}
     	<div class="h2">Artículos</div>
     	<section class="post owl-carousel mb-30">
     		<a href="#" class="post_item"><span class="post_item_in">
