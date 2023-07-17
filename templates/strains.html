@@ -15,6 +15,17 @@ Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos 
 
 {% block content %}
     <div class="container flex-grow">
+       {% block intro %}
+           <section class="intro-section">
+    <div class="text-content">
+        <h1>Nuestro Catálogo de Cepas de Marihuana: Diversidad y Calidad</h1>
+        <h2>Descubre la variedad y unicidad de cada cepa de marihuana en nuestro catálogo. Aquí, puedes explorar en detalle las características, beneficios terapéuticos, sabores y niveles de THC de cada cepa. Encuentra la cepa que se ajusta perfectamente a tus necesidades y preferencias.</h2>
+    </div>
+    <div class="image-container">
+        <img src="{% static 'img/footer.svg' %}" alt="">
+    </div>
+</section>
+           {% endblock intro %}
     	<div class="h3 filter__title">FILTOROS</div>
       {% csrf_token %}
        <form method="get" id="filterForm">
