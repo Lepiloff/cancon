@@ -144,4 +144,8 @@ def article_list(request):
 
 def article_detail(request, slug):
     article = get_object_or_404(Article, slug=slug)
-    return render(request, 'article_detail.html', {'article': article})
+    image = article.images.filter(is_preview=False).first()
+
+    return render(request, 'article_detail.html', {'article': article, 'image': image})
+
+
