@@ -17,9 +17,9 @@
     </div>
     <h2>{{ article.title }}</h2>
     <p>{{ article.created_at }}</p><br>
-    {% for image in article.images.all %}
+    {% if image %}
         <img src="{{ image.img.url }}" alt="{{ image.img_alt_text }}">
-    {% endfor %}
+    {% endif %}
     <div>{{ article.text_content|safe }}</div>
 </div>
 </div>
