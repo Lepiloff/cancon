@@ -34,13 +34,10 @@
                             {% for image in article.images.all %}
                                 {% if image.is_preview %}
                                     <img src="{{ image.img.url }}" alt="{{ image.img_alt_text }}" width="380" height="267" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="post_item_img">
-                                {% else %}
-                                    <img src="{% static 'img/default_preview.jpg' %}" alt="Default preview image" width="380" height="267" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="post_item_img">
                                 {% endif %}
                             {% endfor %}
                             <span class="post_item_descript">
                                 <span class="post_item_h3">{{ article.title }}</span>
-                                <span class="post_item_p">{{ article.description }}</span>
                             </span>
                         </span>
                     </a>
