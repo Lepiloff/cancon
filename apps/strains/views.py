@@ -15,8 +15,10 @@ from apps.strains.models import Article, Strain
 
 def main_page(request):
     strains = Strain.objects.filter(active=True, main=True).order_by('-rating')[:8]
+    articles = Article.objects.all().order_by('-created_at')[:6]
     context = {
         'strains': strains,
+        'articles': articles,
     }
     return render(request, 'main.html', context)
 
@@ -145,7 +147,6 @@ def article_list(request):
 def article_detail(request, slug):
     article = get_object_or_404(Article, slug=slug)
     image = article.images.filter(is_preview=False).first()
-
     return render(request, 'article_detail.html', {'article': article, 'image': image})
 
 
