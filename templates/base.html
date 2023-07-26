@@ -14,9 +14,11 @@
 <!--[if !(IE 6) | !(IE 7) | !(IE 8) | !(IE 9) ]><!-->
 <html dir="ltr" lang="es">
 <!--<![endif]-->
+{% load static %}
 <head>
     <meta charset="utf-8" />
     <title>{% block title %}{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
     <meta name="keywords" content="{% block keywords %}{% endblock %}" />
     <meta name="description" content="{% block description %}{% endblock %}" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
