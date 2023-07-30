@@ -10,47 +10,85 @@
 {% endblock %}
 
 {% block content %}
-<div class="container flex-grow">
-    <div id="articles">
-        {% for article in articles %}
-            <div class="article">
-                <h2><a href="{% url 'article_detail' slug=article.slug %}">{{ article.title }}</a></h2>
 
-                {% for image in article.images.all %}
-                    {% if image.is_preview %}
-                        <img src="{{ image.img.url }}" alt="{{ image.img_alt_text }}">
-                    {% endif %}
-                    <div>{{ article.description }}</div>
-                {% endfor %}
-                <div>Categories:
-                    {% for category in article.category.all %}
-                        <a href="#" class="category-tag" data-category="{{ category.name }}">{{ category.name }}</a>
-                    {% endfor %}
-                </div>
+    <main class="main">
+        <div class="blog">
+            <div class="container">
+                {% if articles %}
+                    <!-- Display the latest article -->
+                    {% with articles|first as latest_article %}
+                    <article class="article article--bg">
+                        <a href="{% url 'article_detail' slug=latest_article.slug %}" class="article__img">
+                            {% for image in latest_article.images.all %}
+                                {% if image.is_preview %}
+                                    <img src="{{ image.img.url }}" alt="{{ image.img_alt_text }}">
+                                {% endif %}
+                            {% endfor %}
+                        </a>
+                        <div class="article__inner">
+                            <span class="article__events">
+                                {% for category in latest_article.category.all %}
+                                    {{ category.name }}
+                                {% endfor %}
+                            </span>
+                            <div class="article__content">
+                                <h2 class="article__title">
+                                    <a href="{% url 'article_detail' slug=latest_article.slug %}">{{ latest_article.title }}</a>
+                                </h2>
+                                <div class="article__descr">
+                                    <p>{{ latest_article.description }}</p>
+                                </div>
+                            </div>
+                            <div class="article__footer">
+                                <div class="article__footer-descr">
+                                    <div class="article__footer-time">
+                                        <time>{{ latest_article.date_posted|date:"d/m/Y" }}</time>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                    {% endwith %}
+
+                    <!-- Iterate over the rest of the articles -->
+                    <div class="blog__items">
+                        {% for article in articles|slice:"1:" %}
+                            <article class="article">
+                                <a href="{% url 'article_detail' slug=article.slug %}">
+                                    <div class="article__img">
+                                        {% for image in article.images.all %}
+                                            {% if image.is_preview %}
+                                                <img src="{{ image.img.url }}" alt="{{ image.img_alt_text }}">
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    <div class="article__content">
+                                        <span class="article__events">
+                                            {% for category in article.category.all %}
+                                                {{ category.name }}
+                                            {% endfor %}
+                                        </span>
+                                        <h2 class="article__title">{{ article.title }}</h2>
+                                        <div class="article__descr">
+                                            <p>{{ article.description }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="article__footer">
+                                        <div class="article__footer-descr">
+                                            <div class="article__footer-time">
+                                                <time>{{ article.date_posted|date:"d/m/Y" }}</time>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </article>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>No articles found</p>
+                {% endif %}
             </div>
-        {% empty %}
-            <p>No articles found</p>
-        {% endfor %}
-    </div>
-</div>
+        </div>
+    </main>
 {% endblock content %}
-{% block page_scripts %}
-    <script>
-$(document).on('click', '.category-tag', function(e) {
-    e.preventDefault();
-    const category = $(this).data('category');
 
-    $.ajax({
-        url: '/articles/',
-        data: {
-            'category': category,
-        },
-        dataType: 'html',
-        success: function(data) {
-            $('#articles').html(data);
-        }
-    });
-});
-
-</script>
-{% endblock page_scripts %}
