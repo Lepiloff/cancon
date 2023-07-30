@@ -20,7 +20,7 @@
                     <article class="article article--bg">
                         <a href="{% url 'article_detail' slug=latest_article.slug %}" class="article__img">
                             {% for image in latest_article.images.all %}
-                                {% if image.is_preview %}
+                                {% if not image.is_preview %}
                                     <img src="{{ image.img.url }}" alt="{{ image.img_alt_text }}">
                                 {% endif %}
                             {% endfor %}
@@ -36,7 +36,7 @@
                                     <a href="{% url 'article_detail' slug=latest_article.slug %}">{{ latest_article.title }}</a>
                                 </h2>
                                 <div class="article__descr">
-                                    <p>{{ latest_article.description }}</p>
+                                    <p>{{ latest_article.text_content|truncatechars:300|safe }}</p>
                                 </div>
                             </div>
                             <div class="article__footer">
@@ -70,13 +70,13 @@
                                         </span>
                                         <h2 class="article__title">{{ article.title }}</h2>
                                         <div class="article__descr">
-                                            <p>{{ article.description }}</p>
+                                            <p>{{ article.text_content|truncatechars:256|safe }}</p>
                                         </div>
                                     </div>
                                     <div class="article__footer">
                                         <div class="article__footer-descr">
                                             <div class="article__footer-time">
-                                                <time>{{ article.date_posted|date:"d/m/Y" }}</time>
+                                                <time>{{ article.created_at|date:"d/m/Y" }}</time>
                                             </div>
                                         </div>
                                     </div>
