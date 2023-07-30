@@ -8,21 +8,33 @@
     {{ article.description }}
 {% endblock %}
 {% block content %}
-<div class="container flex-grow">
-<div class="article">
-    <div>Categories:
-        {% for category in article.category.all %}
-            <a href="#" class="category-tag" data-category="{{ category.name }}">{{ category.name }}</a>
-        {% endfor %}
-    </div>
-    <h2>{{ article.title }}</h2>
-    <p>{{ article.created_at }}</p><br>
-    {% if image %}
-        <img src="{{ image.img.url }}" alt="{{ image.img_alt_text }}">
-    {% endif %}
-    <div>{{ article.text_content|safe }}</div>
-</div>
-</div>
-
-{% endblock content %}
-
+    <main class="main">
+        <div class="article-page">
+            <div class="container">
+                <div class="article-page__header">
+                    <div class="article-page__case">
+                        {% for category in article.category.all %}
+                            <a href="#" class="category-tag" data-category="{{ category.name }}">{{ category.name }}</a>
+                        {% endfor %}
+                    </div>
+                    <h1 class="article-page__title">{{ article.title }}</h1>
+                    <div class="article__footer">
+                        <div class="article__footer-descr">
+                            <div class="article__footer-time">
+                                <time>{{ article.created_at|date:"d/m/Y" }}</time>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="article-page__img">
+                    {% if image %}
+                        <img src="{{ image.img.url }}" alt="{{ image.img_alt_text }}">
+                    {% endif %}
+                </div>
+                <div class="article-page__descr">
+                    {{ article.text_content|safe }}
+                </div>
+            </div>
+        </div>
+    </main>
+{% endblock content%}
