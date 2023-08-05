@@ -13,7 +13,18 @@ from .models import (
 
 
 class StrainAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'rating', 'thc', 'cbd', 'cbg', 'active', 'main', 'top')
+    list_display = (
+        'name',
+        'category',
+        'rating',
+        'thc',
+        'cbd',
+        'cbg',
+        'active',
+        'main',
+        'top',
+        'is_review'
+    )
     search_fields = ('name', 'category')
     list_filter = ('category', )
     filter_horizontal = ('feelings', 'negatives', 'helps_with', 'flavors')
