@@ -120,6 +120,7 @@ def delete_strain_image(sender, instance, **kwargs):
     if instance.img:
         instance.img.delete(False)
 
+
 @receiver(post_delete, sender=ArticleImage)
 def delete_article_image(sender, instance, **kwargs):
     if instance.img:

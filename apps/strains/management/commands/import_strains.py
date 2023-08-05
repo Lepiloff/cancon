@@ -171,9 +171,9 @@ class Command(BaseCommand):
                 negative, _ = Negative.objects.get_or_create(name=negative_name)
                 strain.negatives.add(negative)
 
-            for helps_with_name in strain_data['helps_with']:
-                helps_with, _ = HelpsWith.objects.get_or_create(name=helps_with_name)
-                strain.helps_with.add(helps_with)
+            # for helps_with_name in strain_data['helps_with']:
+            #     helps_with, _ = HelpsWith.objects.get_or_create(name=helps_with_name)
+            #     strain.helps_with.add(helps_with)
 
             for flavor_name in strain_data['flavors']:
                 flavor, _ = Flavor.objects.get_or_create(name=flavor_name)
