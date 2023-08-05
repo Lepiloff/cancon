@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load translate from translate %}
 {% block title %}
     {{ strain.name }}
 {% endblock %}
@@ -53,30 +54,30 @@
                 <td class="tovar__info_td"><div class="raty raty--tovar" data-score="{{ strain.rating }}" data-readonly="true"></div></td>
             </tr>
         </table>
-        <div class="tovar__param">
-            <div class="tovar__param_ico">
-                <img src="{% static 'img/tovar_info1.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
+            <div class="tovar__param">
+                <div class="tovar__param_ico">
+                    <img src="{% static 'img/tovar_info1.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
+                </div>
+                <span>Sensaciones:&nbsp;<span class="color-grey">{% for feeling in strain.feelings.all %}{{ feeling.name|translate:feelings_translation }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
             </div>
-            <span>Sensaciones:&nbsp;<span class="color-grey">{% for feeling in strain.feelings.all %}{{ feeling.name|lower }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
-        </div>
-        <div class="tovar__param">
-            <div class="tovar__param_ico">
-                <img src="{% static 'img/tovar_info2.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
+            <div class="tovar__param">
+                <div class="tovar__param_ico">
+                    <img src="{% static 'img/tovar_info2.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
+                </div>
+                <span>Negativos:&nbsp;<span class="color-grey">{% for negative in strain.negatives.all %}{{ negative.name|translate:negatives_translator }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
             </div>
-            <span>Negativos:&nbsp;<span class="color-grey">{% for negative in strain.negatives.all %}{{ negative.name|lower }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
-        </div>
-        <div class="tovar__param">
-            <div class="tovar__param_ico">
-                <img src="{% static 'img/tovar_info3.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
+            <div class="tovar__param">
+                <div class="tovar__param_ico">
+                    <img src="{% static 'img/tovar_info3.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
+                </div>
+                <span>Sabores:&nbsp;<span class="color-grey">{% for flavor in strain.flavors.all %}{{ flavor.name|translate:flavors_translation }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
             </div>
-            <span>Sabores:&nbsp;<span class="color-grey">{% for flavor in strain.flavors.all %}{{ flavor.name|lower }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
-        </div>
-        <div class="tovar__param">
-            <div class="tovar__param_ico">
-                <img src="{% static 'img/tovar_info4.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
+            <div class="tovar__param">
+                <div class="tovar__param_ico">
+                    <img src="{% static 'img/tovar_info4.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
+                </div>
+                <span>Ayuda con:&nbsp;<span class="color-grey">{% for help in strain.helps_with.all %}{{ help.name|translate:helps_with_translation }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
             </div>
-            <span>Ayuda con:&nbsp;<span class="color-grey">{% for help in strain.helps_with.all %}{{ help.name|lower }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
-        </div>
     </div>
     </div>
 
