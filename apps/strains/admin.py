@@ -7,7 +7,8 @@ from .models import (
     Feeling,
     Negative,
     HelpsWith,
-    Flavor
+    Flavor,
+    Terpene,
 )
 
 
@@ -31,6 +32,12 @@ class ArticleAdmin(admin.ModelAdmin):
     list_filter = ('category', )
 
 
+class TerpeneAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description')
+    search_fields = ('name',)
+    list_filter = ('name',)
+
+
 admin.site.register(Strain, StrainAdmin)
 admin.site.register(ArticleCategory)
 admin.site.register(Article, ArticleAdmin)
@@ -38,3 +45,4 @@ admin.site.register(Feeling)
 admin.site.register(Negative)
 admin.site.register(HelpsWith)
 admin.site.register(Flavor)
+admin.site.register(Terpene, TerpeneAdmin)
