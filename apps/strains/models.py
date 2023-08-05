@@ -38,11 +38,13 @@ class Strain(BaseText):
     negatives = models.ManyToManyField('Negative')
     helps_with = models.ManyToManyField('HelpsWith')
     flavors = models.ManyToManyField('Flavor')
-    terpenes = models.ManyToManyField('Terpene', blank=True)
+    dominant_terpene = models.OneToOneField('Terpene', related_name='dominant_in_strains', null=True, blank=True, on_delete=models.SET_NULL)
+    other_terpenes = models.ManyToManyField('Terpene', related_name='in_strains', blank=True)
     slug = models.SlugField(unique=True, default='')
     active = models.BooleanField(default=False)
     top = models.BooleanField(default=False)
     main = models.BooleanField(default=False)
+    is_review = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -110,6 +112,7 @@ class Flavor(models.Model):
 
 class Terpene(models.Model):
     name = models.CharField(max_length=50, unique=True)
+    description = models.TextField(blank=True)
 
     def __str__(self):
         return self.name
