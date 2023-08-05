@@ -8,6 +8,7 @@ from apps.strains.localizations import (
     feelings_translation,
     helps_with_translation,
     flavors_translation,
+    negatives_translator,
 )
 from apps.strains.forms import StrainFilterForm
 from apps.strains.models import Article, Strain
@@ -15,7 +16,7 @@ from apps.strains.models import Article, Strain
 
 def main_page(request):
     strains = Strain.objects.filter(active=True, main=True).order_by('-rating')[:8]
-    articles = Article.objects.all().order_by('-created_at')[:6]
+    articles = Article.objects.exclude(category__name='TOP 10').order_by('-created_at')[:6]
     context = {
         'strains': strains,
         'articles': articles,
@@ -44,6 +45,10 @@ def strain_detail(request, slug):
     context = {
         'strain': strain,
         'strains': related_strains[:8],  # Ограничиваем до 8, на случай если набралось больше
+        'feelings_translation': feelings_translation,
+        'helps_with_translation': helps_with_translation,
+        'flavors_translation': flavors_translation,
+        'negatives_translator': negatives_translator,
     }
 
     return render(request, 'strain.html', context)
@@ -132,7 +137,7 @@ def search(request):
 
 def article_list(request):
     category = request.GET.get('category')
-    articles = Article.objects.all()
+    articles = Article.objects.all().order_by('-created_at')
 
     if category:
         articles = articles.filter(category__name=category)
