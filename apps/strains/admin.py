@@ -17,7 +17,7 @@ class StrainAdmin(admin.ModelAdmin):
     search_fields = ('name', 'category')
     list_filter = ('category', )
     filter_horizontal = ('feelings', 'negatives', 'helps_with', 'flavors')
-    list_editable = ('active', 'main', 'top')
+    list_editable = ('active', 'main', 'top', 'is_review')
 
 
 class ArticleImageInline(admin.TabularInline):
