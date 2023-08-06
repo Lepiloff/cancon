@@ -78,6 +78,25 @@
                 </div>
                 <span>Ayuda con:&nbsp;<span class="color-grey">{% for help in strain.helps_with.all %}{{ help.name|translate:helps_with_translation }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
             </div>
+            <!-- Terpeno dominante -->
+            {% if strain.dominant_terpene %}
+                <div class="tovar__param">
+                    <div class="tovar__param_ico">
+                        <img src="{% static 'img/tovar_table_0.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
+                    </div>
+                    <span>Terpeno dominante:&nbsp;<span class="color-grey">{{ strain.dominant_terpene.name|translate:terpenes_translation }}</span></span>
+                </div>
+            {% endif %}
+
+            <!-- OTROS TERPENOS -->
+            {% if strain.other_terpenes.all %}
+                <div class="tovar__param">
+                    <div class="tovar__param_ico">
+                        <img src="{% static 'img/tovar_table_0.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
+                    </div>
+                    <span>Otros terpenos:&nbsp;<span class="color-grey">{% for terpene in strain.other_terpenes.all %}{{ terpene.name|translate:terpenes_translation }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
+                </div>
+            {% endif %}
     </div>
     </div>
 
