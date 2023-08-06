@@ -117,3 +117,6 @@ negatives_translator = {
     'Headache':	'Cefalea',
 }
 
+
+terpenes_translation = {}
+

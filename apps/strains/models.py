@@ -38,7 +38,8 @@ class Strain(BaseText):
     negatives = models.ManyToManyField('Negative')
     helps_with = models.ManyToManyField('HelpsWith')
     flavors = models.ManyToManyField('Flavor')
-    dominant_terpene = models.OneToOneField('Terpene', related_name='dominant_in_strains', null=True, blank=True, on_delete=models.SET_NULL)
+    dominant_terpene = models.ForeignKey('Terpene', related_name='dominant_in_strains', null=True,
+                                         blank=True, on_delete=models.SET_NULL)
     other_terpenes = models.ManyToManyField('Terpene', related_name='in_strains', blank=True)
     slug = models.SlugField(unique=True, default='')
     active = models.BooleanField(default=False)
