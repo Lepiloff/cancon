@@ -9,6 +9,7 @@ from apps.strains.localizations import (
     helps_with_translation,
     flavors_translation,
     negatives_translator,
+    terpenes_translation,
 )
 from apps.strains.forms import StrainFilterForm
 from apps.strains.models import Article, Strain
@@ -49,6 +50,7 @@ def strain_detail(request, slug):
         'helps_with_translation': helps_with_translation,
         'flavors_translation': flavors_translation,
         'negatives_translator': negatives_translator,
+        'terpenes_translation': terpenes_translation,
     }
 
     return render(request, 'strain.html', context)
