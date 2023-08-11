@@ -8,3 +8,4 @@ data/
 postgres-data/
 media/
 json_data/
+.pytest_cache/
