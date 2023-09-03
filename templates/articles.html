@@ -19,11 +19,9 @@
                     {% with articles|first as latest_article %}
                     <article class="article article--bg">
                         <a href="{% url 'article_detail' slug=latest_article.slug %}" class="article__img">
-                            {% for image in latest_article.images.all %}
-                                {% if not image.is_preview %}
-                                    <img src="{{ image.img.url }}" alt="{{ image.img_alt_text }}">
-                                {% endif %}
-                            {% endfor %}
+                            {% if main_image %}
+                                <img src="{{ main_image.img.url }}" alt="{{ main_image.img_alt_text }}">
+                            {% endif %}
                         </a>
                         <div class="article__inner">
                             <span class="article__events">
