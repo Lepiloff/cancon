@@ -58,7 +58,7 @@ class Strain(BaseText):
 
 class Article(BaseText):
     category = models.ManyToManyField('ArticleCategory')
-    slug = models.SlugField(unique=True, default='', blank=True)
+    slug = models.SlugField(unique=True, default='', blank=True, max_length=255)
 
     def save(self, *args, **kwargs):
         if not self.slug:

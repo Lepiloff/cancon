@@ -102,19 +102,28 @@ def article_detail(request, slug):
 
 def article_list(request):
     category = request.GET.get('category')
-    articles = Article.objects.all().order_by('-created_at')
+    articles = Article.objects.exclude(category__name='TOP 10').order_by(
+        '-created_at').prefetch_related('images')
 
     if category:
         articles = articles.filter(category__name=category)
 
+    # Получаем первое изображение (не превью) только для первой статьи
+    main_image = None
+    if articles:
+        main_image = articles[0].images.filter(is_preview=False).first()
+
     if is_ajax_request(request):
         html_articles = render_to_string(
             'articles.html',
-            {'articles': articles}
+            {'articles': articles, 'main_image': main_image}
         )
         return HttpResponse(html_articles)
 
-    return render(request, 'articles.html', {'articles': articles})
+    return render(request,
+                  'articles.html',
+                  {'articles': articles, 'main_image': main_image}
+                  )
 
 
 def search(request):
