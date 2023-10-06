@@ -23,7 +23,8 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('tinymce/', include('tinymce.urls')),
-    path('', include('apps.strains.urls'))
+    path('', include('apps.strains.urls')),
+    path('', include('apps.chat_bot.urls')),
 ]
 
 if settings.DEBUG:
