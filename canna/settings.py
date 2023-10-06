@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users',
     'apps.strains',
+    'apps.chat_bot',
     'storages',
     'tinymce',
 ]
