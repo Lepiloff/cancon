@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load json_ld %}
 {% load translate from translate %}
 {% block title %}
     {{ strain.name }}
@@ -14,6 +15,9 @@
 {% endblock %}
 
 {% block content %}
+    {% block meta_tags %}
+        {% render_json_ld strain.structured_data %}
+    {% endblock %}
 <div class="container flex-grow">
     <h1>{{ strain.name }}</h1>
     <div class="tovar tavar--section">
