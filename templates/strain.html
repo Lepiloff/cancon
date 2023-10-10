@@ -14,6 +14,21 @@
 {% endblock %}
 
 {% block content %}
+    <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "Product",
+          "name": "{{ strain.name }}",
+          "image": [
+            "{{ strain.img.url }}"
+           ],
+          "description": "{{ strain.description|escapejs }}",
+          "brand": {
+            "@type": "Thing",
+            "name": "cannamente.com"
+          },
+        }
+    </script>
 <div class="container flex-grow">
     <h1>{{ strain.name }}</h1>
     <div class="tovar tavar--section">
