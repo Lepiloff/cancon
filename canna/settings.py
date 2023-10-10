@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'apps.strains',
     'storages',
     'tinymce',
+    'django_json_ld',
 ]
 
 MIDDLEWARE = [
