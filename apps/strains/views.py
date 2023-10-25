@@ -15,6 +15,10 @@ from apps.strains.models import Article, Strain
 from apps.strains.utils import get_related_strains, get_filtered_strains, is_ajax_request
 
 
+def custom_page_not_found_view(request, exception):
+    return render(request, '404.html', {})
+
+
 def main_page(request):
     strains = Strain.objects.filter(active=True, main=True).order_by('-rating')[:8]
     articles = Article.objects.exclude(category__name='TOP 10').order_by('-created_at')[:6]
