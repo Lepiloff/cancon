@@ -65,5 +65,4 @@ def get_filtered_strains(form):
 
     if form.cleaned_data['flavors']:
         strains = strains.filter(flavors__in=form.cleaned_data['flavors'])
-
-    return strains.order_by('name')
+    return strains.distinct().order_by('name')
