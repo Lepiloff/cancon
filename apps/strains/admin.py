@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import (
+    AlternativeStrainName,
     Article,
     ArticleCategory,
     ArticleImage,
@@ -10,6 +11,11 @@ from .models import (
     Flavor,
     Terpene,
 )
+
+
+class AlternativeNameInline(admin.TabularInline):
+    model = AlternativeStrainName
+    extra = 1
 
 
 class StrainAdmin(admin.ModelAdmin):
@@ -29,6 +35,7 @@ class StrainAdmin(admin.ModelAdmin):
     list_filter = ('category', )
     filter_horizontal = ('feelings', 'negatives', 'helps_with', 'flavors')
     list_editable = ('active', 'main', 'top', 'is_review')
+    inlines = [AlternativeNameInline]
 
 
 class ArticleImageInline(admin.TabularInline):
