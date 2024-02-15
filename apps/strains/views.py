@@ -17,7 +17,9 @@ from apps.strains.utils import get_related_strains, get_filtered_strains, is_aja
 
 
 def custom_page_not_found_view(request, exception):
-    return render(request, '404.html', {})
+    response = render(request, '404.html', {})
+    response.status_code = 404
+    return response
 
 
 def main_page(request):
@@ -35,7 +37,6 @@ def strain_detail(request, slug):
         Strain.objects.prefetch_related('feelings', 'negatives', 'flavors', 'helps_with',
                                         'dominant_terpene', 'other_terpenes'), slug=slug,
         active=True)
-
     related_strains = get_related_strains(strain)
 
     context = {

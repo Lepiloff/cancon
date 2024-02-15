@@ -2,7 +2,9 @@ from unittest.mock import patch
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from apps.strains.factories import StrainFactory, ArticleFactory, ArticleCategoryFactory
+from apps.strains.factories import (
+    StrainFactory, ArticleFactory, ArticleCategoryFactory, AlternativeNameFactory
+)
 
 
 class ViewsTestCase(TestCase):
@@ -83,7 +85,17 @@ class ViewsTestCase(TestCase):
     def test_search_view_with_ajax_query(self, _mocked_is_ajax):
         strain = StrainFactory.create(name="Test Strain")
 
-        response = self.client.get(reverse('search'), {'q': 'Test'})
+        response = self.client.get(reverse('search'), {'q': 'Test'},
+                                   HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, strain.name)
+
+    def test_search_view_with_ajax_query_alternative_name(self):
+        strain = StrainFactory()
+        AlternativeNameFactory(strain=strain, name="Alternative Strain Name")
+        response = self.client.get(reverse('search'), {'q': 'Alternative'},
+                                   HTTP_X_REQUESTED_WITH='XMLHttpRequest')
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, strain.name)
@@ -100,20 +112,15 @@ class ViewsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "No query provided")
 
-    from unittest.mock import patch
-
-    @patch('apps.strains.views.is_ajax_request', return_value=True)
-    def test_search_view_no_results(self, _):
+    def test_search_view_no_results(self):
         StrainFactory.create(name="Blue Dream")
         StrainFactory.create(name="Sour Diesel")
         StrainFactory.create(name="Girl Scout Cookies")
 
-        response = self.client.get(reverse('search'), {'q': 'Nonexistent Strain'})
+        response = self.client.get(reverse('search'), {'q': 'Nonexistent Strain'}, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
 
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "Blue Dream")
         self.assertNotContains(response, "Sour Diesel")
         self.assertNotContains(response, "Girl Scout Cookies")
-        # Проверьте также, что ответ содержит какое-то сообщение об отсутствии результатов, если это предусмотрено вашей реализацией.
-
 

@@ -5,7 +5,7 @@ import factory
 
 from apps.strains.models import (
     Strain, Article, ArticleImage, ArticleCategory,
-    Feeling, Negative, HelpsWith, Flavor, Terpene
+    Feeling, Negative, HelpsWith, Flavor, Terpene, AlternativeStrainName
 )
 
 
@@ -134,6 +134,14 @@ class StrainFactory(BaseTextFactory):
         else:
             terpenes = TerpeneFactory.create_batch(3)
             self.other_terpenes.add(*terpenes)
+
+
+class AlternativeNameFactory(factory.django.DjangoModelFactory):
+    name = factory.Faker('word')
+    strain = factory.SubFactory(StrainFactory)
+
+    class Meta:
+        model = AlternativeStrainName
 
 
 class ArticleCategoryFactory(factory.django.DjangoModelFactory):
