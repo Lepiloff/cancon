@@ -71,6 +71,14 @@ class Strain(BaseText):
         return self.name
 
 
+class AlternativeStrainName(models.Model):
+    name = models.CharField(max_length=255)
+    strain = models.ForeignKey(Strain, related_name='alternative_names', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+
 class Article(BaseText):
     category = models.ManyToManyField('ArticleCategory')
     slug = models.SlugField(unique=True, default='', blank=True, max_length=255)
