@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.http import HttpResponse
@@ -133,13 +134,16 @@ def article_list(request):
 def search(request):
     query = request.GET.get('q')
     if query:
-        results = Strain.objects.filter(name__icontains=query)
+        results = Strain.objects.filter(
+            Q(name__icontains=query) |
+            Q(alternative_names__name__icontains=query)
+        ).distinct()
         links = [
             {'name': strain.name, 'url': reverse('strain_detail', args=[strain.slug])}
             for strain in results
         ]
 
-        if is_ajax_request(request):
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             html = render_to_string('modal_body.html', {'links': links})
             return HttpResponse(html)
         else:
