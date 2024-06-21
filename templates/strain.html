@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
+{% load json_ld %}
 {% load translate from translate %}
 {% block title %}
-    {{ strain.name }}
+    {{ strain.name }} cepas de marihuana
 {% endblock %}
 
 {% block keywords %}
@@ -14,6 +15,9 @@
 {% endblock %}
 
 {% block content %}
+    {% block meta_tags %}
+        {% render_json_ld strain.structured_data %}
+    {% endblock %}
 <div class="container flex-grow">
     <h1>{{ strain.name }}</h1>
     <div class="tovar tavar--section">
@@ -36,17 +40,17 @@
             </tr>
             <tr>
                 <td class="tovar__info_th">Thc:</td>
-                <td class="tovar__info_td">{{ strain.thc }}%</td>
+                <td class="tovar__info_td">{{ strain.thc|floatformat:"0" }}%</td>
             </tr>
             {% if strain.cbd is not none %}
                 <tr>
                     <td class="tovar__info_th">Cbd:</td>
-                    <td class="tovar__info_td">{{ strain.cbd }}%</td>
+                    <td class="tovar__info_td">{{ strain.cbd|floatformat:"0" }}%</td>
                 </tr>
             {% elif strain.cbg is not none %}
                 <tr>
                     <td class="tovar__info_th">Cbg:</td>
-                    <td class="tovar__info_td">{{ strain.cbg }}%</td>
+                    <td class="tovar__info_td">{{ strain.cbg|floatformat:"0" }}%</td>
                 </tr>
             {% endif %}
             <tr>

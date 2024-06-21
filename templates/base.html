@@ -16,6 +16,15 @@
 <!--<![endif]-->
 {% load static %}
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HTGQ1DC07H"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-HTGQ1DC07H');
+    </script>
     <meta charset="utf-8" />
     <title>{% block title %}{% endblock %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
@@ -79,8 +88,8 @@
 		    		<a href="#" class="logo footer--logo">
 			            <img src="{% static 'img/logo.svg' %}" alt="" width="195" height="18" loading="lazy" decoding="async" class="logo_img">
 			        </a><br>
-		    		<a href="mailto:Gmail@gmail.com">
-		    			Gmail@gmail.com
+		    		<a href="mailto:cannament@gmail.com">
+		    			cannament@gmail.com
 		    		</a>
 	    		</div>
 	    	</div>

@@ -52,6 +52,29 @@ class Strain(BaseText):
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
 
+    @property
+    def structured_data(self):
+        data = {
+            '@type': 'Product',
+            'name': self.name,
+            'description': self.description,
+            'image': self.img.url if self.img else None,
+            'category': self.get_category_display(),
+            'feelings': [feeling.name for feeling in self.feelings.all()],
+            'negatives': [negative.name for negative in self.negatives.all()],
+            'helpsWith': [helps_with.name for helps_with in self.helps_with.all()],
+            'flavors': [flavor.name for flavor in self.flavors.all()],
+        }
+        return data
+
+    def __str__(self):
+        return self.name
+
+
+class AlternativeStrainName(models.Model):
+    name = models.CharField(max_length=255)
+    strain = models.ForeignKey(Strain, related_name='alternative_names', on_delete=models.CASCADE)
+
     def __str__(self):
         return self.name
 

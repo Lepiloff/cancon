@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.http import HttpResponse
@@ -15,6 +16,12 @@ from apps.strains.models import Article, Strain
 from apps.strains.utils import get_related_strains, get_filtered_strains, is_ajax_request
 
 
+def custom_page_not_found_view(request, exception):
+    response = render(request, '404.html', {})
+    response.status_code = 404
+    return response
+
+
 def main_page(request):
     strains = Strain.objects.filter(active=True, main=True).order_by('-rating')[:8]
     articles = Article.objects.exclude(category__name='TOP 10').order_by('-created_at')[:6]
@@ -30,7 +37,6 @@ def strain_detail(request, slug):
         Strain.objects.prefetch_related('feelings', 'negatives', 'flavors', 'helps_with',
                                         'dominant_terpene', 'other_terpenes'), slug=slug,
         active=True)
-
     related_strains = get_related_strains(strain)
 
     context = {
@@ -129,13 +135,16 @@ def article_list(request):
 def search(request):
     query = request.GET.get('q')
     if query:
-        results = Strain.objects.filter(name__icontains=query)
+        results = Strain.objects.filter(
+            Q(name__icontains=query) |
+            Q(alternative_names__name__icontains=query)
+        ).distinct()
         links = [
             {'name': strain.name, 'url': reverse('strain_detail', args=[strain.slug])}
             for strain in results
         ]
 
-        if is_ajax_request(request):
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             html = render_to_string('modal_body.html', {'links': links})
             return HttpResponse(html)
         else:
