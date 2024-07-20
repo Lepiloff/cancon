@@ -23,7 +23,7 @@ def chat_view(request):
             user_message = form.cleaned_data['message']
             messages.append({"role": "user", "content": user_message})
 
-            bot_message = chatbot(user_message)
+            bot_message = chatbot(user_message, messages)  # Передаем историю сообщений в чатбот
             messages.append({"role": "assistant", "content": bot_message})
 
             request.session['chat_messages'] = messages
