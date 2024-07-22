@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    Mapa de Tiendas de CBD - Cannamente
+{% endblock %}
+
+{% block keywords %}
+    tiendas, CBD, mapa, localización, Cannamente
+{% endblock %}
+
+{% block description %}
+    Encuentra tiendas de CBD en tu área con el mapa interactivo de Cannamente. Descubre las mejores tiendas y obtén direcciones fácilmente.
+{% endblock %}
+
+{% block content %}
+    <div class="container flex-grow">
+        <div class="h2">Mapa de Tiendas de CBD</div>
+        <div id="map-container" class="map-container">
+            <div id="map" class="map">
+                 {{ map_html|safe }}
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block footer_col_2 %}
+    <div class="footer_col footer_col--2">
+        Encuentra las mejores tiendas de CBD en tu área con nuestro mapa interactivo. Descubre nuevas tiendas y obtén direcciones fácilmente.
+    </div>
+{% endblock footer_col_2 %}
