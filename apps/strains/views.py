@@ -108,7 +108,7 @@ def article_detail(request, slug):
 
 def article_list(request):
     category = request.GET.get('category')
-    articles = Article.objects.exclude(category__name='TOP 10').order_by(
+    articles = Article.objects.exclude(category__name__in=['TOP 10', 'Terpenes']).order_by(
         '-created_at').prefetch_related('images')
 
     if category:
@@ -151,3 +151,20 @@ def search(request):
             return redirect('/')
     else:
         return HttpResponse("No query provided")
+
+
+def terpene_list(request):
+    terpenes = Article.objects.filter(category__name='Terpenes').prefetch_related('images')
+
+    return render(request, 'terpene_list.html', {'terpenes': terpenes})
+
+
+def terpene_detail(request, slug):
+    terpene = get_object_or_404(Article, slug=slug, category__name='Terpenes')
+    image = terpene.images.filter(is_main=True).first()
+
+    return render(
+        request,
+        'terpene_detail.html',
+        {'terpene': terpene, 'image': image}
+    )
