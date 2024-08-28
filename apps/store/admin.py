@@ -10,8 +10,8 @@ class VendorAdmin(admin.ModelAdmin):
 
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ('address', 'latitude', 'longitude')
-    search_fields = ('address',)
+    list_display = ('address', 'latitude', 'longitude', 'country')
+    search_fields = ('address','country')
 
 
 @admin.register(Store)
