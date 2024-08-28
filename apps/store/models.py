@@ -12,9 +12,20 @@ class Vendor(models.Model):
 
 
 class Location(models.Model):
+    COUNTRY_CHOICES = [
+        ('mx', 'Mexico'),
+        ('es', 'Spain'),
+        ('ar', 'Argentina'),
+        ('co', 'Colombia'),
+        ('cl', 'Chile'),
+        ('us', 'United States'),
+        ('pe', 'Peru'),
+        ('uy', 'Uruguay'),
+    ]
     address = models.CharField(max_length=255, blank=True, null=True)
     latitude = models.FloatField()
     longitude = models.FloatField()
+    country = models.CharField(max_length=4, choices=COUNTRY_CHOICES, default='es')
 
     class Meta:
         verbose_name_plural = 'Locations'
