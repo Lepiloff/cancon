@@ -62,7 +62,7 @@
                         <a href="{% url 'article_list' %}" class="menu_a">Blog</a>
                     </li>
                     <li class="menu_li">
-                        <a href="{% url 'global_map_redirect' %}">Tienda de CBD y dispensario</a>
+                        <a href="{% url 'global_map_redirect' %}" class="menu_a">Tiendas/Dispensarios</a>
                     </li>
                 </ul>
             </nav>
@@ -79,7 +79,8 @@
     	<div class="footer_row">
 	    	<div class="footer_col footer_col--1 ">
 	    		<a href="{% url 'strain_list' %}" class="footer_a">Variedades</a><br>
-	    		<a href="{% url 'article_list' %}" class="footer_a">Blog</a>
+	    		<a href="{% url 'article_list' %}" class="footer_a">Blog</a><br>
+                 <a href="{% url 'global_map_redirect' %}" class="footer_a">Tiendas/Dispensarios</a><br>
 	    	</div>
             {% block footer_col_2 %}
 
@@ -100,7 +101,9 @@
 	    		<img src="{% static 'img/footer.svg' %}" alt="" width="" height="" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="footer_img">
 	    	</div>
     	</div>
-    	<div class="footer_copyright">Copyright 2023</div>
+    	<div class="footer_copyright">
+            <p>&copy; Copyright 2023-2024</p>
+        </div>
     </div></footer>
     {% endblock footer %}
 
