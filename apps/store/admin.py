@@ -11,16 +11,16 @@ class VendorAdmin(admin.ModelAdmin):
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
     list_display = ('address', 'latitude', 'longitude', 'country')
-    search_fields = ('address','country')
+    search_fields = ('address', 'country')
 
 
 @admin.register(Store)
 class StoreAdmin(admin.ModelAdmin):
-    list_display = ('name', 'vendor', 'location', 'opening_hours')
+    list_display = (
+        'name',
+        'vendor',
+        'location',
+    )
     search_fields = ('name', 'vendor__name', 'location__address')
     list_filter = ('vendor', 'location')
     raw_id_fields = ('vendor', 'location')
-
-
-# admin.site.register(Store, StoreAdmin)
-# admin.site.register(Location, LocationAdmin)
