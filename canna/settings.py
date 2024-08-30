@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users',
     'apps.strains',
+    'apps.store',
     'storages',
     'tinymce',
     'django_json_ld',
