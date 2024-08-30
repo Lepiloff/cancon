@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+    Catálogo de Terpenos en Cannamente
+{% endblock %}
+
+{% block keywords %}
+    Terpenos, Catálogo de Terpenos, Cannamente
+{% endblock %}
+
+{% block description %}
+    Explora nuestro catálogo de terpenos en Cannamente. Conoce los diferentes terpenos, sus efectos y características.
+{% endblock %}
+
+{% block content %}
+    <div class="container flex-grow">
+        <div class="h2">Catálogo de Terpenos</div>
+        <section class="post post--row mb-30">
+            {% for item in terpenes_with_images %}
+                <a href="{% url 'terpene_detail' slug=item.slug %}" class="post_item post_item--col_4">
+                    <span class="post_item_in post_item_in--2">
+                        <img src="{{ item.preview_image.img.url }}" alt="{{ item.preview_image.img_alt_text }}" width="380" height="267" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="post_item_img">
+                        <span class="post_item_descript post_item_descript--2">
+                            <span class="post_item_h3">{{ item.title }}</span>
+                        </span>
+                    </span>
+                </a>
+            {% endfor %}
+        </section>
+    </div>
+{% endblock content %}
