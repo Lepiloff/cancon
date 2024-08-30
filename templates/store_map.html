@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    Mapa de tiendas y dispensarios  en {{ country }} - Cannamente
+{% endblock %}
+
+{% block keywords %}
+    tiendas, dispensarios, THC, CBD, mapa, localización, Cannamente, {{ country }}
+{% endblock %}
+
+{% block description %}
+    Encuentra tiendas y dispensarios en {{ country }} con nuestro mapa interactivo. Descubre las mejores tiendas y obtén direcciones fácilmente.
+{% endblock %}
+
+{% block content %}
+<div class="container flex-grow">
+    <div class="h2">Mapa de tiendas y dispensarios en {{ country }}</div>
+    
+    {% if message %}
+        <div style="border: 1px solid #ccc; background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
+            <p style="margin: 0; color: #555;">{{ message }}</p>
+        </div>
+    {% endif %}
+    
+    <!-- Форма для выбора страны -->
+    <div style="text-align: center; margin: 40px 0;">
+        <label for="country-select" style="font-weight: bold; margin-right: 10px; font-size: 16px;">Selecciona un país:</label>
+        <select id="country-select" name="country" style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px;">
+            <option value="">Seleccione un país</option>
+            {% for code, name in country_choices %}
+                <option value="{{ code }}">{{ name }}</option>
+            {% endfor %}
+        </select>
+        <button id="country-select-button" style="padding: 10px 20px; margin-left: 10px; border-radius: 5px; background-color: #3C7E80; color: white; border: none; cursor: pointer; font-size: 14px;">
+            Ver
+        </button>
+    </div>
+
+    {% if not message %}
+    <div id="map-container" class="map-container">
+        <div id="map" class="map">
+            {{ map_html|safe }}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock content %}
+
+{% block footer_col_2 %}
+    <div class="footer_col footer_col--2">
+        Encuentra las mejores tiendas y dispensarios  en {{ country|upper }} con nuestro mapa interactivo.
+    </div>
+{% endblock footer_col_2 %}
+
+{% block page_scripts %} 
+<script>
+console.log("Script loaded and running");
+    document.addEventListener('DOMContentLoaded', function() {
+        var button = document.getElementById('country-select-button');
+        var select = document.getElementById('country-select');
+
+        if (button && select) {
+            button.addEventListener('click', function() {
+                var country = select.value;
+                if (country) {
+                    window.location.href = '/store/' + country + '/map/';
+                }
+            });
+        }
+    });
+</script>
+{% endblock page_scripts %}
