@@ -100,7 +100,7 @@ def map_view(request, country):
 def get_country_from_ip():
     response = requests.get('https://ipinfo.io/json')
     data = response.json()
-    logger.info(f"IP Info Data: {data}")
+    print(f"IP Info Data: {data}")
     return data.get('country', '').lower()
 
 
