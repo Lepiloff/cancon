@@ -1,14 +1,24 @@
-import logging
 import requests
+
 import folium
+from canna.logging import logger
+
+def get_country_from_ip():
+    try:
+        response = requests.get('https://ipinfo.io/json')
+        data = response.json()
+        logger.info(f"IP Info Data: {data}")
+        return data.get('country', '').lower()
+    except Exception as e:
+        logger.error(f"Error getting country from IP: {e}")
+        return 'unknown'
+
 
 from django.shortcuts import render, redirect
 from django.templatetags.static import static
 
 from .models import Location, Store, COUNTRY_CHOICES, COUNTRY_COORDINATES
 
-
-logger = logging.getLogger(__name__)
 
 
 def get_country_info(country_code):
@@ -98,10 +108,14 @@ def map_view(request, country):
 
 
 def get_country_from_ip():
-    response = requests.get('https://ipinfo.io/json')
-    data = response.json()
-    print(f"IP Info Data: {data}")
-    return data.get('country', '').lower()
+    try:
+        response = requests.get('https://ipinfo.io/json')
+        data = response.json()
+        logger.info(f"IP Info Data: {data}")
+        return data.get('country', '').lower()
+    except Exception as e:
+        logger.error(f"Error getting country from IP: {e}")
+        return 'unknown'
 
 
 def global_map_redirect(request):
