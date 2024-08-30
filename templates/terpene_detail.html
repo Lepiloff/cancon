@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+    {{ terpene.description }}
+{% endblock %}
+
+{% block description %}
+    {{ terpene.description }}
+{% endblock %}
+{% block content %}
+    <main class="main">
+        <div class="article-page">
+            <div class="container">
+                <div class="article-page__header">
+                    <div class="article-page__case">
+                        <a href="#" class="category-tag">Terpeno</a>
+                    </div>
+                    <h1 class="article-page__title">{{ terpene.title }}</h1>
+                    <div class="article__footer">
+                        <div class="article__footer-descr">
+                            <div class="article__footer-time">
+                                <time>{{ terpene.created_at|date:"d/m/Y" }}</time>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="article-page__img">
+                    {% if image %}
+                        <img src="{{ image.img.url }}" alt="{{ image.img_alt_text }}">
+                    {% endif %}
+                </div>
+                <div class="article-page__descr">
+                    {{ terpene.text_content|safe }}
+                </div>
+            </div>
+        </div>
+    </main>
+{% endblock content %}
