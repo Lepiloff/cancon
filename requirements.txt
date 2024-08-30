@@ -10,6 +10,7 @@ django-tinymce==3.6.1
 exceptiongroup==1.1.2
 factory-boy==3.3.0
 Faker==19.3.0
+folium==0.17.0
 gunicorn==20.1.0
 idna==3.4
 inflection==0.5.1
