@@ -38,9 +38,16 @@ class Strain(BaseText):
     negatives = models.ManyToManyField('Negative')
     helps_with = models.ManyToManyField('HelpsWith')
     flavors = models.ManyToManyField('Flavor')
-    dominant_terpene = models.ForeignKey('Terpene', related_name='dominant_in_strains', null=True,
-                                         blank=True, on_delete=models.SET_NULL)
-    other_terpenes = models.ManyToManyField('Terpene', related_name='in_strains', blank=True)
+    dominant_terpene = models.ForeignKey(
+        'Terpene',
+        related_name='dominant_in_strains',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
+    other_terpenes = models.ManyToManyField(
+        'Terpene', related_name='in_strains', blank=True
+    )
     slug = models.SlugField(unique=True, default='')
     active = models.BooleanField(default=False)
     top = models.BooleanField(default=False)
@@ -73,7 +80,9 @@ class Strain(BaseText):
 
 class AlternativeStrainName(models.Model):
     name = models.CharField(max_length=255)
-    strain = models.ForeignKey(Strain, related_name='alternative_names', on_delete=models.CASCADE)
+    strain = models.ForeignKey(
+        Strain, related_name='alternative_names', on_delete=models.CASCADE
+    )
 
     def __str__(self):
         return self.name

@@ -26,7 +26,8 @@ handler404 = 'apps.strains.views.custom_page_not_found_view'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('tinymce/', include('tinymce.urls')),
-    path('', include('apps.strains.urls'))
+    path('', include('apps.strains.urls')),
+    path('store/', include('apps.store.urls')),
 ]
 
 if settings.DEBUG:

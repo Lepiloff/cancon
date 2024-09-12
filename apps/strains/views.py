@@ -24,7 +24,7 @@ def custom_page_not_found_view(request, exception):
 
 def main_page(request):
     strains = Strain.objects.filter(active=True, main=True).order_by('-rating')[:8]
-    articles = Article.objects.exclude(category__name='TOP 10').order_by('-created_at')[:6]
+    articles = Article.objects.exclude(category__name__in=['TOP 10', 'Terpenes']).order_by('-created_at')[:6]
     context = {
         'strains': strains,
         'articles': articles,
@@ -108,7 +108,7 @@ def article_detail(request, slug):
 
 def article_list(request):
     category = request.GET.get('category')
-    articles = Article.objects.exclude(category__name='TOP 10').order_by(
+    articles = Article.objects.exclude(category__name__in=['TOP 10', 'Terpenes']).order_by(
         '-created_at').prefetch_related('images')
 
     if category:
@@ -151,3 +151,35 @@ def search(request):
             return redirect('/')
     else:
         return HttpResponse("No query provided")
+
+
+def terpene_list(request):
+    terpenes = Article.objects.filter(category__name='Terpenes').prefetch_related('images')
+
+    terpenes_with_images = []
+    for terpene in terpenes:
+        preview_image = terpene.images.filter(is_preview=True).first()
+        terpenes_with_images.append({
+            'terpene': terpene,
+            'preview_image': preview_image,
+            'title': terpene.title,
+            'slug': terpene.slug,
+        })
+
+    return render(request, 'terpene_list.html', {'terpenes_with_images': terpenes_with_images})
+
+
+def terpene_detail(request, slug):
+    terpene = get_object_or_404(Article, slug=slug, category__name='Terpenes')
+    image = terpene.images.filter(
+        is_preview=False).first()
+
+    return render(
+        request,
+        'terpene_detail.html',
+        {
+            'terpene': terpene,
+            'image': image,
+        }
+    )
+
