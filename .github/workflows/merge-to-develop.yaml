@@ -18,6 +18,8 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test_db
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
         options: >-
           --health-cmd "pg_isready -U postgres" 
           --health-interval 10s
@@ -47,7 +49,11 @@ jobs:
 
       - name: Migrate and run tests
         env:
-          DATABASE_URL: postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/test_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
           ALLOWED_HOSTS: "localhost,127.0.0.1"
           CSRF_TRUSTED_ORIGINS: "http://localhost"
         run: |
