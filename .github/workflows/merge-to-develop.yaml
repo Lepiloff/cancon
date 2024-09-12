@@ -41,6 +41,7 @@ jobs:
       - name: Migrate and run tests
         env:
           DATABASE_URL: postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/test_db
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
         run: |
           python manage.py migrate
           python manage.py pytest
