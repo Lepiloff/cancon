@@ -15,11 +15,11 @@ jobs:
         ports:
           - 5432:5432
         env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
         options: >-
-          --health-cmd "pg_isready -U ${{ secrets.POSTGRES_USER }}" 
+          --health-cmd "pg_isready -U postgres" 
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -38,7 +38,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run tests
+      - name: Migrate and run tests
+        env:
+          DATABASE_URL: postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/test_db
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
         run: |
           python manage.py migrate
-          pytest
+          python manage.py pytest
