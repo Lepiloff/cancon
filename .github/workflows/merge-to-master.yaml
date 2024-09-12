@@ -58,4 +58,4 @@ jobs:
           CSRF_TRUSTED_ORIGINS: "http://localhost"
         run: |
           python manage.py migrate
-          python manage.py pytest
+          pytest
