@@ -31,7 +31,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: Install dependencies
         run: |
@@ -42,6 +42,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/test_db
           ALLOWED_HOSTS: "localhost,127.0.0.1"
+          CSRF_TRUSTED_ORIGINS: "http://localhost"
         run: |
           python manage.py migrate
           python manage.py pytest
