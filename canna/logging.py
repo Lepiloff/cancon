@@ -2,7 +2,7 @@ from loguru import logger
 import sys
 import os
 
-LOG_PATH = "/app/logs/django.log"
+LOG_PATH = os.environ.get('LOG_PATH', '/app/logs/django.log')
 
 os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
 
