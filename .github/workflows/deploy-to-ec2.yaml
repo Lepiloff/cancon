@@ -40,7 +40,8 @@ jobs:
 
       # Отображение результата проверки
       - name: Read if rebuild is needed
-        run: echo "Rebuild needed: ${{ steps.check_changes.outputs.rebuild }}"
+        run: |
+          echo "Rebuild needed: ${{ steps.check_changes.outputs.rebuild }}"
         shell: bash
 
       # Деплой на EC2 с обработкой ошибок и откатом
