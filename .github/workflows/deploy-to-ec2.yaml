@@ -22,6 +22,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
+      # Проверка изменений в Dockerfile или requirements.txt
       - name: Check if Dockerfile or requirements.txt changed
         id: check_changes
         run: |
@@ -35,17 +36,21 @@ jobs:
           else
             echo "No changes in Dockerfile or requirements.txt."
             echo "false" > needs_rebuild.txt
+          fi
         shell: bash
 
       - name: Read if rebuild is needed
         id: rebuild_needed
-        run: |
+        run: | 
           echo "Rebuild needed: $(cat needs_rebuild.txt)"
         shell: bash
 
+      # Деплой на EC2 с обработкой ошибок и откатом
       - name: Deploy to EC2
         run: |
           echo "Connecting to EC2 server..."
+          set -e  # Прерывание выполнения при любой ошибке
+          trap 'echo "Deployment failed, rolling back..."; ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_IP_ADDRESS }} "cd /home/ubuntu/cancon && docker-compose down && git reset --hard && docker-compose up -d"' ERR
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_IP_ADDRESS }} << 'EOF'
             cd /home/ubuntu/cancon
             echo "Navigated to project directory."
