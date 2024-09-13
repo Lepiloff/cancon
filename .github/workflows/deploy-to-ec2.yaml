@@ -27,22 +27,21 @@ jobs:
         id: check_changes
         run: |
           echo "Checking if Dockerfile or requirements.txt have been changed..."
-          git fetch origin master
           CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
           echo "Changed files: $CHANGED_FILES"
           if [[ "$CHANGED_FILES" == *"Dockerfile"* || "$CHANGED_FILES" == *"requirements.txt"* ]]; then
+            echo "::set-output name=rebuild::true"
             echo "Changes detected in Dockerfile or requirements.txt."
-            echo "true" > needs_rebuild.txt
           else
+            echo "::set-output name=rebuild::false"
             echo "No changes in Dockerfile or requirements.txt."
-            echo "false" > needs_rebuild.txt
           fi
         shell: bash
 
+      # Отображение результата проверки
       - name: Read if rebuild is needed
-        id: rebuild_needed
-        run: | 
-          echo "Rebuild needed: $(cat needs_rebuild.txt)"
+        run: |
+          echo "Rebuild needed: ${{ steps.check_changes.outputs.rebuild }}"
         shell: bash
 
       # Деплой на EC2 с обработкой ошибок и откатом
@@ -56,7 +55,7 @@ jobs:
             echo "Navigated to project directory."
             docker-compose down
             git pull origin master
-            if [ "$(cat needs_rebuild.txt)" == "true" ]; then
+            if [ "${{ steps.check_changes.outputs.rebuild }}" == "true" ]; then
               echo "Rebuilding Docker containers."
               docker-compose build --no-cache
             else
