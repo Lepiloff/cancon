@@ -5,6 +5,7 @@ __pycache__
 staticfiles/
 static/
 data/
+logs
 postgres-data/
 media/
 json_data/
