@@ -11,27 +11,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Отладка: Начало процесса деплоя
-      - name: Start Deploy Process
-        run: echo "Starting deployment process..."
-
-      # Шаг для получения кода репозитория
+      # Получаем полную историю коммитов, а не только последний
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 1
-      - name: Debug Checkout
-        run: echo "Code has been checked out."
+          fetch-depth: 0
 
-      # Установка SSH ключа из секретов GitHub
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
-      - name: Debug SSH Setup
-        run: echo "SSH setup completed."
 
-      # Проверка изменений в Dockerfile или requirements.txt
       - name: Check if Dockerfile or requirements.txt changed
         id: check_changes
         run: |
@@ -47,11 +37,12 @@ jobs:
             echo "false" > needs_rebuild.txt
         shell: bash
 
-      - name: Debug Change Detection
+      - name: Read if rebuild is needed
+        id: rebuild_needed
         run: |
-          echo "Rebuild flag is set to: $(cat needs_rebuild.txt)"
+          echo "Rebuild needed: $(cat needs_rebuild.txt)"
+        shell: bash
 
-      # Шаг для подключения к EC2 и выполнения команд деплоя
       - name: Deploy to EC2
         run: |
           echo "Connecting to EC2 server..."
@@ -59,9 +50,7 @@ jobs:
             cd /home/ubuntu/cancon
             echo "Navigated to project directory."
             docker-compose down
-            echo "Containers stopped."
             git pull origin master
-            echo "Pulled latest changes from master."
             if [ "$(cat needs_rebuild.txt)" == "true" ]; then
               echo "Rebuilding Docker containers."
               docker-compose build --no-cache
