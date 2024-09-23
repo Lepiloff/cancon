@@ -1,8 +1,11 @@
+from bs4 import BeautifulSoup
+from tinymce.models import HTMLField
+
 from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.template.defaultfilters import slugify
-from tinymce.models import HTMLField
+
 
 
 CATEGORY_CHOICES = [
@@ -91,11 +94,47 @@ class AlternativeStrainName(models.Model):
 class Article(BaseText):
     category = models.ManyToManyField('ArticleCategory')
     slug = models.SlugField(unique=True, default='', blank=True, max_length=255)
+    h3_headings = models.JSONField(default=list, blank=True, null=True)
 
     def save(self, *args, **kwargs):
+        # Обработка text_content перед сохранением
+        soup = BeautifulSoup(self.text_content, 'html.parser')
+        slug_count = {}
+        headings = []
+        modified = False
+
+        for header in soup.find_all('h3'):
+            header_id = header.get('id')
+            if not header_id:
+                # Генерация уникального id на основе текста заголовка
+                text = header.get_text()
+                slug = slugify(text)
+                if slug in slug_count:
+                    slug_count[slug] += 1
+                    slug = f"{slug}-{slug_count[slug]}"
+                else:
+                    slug_count[slug] = 1
+                header['id'] = slug
+                modified = True
+                header_id = slug  # Обновляем переменную после присвоения
+
+            header_text = header.get_text()
+            headings.append({
+                'id': header_id,
+                'text': header_text
+            })
+
+        if modified:
+            self.text_content = str(soup)
+
+        self.h3_headings = headings
+
         if not self.slug:
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
+
+    def get_headings(self):
+        return self.h3_headings
 
 
 class ArticleImage(models.Model):
