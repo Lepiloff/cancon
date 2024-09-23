@@ -26,15 +26,42 @@
                         </div>
                     </div>
                 </div>
-                <div class="article-page__img">
-                    {% if image %}
-                        <img src="{{ image.img.url }}" alt="{{ image.img_alt_text }}">
-                    {% endif %}
+                <!-- Начало нового блока article-page__body -->
+                <div class="article-page__body">
+                    <div class="article-content">
+                        <div class="article-page__img">
+                            {% if image %}
+                                <img src="{{ image.img.url }}" alt="{{ image.img_alt_text }}">
+                            {% endif %}
+                        </div>
+                        <div class="article-page__descr">
+                            {{ article.text_content|safe }}
+                        </div>
+                    </div>
+                    <aside class="right-side">
+                        <!-- Дополнительная информация, ссылки-якоря, реклама -->
+                        <nav class="anchor-links">
+                            {% if headings %}
+                                <ul>
+                                    {% for heading in headings %}
+                                        <li>
+                                            <a href="#{{ heading.id }}">{{ heading.text }}</a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </nav>
+                        <div class="advertisement">
+                            <!-- Код рекламы -->
+                        </div>
+                    </aside>
                 </div>
-                <div class="article-page__descr">
-                    {{ article.text_content|safe }}
-                </div>
+                <!-- Конец блока article-page__body -->
             </div>
         </div>
     </main>
 {% endblock content%}
+{% block page_scripts %}
+        <script src="{% static 'js/anchor_articles.js' %}"></script>
+{% endblock page_scripts %}
+

@@ -59,7 +59,10 @@
                         <a href="{% url 'strain_list' %}" class="menu_a">Variedades</a>
                     </li>
                     <li class="menu_li">
-                        <a href="{% url 'article_list' %}" class="menu_a">Blog</a>
+                        <a href="{% url 'terpene_list' %}" class="menu_a">Terpenos</a>
+                    </li>
+                    <li class="menu_li">
+                        <a href="{% url 'article_list' %}" class="menu_a">Artículos</a>
                     </li>
                     <li class="menu_li">
                         <a href="{% url 'global_map_redirect' %}" class="menu_a">Tiendas/Dispensarios</a>
@@ -79,7 +82,8 @@
     	<div class="footer_row">
 	    	<div class="footer_col footer_col--1 ">
 	    		<a href="{% url 'strain_list' %}" class="footer_a">Variedades</a><br>
-	    		<a href="{% url 'article_list' %}" class="footer_a">Blog</a><br>
+                <a href="{% url 'terpene_list' %}" class="footer_a">Terpenos</a><br>
+	    		<a href="{% url 'article_list' %}" class="footer_a">Artículos</a><br>
                  <a href="{% url 'global_map_redirect' %}" class="footer_a">Tiendas/Dispensarios</a><br>
 	    	</div>
             {% block footer_col_2 %}
