@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}
-    {{ article.description }}
+    {{ article.title }}
+{% endblock %}
+
+{% block keywords %}
+    {{ article.keywords }}
 {% endblock %}
 
 {% block description %}
