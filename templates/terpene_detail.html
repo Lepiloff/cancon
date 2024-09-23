@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}
-    {{ terpene.description }}
+    Descripción y propiedades del terpeno {{ terpene.title }}
+{% endblock %}
+
+{% block keywords %}
+    {{ terpene.keywords }}
 {% endblock %}
 
 {% block description %}
