@@ -99,10 +99,11 @@ def strain_list(request):
 def article_detail(request, slug):
     article = get_object_or_404(Article, slug=slug)
     image = article.images.filter(is_preview=False).first()
+    headings = article.get_headings()
     return render(
         request,
         'article_detail.html',
-        {'article': article, 'image': image}
+        {'article': article, 'image': image, 'headings': headings}
     )
 
 
@@ -173,13 +174,14 @@ def terpene_detail(request, slug):
     terpene = get_object_or_404(Article, slug=slug, category__name='Terpenes')
     image = terpene.images.filter(
         is_preview=False).first()
-
+    headings = terpene.get_headings()
     return render(
         request,
         'terpene_detail.html',
         {
             'terpene': terpene,
             'image': image,
+            'headings': headings
         }
     )
 
