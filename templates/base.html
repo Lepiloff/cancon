@@ -36,22 +36,24 @@
 </head>
 <body class="">
 <main class="page">
-    {% block header_block %}
-        	<header class="header container">
+{% block header_block %}
+    <header class="header container">
         <a href="/" class="logo">
             <img src="{% static 'img/logo.svg' %}" alt="" width="195" height="18" loading="lazy" decoding="async" class="logo_img">
         </a>
         <div class="menu-btn">
             <img src="{% static 'img/menu-btn.svg' %}" alt="" width="24" height="24" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="menu-btn-ico">
-           	<img src="{% static 'img/close.svg' %}" alt="" width="24" height="24" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="menu-btn-close">
+            <img src="{% static 'img/close.svg' %}" alt="" width="24" height="24" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="menu-btn-close">
         </div>
         <div class="header-menu-wrapper">
+            <!-- Форма поиска -->
             <form action="{% url 'search' %}" method="get" id="searchForm" class="header__search">
                 <input type="text" name="q" class="header__search_input form-control" placeholder="Search">
                 <button type="submit" class="header__search_submit" data-toggle="modal" data-target="#exampleModal">
                     <img src="{% static 'img/search.svg' %}" alt="" width="15" height="15" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="img_center">
                 </button>
             </form>
+            <!-- Существующее меню (отображается только на мобильных) -->
             <nav class="menu">
                 <div class="menu_caption">Menu</div>
                 <ul class="menu_ul">
@@ -69,9 +71,26 @@
                     </li>
                 </ul>
             </nav>
+            <!-- Новый горизонтальный блок меню (отображается только на десктопах) -->
+            <nav class="desktop-menu">
+                <ul class="desktop-menu_ul">
+                    <li class="desktop-menu_li">
+                        <a href="{% url 'strain_list' %}" class="desktop-menu_a">Variedades</a>
+                    </li>
+                    <li class="desktop-menu_li">
+                        <a href="{% url 'terpene_list' %}" class="desktop-menu_a">Terpenos</a>
+                    </li>
+                    <li class="desktop-menu_li">
+                        <a href="{% url 'article_list' %}" class="desktop-menu_a">Artículos</a>
+                    </li>
+                    <li class="desktop-menu_li">
+                        <a href="{% url 'global_map_redirect' %}" class="desktop-menu_a">Tiendas/Dispensarios</a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </header>
-    {% endblock header_block %}
+{% endblock header_block %}
 
     {% block content %}
        {% block intro %} {% endblock intro %}
