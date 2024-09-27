@@ -18,109 +18,108 @@
     {% block meta_tags %}
         {% render_json_ld strain.structured_data %}
     {% endblock %}
-<div class="container flex-grow">
-    <h1>{{ strain.name }}</h1>
-    <div class="tovar tavar--section">
-    <div class="tovar_col tovar_col--l">
-         {% if strain.img %}
-        <a href="#" data-fancybox="gallery1" class="tovar_imgwrap">
-            <img src="{{ strain.img.url }}" alt="{{ strain.img_alt_text }}" width="500" height="500" class="tovar_img">
-        </a>
-        {% else %}
-         <a href="#" data-fancybox="gallery1" class="tovar_imgwrap">
-            <img src="{% static 'img/no_img.png' %}" alt="{{ strain.name }}" width="380" height="267" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="object_fit">
-        </a>
-        {% endif %}
-    </div>
-    <div class="tovar_col tovar_col--r">
-        <table class="tovar__info">
-            <tr>
-                <td class="tovar__info_th">Categoría:</td>
-                <td class="tovar__info_td">{{ strain.category }}</td>
-            </tr>
-            <tr>
-                <td class="tovar__info_th">Thc:</td>
-                <td class="tovar__info_td">{{ strain.thc|floatformat:"0" }}%</td>
-            </tr>
-            {% if strain.cbd is not none %}
-                <tr>
-                    <td class="tovar__info_th">Cbd:</td>
-                    <td class="tovar__info_td">{{ strain.cbd|floatformat:"0" }}%</td>
-                </tr>
-            {% elif strain.cbg is not none %}
-                <tr>
-                    <td class="tovar__info_th">Cbg:</td>
-                    <td class="tovar__info_td">{{ strain.cbg|floatformat:"0" }}%</td>
-                </tr>
-            {% endif %}
-            <tr>
-                <td class="tovar__info_th">Valoración:</td>
-                <td class="tovar__info_td"><div class="raty raty--tovar" data-score="{{ strain.rating }}" data-readonly="true"></div></td>
-            </tr>
-        </table>
-            <div class="tovar__param">
-                <div class="tovar__param_ico">
-                    <img src="{% static 'img/tovar_info1.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
-                </div>
-                <span>Sensaciones:&nbsp;<span class="color-grey">{% for feeling in strain.feelings.all %}{{ feeling.name|translate:feelings_translation }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
+    
+    <div class="blog">
+        <div class="container flex-grow">
+            <h1>{{ strain.name }}</h1>
+            <div class="tovar tavar--section">
+            <div class="tovar_col tovar_col--l">
+                 {% if strain.img %}
+                <a href="#" data-fancybox="gallery1" class="tovar_imgwrap">
+                    <img src="{{ strain.img.url }}" alt="{{ strain.img_alt_text }}" width="500" height="500" class="tovar_img">
+                </a>
+                {% else %}
+                 <a href="#" data-fancybox="gallery1" class="tovar_imgwrap">
+                    <img src="{% static 'img/no_img.png' %}" alt="{{ strain.name }}" width="380" height="267" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="object_fit">
+                </a>
+                {% endif %}
             </div>
-            <div class="tovar__param">
-                <div class="tovar__param_ico">
-                    <img src="{% static 'img/tovar_info2.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
-                </div>
-                <span>Negativos:&nbsp;<span class="color-grey">{% for negative in strain.negatives.all %}{{ negative.name|translate:negatives_translator }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
-            </div>
-            <div class="tovar__param">
-                <div class="tovar__param_ico">
-                    <img src="{% static 'img/tovar_info3.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
-                </div>
-                <span>Sabores:&nbsp;<span class="color-grey">{% for flavor in strain.flavors.all %}{{ flavor.name|translate:flavors_translation }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
-            </div>
-            <div class="tovar__param">
-                <div class="tovar__param_ico">
-                    <img src="{% static 'img/tovar_info4.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
-                </div>
-                <span>Ayuda con:&nbsp;<span class="color-grey">{% for help in strain.helps_with.all %}{{ help.name|translate:helps_with_translation }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
-            </div>
-            <!-- Terpeno dominante -->
-            {% if strain.dominant_terpene %}
-                <div class="tovar__param">
-                    <div class="tovar__param_ico">
-                        <img src="{% static 'img/tovar_table_0.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
+            <div class="tovar_col tovar_col--r">
+                <table class="tovar__info">
+                    <tr>
+                        <td class="tovar__info_th">Categoría:</td>
+                        <td class="tovar__info_td">{{ strain.category }}</td>
+                    </tr>
+                    <tr>
+                        <td class="tovar__info_th">Thc:</td>
+                        <td class="tovar__info_td">{{ strain.thc|floatformat:"0" }}%</td>
+                    </tr>
+                    {% if strain.cbd is not none %}
+                        <tr>
+                            <td class="tovar__info_th">Cbd:</td>
+                            <td class="tovar__info_td">{{ strain.cbd|floatformat:"0" }}%</td>
+                        </tr>
+                    {% elif strain.cbg is not none %}
+                        <tr>
+                            <td class="tovar__info_th">Cbg:</td>
+                            <td class="tovar__info_td">{{ strain.cbg|floatformat:"0" }}%</td>
+                        </tr>
+                    {% endif %}
+                    <tr>
+                        <td class="tovar__info_th">Valoración:</td>
+                        <td class="tovar__info_td"><div class="raty raty--tovar" data-score="{{ strain.rating }}" data-readonly="true"></div></td>
+                    </tr>
+                </table>
+                    <div class="tovar__param">
+                        <div class="tovar__param_ico">
+                            <img src="{% static 'img/tovar_info1.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
+                        </div>
+                        <span>Sensaciones:&nbsp;<span class="color-grey">{% for feeling in strain.feelings.all %}{{ feeling.name|translate:feelings_translation }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
                     </div>
-                    <span>Terpeno dominante:&nbsp;<span class="color-grey">{{ strain.dominant_terpene.name|translate:terpenes_translation }}</span></span>
-                </div>
-            {% endif %}
-
-            <!-- OTROS TERPENOS -->
-            {% if strain.other_terpenes.all %}
-                <div class="tovar__param">
-                    <div class="tovar__param_ico">
-                        <img src="{% static 'img/tovar_table_0.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
+                    <div class="tovar__param">
+                        <div class="tovar__param_ico">
+                            <img src="{% static 'img/tovar_info2.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
+                        </div>
+                        <span>Negativos:&nbsp;<span class="color-grey">{% for negative in strain.negatives.all %}{{ negative.name|translate:negatives_translator }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
                     </div>
-                    <span>Otros terpenos:&nbsp;<span class="color-grey">{% for terpene in strain.other_terpenes.all %}{{ terpene.name|translate:terpenes_translation }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
-                </div>
-            {% endif %}
+                    <div class="tovar__param">
+                        <div class="tovar__param_ico">
+                            <img src="{% static 'img/tovar_info3.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
+                        </div>
+                        <span>Sabores:&nbsp;<span class="color-grey">{% for flavor in strain.flavors.all %}{{ flavor.name|translate:flavors_translation }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
+                    </div>
+                    <div class="tovar__param">
+                        <div class="tovar__param_ico">
+                            <img src="{% static 'img/tovar_info4.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
+                        </div>
+                        <span>Ayuda con:&nbsp;<span class="color-grey">{% for help in strain.helps_with.all %}{{ help.name|translate:helps_with_translation }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
+                    </div>
+                    <!-- Terpeno dominante -->
+                    {% if strain.dominant_terpene %}
+                        <div class="tovar__param">
+                            <div class="tovar__param_ico">
+                                <img src="{% static 'img/tovar_table_0.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
+                            </div>
+                            <span>Terpeno dominante:&nbsp;<span class="color-grey">{{ strain.dominant_terpene.name|translate:terpenes_translation }}</span></span>
+                        </div>
+                    {% endif %}
+        
+                    <!-- OTROS TERPENOS -->
+                    {% if strain.other_terpenes.all %}
+                        <div class="tovar__param">
+                            <div class="tovar__param_ico">
+                                <img src="{% static 'img/tovar_table_0.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
+                            </div>
+                            <span>Otros terpenos:&nbsp;<span class="color-grey">{% for terpene in strain.other_terpenes.all %}{{ terpene.name|translate:terpenes_translation }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
+                        </div>
+                    {% endif %}
+            </div>
+            </div>
+        
+            <div class="tovar--section">
+            <h2></h2>
+            <div class="tovar_text">{{ strain.text_content|safe }}</div>
+            </div>
+        
+            <div class="h2">Parámetros similares</div>
+            <section class="ctg">
+                {% include "strain_items.html" %}
+            </section>
+            <div class="text-center">
+            <a href="{% url 'strain_list' %}" class="btn btn--outline_с">Ver todos</a>
+            </div>
+        </div>
     </div>
-    </div>
-
-    <div class="tovar--section">
-    <h2></h2>
-    <div class="tovar_text">{{ strain.text_content|safe }}</div>
-    </div>
-
-    <div class="h2">Parámetros similares</div>
-    <section class="ctg">
-        {% include "strain_items.html" %}
-    </section>
-    <div class="text-center">
-    <a href="{% url 'strain_list' %}" class="btn btn--outline_с">Ver todos</a>
-    </div>
-</div>
-
   {% endblock content %}
 
-
-	
-    
 
