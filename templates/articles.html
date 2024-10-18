@@ -60,6 +60,7 @@
                                             {% endif %}
                                         {% endfor %}
                                     </div>
+                                
                                     <div class="article__content">
                                         <span class="article__events">
                                             {% for category in article.category.all %}
@@ -67,10 +68,12 @@
                                             {% endfor %}
                                         </span>
                                         <h2 class="article__title">{{ article.title }}</h2>
-                                        <div class="article__descr">
+
+                                    </div>
+                                </a>
+                                <div class="article__descr">
                                             <p>{{ article.text_content|truncatechars:256|safe }}</p>
                                         </div>
-                                    </div>
                                     <div class="article__footer">
                                         <div class="article__footer-descr">
                                             <div class="article__footer-time">
@@ -78,7 +81,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                </a>
+
                             </article>
                         {% endfor %}
                     </div>
