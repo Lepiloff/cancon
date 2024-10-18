@@ -14,8 +14,9 @@
 {% endblock %}
 
 {% block content %}
+<div class="main">
     <div class="blog">
-        <div class="container flex-grow">
+        <div class="container">
             <div class="h2">Mapa de tiendas y dispensarios en {{ country }}</div>
             
             {% if message %}
@@ -47,11 +48,12 @@
             {% endif %}
         </div>
     </div>
+</div>    
 {% endblock content %}
 
 {% block footer_col_2 %}
     <div class="footer_col footer_col--2">
-        Encuentra las mejores tiendas y dispensarios  en {{ country|upper }} con nuestro mapa interactivo.
+        Encuentra las mejores tiendas y dispensarios  en {{ country|capfirst }} con nuestro mapa interactivo.
     </div>
 {% endblock footer_col_2 %}
 
