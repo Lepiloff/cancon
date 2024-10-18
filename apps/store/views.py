@@ -90,7 +90,7 @@ def map_view(request, country):
         'store_map.html',
         {
             'map_html': map_html,
-            'country': country,
+            'country': country_name,
             'country_choices': Location.COUNTRY_CHOICES,
         },
     )
