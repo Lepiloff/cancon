@@ -18,9 +18,16 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.sitemaps.views import sitemap
 from django.urls import path, include
 
-from apps.strains import views
+from canna.sitemaps import StrainSitemap, ArticleSitemap
+
+
+sitemaps = {
+    'strains': StrainSitemap(),
+    'articles': ArticleSitemap(),
+}
 
 
 handler404 = 'apps.strains.views.custom_page_not_found_view'
@@ -30,7 +37,9 @@ urlpatterns = [
     path('tinymce/', include('tinymce.urls')),
     path('', include('apps.strains.urls')),
     path('store/', include('apps.store.urls')),
-    path('sitemap/', views.sitemap, name='sitemap'),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps},
+         name='django.contrib.sitemaps.views.sitemap'),
+
 ]
 
 if settings.DEBUG:
