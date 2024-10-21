@@ -104,20 +104,17 @@ class Article(BaseText):
         modified = False
 
         for header in soup.find_all('h3'):
-            header_id = header.get('id')
-            if not header_id:
-                # Генерация уникального id на основе текста заголовка
-                text = header.get_text()
-                slug = slugify(text)
-                if slug in slug_count:
-                    slug_count[slug] += 1
-                    slug = f"{slug}-{slug_count[slug]}"
-                else:
-                    slug_count[slug] = 1
-                header['id'] = slug
-                modified = True
-                header_id = slug  # Обновляем переменную после присвоения
-
+            # Генерация уникального id на основе текста заголовка
+            text = header.get_text()
+            slug = slugify(text)
+            if slug in slug_count:
+                slug_count[slug] += 1
+                slug = f"{slug}-{slug_count[slug]}"
+            else:
+                slug_count[slug] = 1
+            header['id'] = f"h-{slug}"
+            modified = True
+            header_id = f"h-{slug}"  # Обновляем переменную после присвоения
             header_text = header.get_text()
             headings.append({
                 'id': header_id,
