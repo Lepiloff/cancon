@@ -20,6 +20,8 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+from apps.strains import views
+
 
 handler404 = 'apps.strains.views.custom_page_not_found_view'
 
@@ -28,6 +30,7 @@ urlpatterns = [
     path('tinymce/', include('tinymce.urls')),
     path('', include('apps.strains.urls')),
     path('store/', include('apps.store.urls')),
+    path('sitemap/', views.sitemap, name='sitemap'),
 ]
 
 if settings.DEBUG:
