@@ -185,3 +185,17 @@ def terpene_detail(request, slug):
         }
     )
 
+
+# SITEMAP #
+
+def sitemap(request):
+    strains = Strain.objects.filter(active=True)
+    articles = Article.objects.all()
+
+    context = {
+        'strains': strains,
+        'articles': articles,
+    }
+
+    return render(request, 'sitemap.html', context)
+
