@@ -48,7 +48,7 @@ def get_filtered_strains(form):
         thc_choices = form.cleaned_data['thc']
         thc_conditions = Q()
         if 'sin thc' in thc_choices:
-            thc_conditions |= Q(thc=0)
+            thc_conditions |= Q(thc=0.99)
         if 'bajo thc' in thc_choices:
             thc_conditions |= Q(thc__range=(1, 10))
         if 'medio thc' in thc_choices:
