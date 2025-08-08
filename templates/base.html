@@ -33,8 +33,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}" />
+    <!-- AI Budtender Chat Widget Styles -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/ai-budtender-chat.css' %}" />
 </head>
-<body class="">
+<body class="" data-ai-budtender-chat>
 <main class="page">
 {% block header_block %}
     <header class="header container">
@@ -161,6 +163,19 @@
         </script>
 
         <script src="{% static 'js/script.js' %}"></script>
+        
+        <!-- AI Budtender Chat Widget -->
+        <script>
+            // AI Budtender Chat Configuration
+            window.AIBudtenderChatConfig = {
+                apiBaseUrl: '/api/chat', // Use Django proxy instead of direct canagent
+                apiKey: '', // API key handled by Django backend
+                websocketUrl: null, // Add WebSocket URL if available
+                autoConnect: true,
+                maxHistory: 10
+            };
+        </script>
+        <script src="{% static 'js/ai-budtender-chat.js' %}"></script>
     {% endblock common_scripts %}
 
     {% block page_scripts %} {% endblock page_scripts %}

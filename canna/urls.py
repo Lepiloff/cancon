@@ -37,6 +37,7 @@ urlpatterns = [
     path('tinymce/', include('tinymce.urls')),
     path('', include('apps.strains.urls')),
     path('store/', include('apps.store.urls')),
+    path('api/chat/', include('apps.chat_bot.urls')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps},
          name='django.contrib.sitemaps.views.sitemap'),
 

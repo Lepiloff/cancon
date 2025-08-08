@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'users',
     'apps.strains',
     'apps.store',
+    'apps.chat_bot',
     'storages',
     'tinymce',
     'django_json_ld',
