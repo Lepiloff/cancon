@@ -40,9 +40,11 @@ The AI Budtender Chat is a sophisticated real-time chat widget that provides per
 
 4. **AI Processing (Canagent)**
    - Receives user message and conversation history
-   - Uses RAG (Retrieval-Augmented Generation) for strain matching
-   - Generates AI response with strain recommendations
-   - Returns JSON with response text and strain data
+   - **Intent Detection**: Automatically detects user needs (sleep/energy/focus/pain/anxiety)
+   - **Structured Filtering**: Applies smart filters based on detected intent
+   - **Vector Search**: Uses pgvector for semantic strain matching within filtered results
+   - Generates AI response with strain recommendations using CompactStrain schema
+   - Returns JSON with response text, recommended strains, detected_intent, and filters_applied
 
 5. **Response Handling**
    - Django logs AI response and recommended strains
@@ -288,6 +290,58 @@ Access analytics through Django Admin → Chat Bot section.
 
 ---
 
-**Implementation completed on**: `feature/ai-budtender-chat` branch  
-**Total development time**: Complete MVP implementation  
-**Status**: ✅ Ready for testing and deployment
+## 🔄 Latest Updates (v2.0 - Enhanced API Integration)
+
+### **API Optimization (August 2025)**
+- **Intent Detection**: Automatic detection of user needs (sleep/energy/focus/pain/anxiety)
+- **Structured Filtering**: Smart strain filtering based on detected intent prevents conflicting recommendations
+- **Compact Response Format**: Optimized `CompactStrain` schema for faster UI rendering
+- **Enhanced Strain Cards**: Display effects with energy types, medical uses, and flavors
+- **Improved Cannabinoid Logic**: Smart CBG/CBD display based on content levels
+
+### **New Response Format**
+```json
+{
+  "response": "AI response text...",
+  "recommended_strains": [
+    {
+      "id": 42,
+      "name": "Northern Lights | Variedad de cannabis",
+      "thc": "18.50", "cbd": "0.10", "cbg": "1.00",
+      "category": "Indica",
+      "url": "http://localhost:8000/strain/northern-lights/",
+      "feelings": [{"name": "Sleepy", "energy_type": "relaxing"}],
+      "helps_with": [{"name": "Insomnia"}],
+      "flavors": [{"name": "earthy"}]
+    }
+  ],
+  "detected_intent": "sleep",
+  "filters_applied": {
+    "preferred_categories": ["Indica"],
+    "required_feelings": ["Sleepy", "Relaxed"]
+  }
+}
+```
+
+### **UI Improvements**
+- **Strain Cards**: Color-coded categories (Indica: blue, Sativa: orange, Hybrid: purple)
+- **Smart Cannabinoid Display**: Shows CBG when CBD is low/null
+- **Effects Visualization**: "Sleepy (relaxing)", "Creative (energizing)"
+- **Medical Uses**: "Ayuda con: Insomnia, Stress"
+- **Flavor Profiles**: "Sabores: earthy, pine"
+
+### **Testing**
+- ✅ Sleep Intent: Returns Indica strains with sleepy/relaxed effects
+- ✅ Energy Intent: Returns Sativa/Hybrid with energetic effects  
+- ✅ Pain Intent: Returns strains helping with pain/inflammation
+- ✅ Focus Intent: Returns strains with focused/creative effects
+- ✅ Strain Cards: Clickable with proper cannabinoid display
+- ✅ Docker Integration: Works with canna + canagent containers
+
+---
+
+**Implementation completed on**: `master` branch  
+**Total development time**: Complete enhanced implementation  
+**Status**: ✅ Production ready with enhanced AI capabilities  
+**API Version**: Canagent v4.1 with intent detection  
+**Test Page**: `/test_chat_integration.html` for integration testing
