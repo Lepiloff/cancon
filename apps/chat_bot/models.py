@@ -149,26 +149,3 @@ class ChatMessage(models.Model):
         return f"{self.get_message_type_display()} - {self.content[:50]}..."
 
 
-class ChatFeedback(models.Model):
-    """User feedback on AI responses"""
-    
-    FEEDBACK_TYPES = [
-        ('thumbs_up', 'Thumbs Up'),
-        ('thumbs_down', 'Thumbs Down'),
-        ('helpful', 'Helpful'),
-        ('not_helpful', 'Not Helpful')
-    ]
-    
-    message = models.ForeignKey(ChatMessage, on_delete=models.CASCADE, related_name='feedback')
-    feedback_type = models.CharField(max_length=20, choices=FEEDBACK_TYPES)
-    comment = models.TextField(blank=True)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    ip_address = models.GenericIPAddressField()
-    
-    class Meta:
-        verbose_name = 'Chat Feedback'
-        verbose_name_plural = 'Chat Feedback'
-        unique_together = ['message', 'ip_address']  # One feedback per message per IP
-    
-    def __str__(self):
-        return f"{self.get_feedback_type_display()} - {self.message.content[:30]}..."
