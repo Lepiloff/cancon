@@ -50,12 +50,18 @@ The AI Budtender Chat is a sophisticated real-time chat widget that provides per
    - Django logs AI response and recommended strains
    - Returns response to frontend with session ID
    - JavaScript displays AI message and strain cards
-   - Strain cards are clickable and link to individual strain pages
+   - **Session ID automatically saved to localStorage** for persistence
+   - **Complete conversation saved with strain metadata**
 
-6. **Session Management**
-   - Client-side conversation history stored in localStorage
-   - Server-side session tracking for analytics
-   - Message history sent with each request for context
+6. **Advanced Session Management**
+   - **Full localStorage persistence**: All messages, strains, and metadata saved
+   - **Cross-page continuity**: Chat history preserved across entire website
+   - **Automatic restoration**: On page load, chat rebuilds complete conversation
+   - **Session ID tracking**: Server maintains conversation context via UUID
+   - **Smart storage**: Three localStorage keys manage different data types:
+     - `ai-budtender-history` - Text history for API requests
+     - `ai-budtender-messages` - Full messages with strain cards for UI restoration
+     - `ai-budtender-session-id` - Server session ID for conversation continuity
 
 ## 📁 Project Structure
 
