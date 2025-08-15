@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from .models import ChatConfiguration, APIKey, ChatSession, ChatMessage, ChatFeedback
+from .models import ChatConfiguration, APIKey, ChatSession, ChatMessage
 
 
 @admin.register(ChatConfiguration)
@@ -102,12 +102,6 @@ class ChatSessionAdmin(admin.ModelAdmin):
     ]
 
 
-class ChatFeedbackInline(admin.TabularInline):
-    model = ChatFeedback
-    extra = 0
-    readonly_fields = ['feedback_type', 'comment', 'timestamp', 'ip_address']
-
-
 @admin.register(ChatMessage)
 class ChatMessageAdmin(admin.ModelAdmin):
     list_display = ['session_preview', 'message_type', 'content_preview', 'timestamp', 'response_time_ms']
@@ -115,7 +109,6 @@ class ChatMessageAdmin(admin.ModelAdmin):
     search_fields = ['content', 'session__session_id', 'session__ip_address']
     readonly_fields = ['session', 'timestamp', 'recommended_strains_display']
     date_hierarchy = 'timestamp'
-    inlines = [ChatFeedbackInline]
 
     def session_preview(self, obj):
         return f"{obj.session.session_id.hex[:8]}..."
@@ -155,18 +148,6 @@ class ChatMessageAdmin(admin.ModelAdmin):
         })
     ]
 
-
-@admin.register(ChatFeedback)
-class ChatFeedbackAdmin(admin.ModelAdmin):
-    list_display = ['message_preview', 'feedback_type', 'timestamp', 'ip_address']
-    list_filter = ['feedback_type', 'timestamp']
-    search_fields = ['message__content', 'comment', 'ip_address']
-    readonly_fields = ['message', 'timestamp']
-    date_hierarchy = 'timestamp'
-
-    def message_preview(self, obj):
-        return obj.message.content[:50] + "..." if len(obj.message.content) > 50 else obj.message.content
-    message_preview.short_description = "Message"
 
 # Custom admin site configuration
 admin.site.site_header = "Canna AI Budtender Admin"

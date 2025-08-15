@@ -187,62 +187,6 @@ class ChatProxyView(View):
             return JsonResponse({'error': 'Internal server error'}, status=500)
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class ChatFeedbackView(View):
-    """Handle user feedback on AI responses"""
-    
-    def post(self, request):
-        try:
-            data = json.loads(request.body)
-            session_id = data.get('session_id')
-            message_id = data.get('message_id')  # Frontend would need to track this
-            feedback_type = data.get('feedback_type')
-            comment = data.get('comment', '')
-            
-            if not all([session_id, feedback_type]):
-                return JsonResponse({'error': 'Missing required fields'}, status=400)
-            
-            # Validate feedback type
-            valid_feedback = ['thumbs_up', 'thumbs_down', 'helpful', 'not_helpful']
-            if feedback_type not in valid_feedback:
-                return JsonResponse({'error': 'Invalid feedback type'}, status=400)
-            
-            # Find the message (this is simplified - in real implementation,
-            # you'd want to track message IDs on the frontend)
-            try:
-                session = ChatSession.objects.get(session_id=session_id)
-                # Get the last AI message from this session
-                message = session.messages.filter(message_type='ai').last()
-                
-                if message:
-                    from .models import ChatFeedback
-                    feedback, created = ChatFeedback.objects.get_or_create(
-                        message=message,
-                        ip_address=get_client_ip(request),
-                        defaults={
-                            'feedback_type': feedback_type,
-                            'comment': comment
-                        }
-                    )
-                    
-                    if not created:
-                        # Update existing feedback
-                        feedback.feedback_type = feedback_type
-                        feedback.comment = comment
-                        feedback.save()
-                    
-                    return JsonResponse({'status': 'success'})
-                else:
-                    return JsonResponse({'error': 'No AI message found'}, status=404)
-                    
-            except ChatSession.DoesNotExist:
-                return JsonResponse({'error': 'Session not found'}, status=404)
-                
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
-        except Exception as e:
-            return JsonResponse({'error': 'Internal server error'}, status=500)
-
 
 @require_http_methods(["GET"])
 def chat_health(request):
