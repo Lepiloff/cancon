@@ -102,6 +102,9 @@ class ChatSession(models.Model):
     message_count = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
     
+    # Context-Aware Architecture v2.0 fields
+    language = models.CharField(max_length=2, blank=True, null=True, help_text='Detected language (es/en)')
+    
     # Optional: Track which API key was used
     api_key = models.ForeignKey(APIKey, on_delete=models.SET_NULL, blank=True, null=True)
     
@@ -131,6 +134,11 @@ class ChatMessage(models.Model):
     
     # For AI responses, store recommended strains
     recommended_strains = models.JSONField(blank=True, null=True)
+    
+    # Context-Aware Architecture v2.0 fields (commented for space optimization)
+    # query_type = models.CharField(max_length=20, blank=True, null=True)
+    # detected_intent = models.CharField(max_length=50, blank=True, null=True)
+    # confidence_score = models.FloatField(blank=True, null=True)
     
     # Performance tracking
     response_time_ms = models.PositiveIntegerField(blank=True, null=True)
