@@ -1,3 +1,12 @@
+"""
+AI Budtender Chat Views
+
+STORAGE ARCHITECTURE:
+- Chat messages: Stored in browser localStorage for instant UX and offline access
+- Session metadata: Stored in database for analytics (user count, message count, response times)
+- Message content storage: DISABLED to save database space (see commented code blocks)
+"""
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -107,13 +116,17 @@ class ChatProxyView(View):
                     api_key=api_key
                 )
             
-            # Log user message
-            ChatMessage.objects.create(
-                session=session,
-                message_type='user',
-                content=message,
-                ip_address=client_ip
-            )
+            # NOTE: Message content storage disabled to save DB space
+            # Chat history is stored in localStorage (browser-side) for better UX
+            # Session metadata is kept for analytics, but message content is excluded
+            # 
+            # # Log user message
+            # ChatMessage.objects.create(
+            #     session=session,
+            #     message_type='user',
+            #     content=message,
+            #     ip_address=client_ip
+            # )
             
             # Forward request to canagent API
             api_start_time = time.time()
@@ -127,7 +140,9 @@ class ChatProxyView(View):
             
             payload = {
                 'message': message,
-                'history': history[-config.max_history:]  # Limit history
+                'history': history[-config.max_history:],  # Limit history
+                'session_id': str(session.session_id),  # Use Django session_id, not client's
+                'source_platform': 'cannamente'  # Platform identification
             }
             
             try:
@@ -143,44 +158,66 @@ class ChatProxyView(View):
                 if response.status_code == 200:
                     response_data = response.json()
                     
-                    # Log AI response
-                    ChatMessage.objects.create(
-                        session=session,
-                        message_type='ai',
-                        content=response_data.get('response', ''),
-                        recommended_strains=response_data.get('recommended_strains', []),
-                        api_response_time_ms=api_response_time,
-                        ip_address=client_ip
-                    )
+                    # Context-Aware Architecture v2.0 - Handle session_id from canagent
+                    canagent_session_id = response_data.get('session_id')
+                    if canagent_session_id and canagent_session_id != str(session.session_id):
+                        # Update our session ID to match canagent's session ID
+                        session.session_id = canagent_session_id
+                        session.save(update_fields=['session_id'])
                     
-                    # Update session
+                    # NOTE: AI response storage disabled to save DB space
+                    # Chat history is stored in localStorage (browser-side) for better UX
+                    # Only response time metrics are tracked for performance monitoring
+                    #
+                    # # Log AI response with Context-Aware metadata  
+                    # ChatMessage.objects.create(
+                    #     session=session,
+                    #     message_type='ai',
+                    #     content=response_data.get('response', ''),
+                    #     recommended_strains=response_data.get('recommended_strains', []),
+                    #     api_response_time_ms=api_response_time,
+                    #     query_type=response_data.get('query_type', 'unknown'),
+                    #     detected_intent=response_data.get('detected_intent'),
+                    #     confidence_score=response_data.get('confidence'),
+                    #     ip_address=client_ip
+                    # )
+                    
+                    # Update session with Context-Aware metadata
                     session.message_count += 2  # User message + AI response
-                    session.save(update_fields=['message_count', 'last_activity_at'])
+                    if response_data.get('language'):
+                        session.language = response_data.get('language')
+                    session.save(update_fields=['message_count', 'last_activity_at', 'language'])
                     
-                    # Add session ID to response
-                    response_data['session_id'] = str(session.session_id)
+                    # Ensure session ID is included in response (use canagent's session ID)
+                    response_data['session_id'] = canagent_session_id or str(session.session_id)
                     
                     return JsonResponse(response_data)
                 
                 else:
                     error_msg = f"API request failed: {response.status_code}"
-                    ChatMessage.objects.create(
-                        session=session,
-                        message_type='error',
-                        content=error_msg,
-                        api_response_time_ms=api_response_time,
-                        ip_address=client_ip
-                    )
+                    # NOTE: Error message storage disabled to save DB space
+                    # Error details are returned to client and logged in browser console
+                    #
+                    # ChatMessage.objects.create(
+                    #     session=session,
+                    #     message_type='error',
+                    #     content=error_msg,
+                    #     api_response_time_ms=api_response_time,
+                    #     ip_address=client_ip
+                    # )
                     return JsonResponse({'error': error_msg}, status=response.status_code)
                     
             except requests.exceptions.RequestException as e:
                 error_msg = f"Failed to connect to AI service: {str(e)}"
-                ChatMessage.objects.create(
-                    session=session,
-                    message_type='error',
-                    content=error_msg,
-                    ip_address=client_ip
-                )
+                # NOTE: Connection error storage disabled to save DB space
+                # Error details are returned to client for debugging purposes
+                #
+                # ChatMessage.objects.create(
+                #     session=session,
+                #     message_type='error',
+                #     content=error_msg,
+                #     ip_address=client_ip
+                # )
                 return JsonResponse({'error': error_msg}, status=502)
                 
         except Exception as e:
