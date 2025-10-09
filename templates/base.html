@@ -1,18 +1,20 @@
 <!DOCTYPE html>
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 <!--[if IE 6]>
-<html id="ie6" dir="ltr" lang="es">
+<html id="ie6" dir="ltr" lang="{{ LANGUAGE_CODE }}">
 <![endif]-->
 <!--[if IE 7]>
-<html id="ie7" dir="ltr" lang="es">
+<html id="ie7" dir="ltr" lang="{{ LANGUAGE_CODE }}">
 <![endif]-->
 <!--[if IE 8]>
-<html id="ie8" dir="ltr" lang="es">
+<html id="ie8" dir="ltr" lang="{{ LANGUAGE_CODE }}">
 <![endif]-->
 <!--[if IE 9]>
-<html id="ie9" dir="ltr" lang="es">
+<html id="ie9" dir="ltr" lang="{{ LANGUAGE_CODE }}">
 <![endif]-->
 <!--[if !(IE 6) | !(IE 7) | !(IE 8) | !(IE 9) ]><!-->
-<html dir="ltr" lang="es">
+<html dir="ltr" lang="{{ LANGUAGE_CODE }}">
 <!--<![endif]-->
 {% load static %}
 <head>
@@ -58,16 +60,16 @@
                 <div class="menu_caption">Menu</div>
                 <ul class="menu_ul">
                     <li class="menu_li">
-                        <a href="{% url 'strain_list' %}" class="menu_a">Variedades</a>
+                        <a href="{% url 'strain_list' %}" class="menu_a">{% trans "Variedades" %}</a>
                     </li>
                     <li class="menu_li">
-                        <a href="{% url 'terpene_list' %}" class="menu_a">Terpenos</a>
+                        <a href="{% url 'terpene_list' %}" class="menu_a">{% trans "Terpenos" %}</a>
                     </li>
                     <li class="menu_li">
-                        <a href="{% url 'article_list' %}" class="menu_a">Artículos</a>
+                        <a href="{% url 'article_list' %}" class="menu_a">{% trans "Artículos" %}</a>
                     </li>
                     <li class="menu_li">
-                        <a href="{% url 'global_map_redirect' %}" class="menu_a">Tiendas/Dispensarios</a>
+                        <a href="{% url 'global_map_redirect' %}" class="menu_a">{% trans "Tiendas/Dispensarios" %}</a>
                     </li>
                 </ul>
             </nav>
@@ -75,19 +77,33 @@
             <nav class="desktop-menu">
                 <ul class="desktop-menu_ul">
                     <li class="desktop-menu_li">
-                        <a href="{% url 'strain_list' %}" class="desktop-menu_a">Variedades</a>
+                        <a href="{% url 'strain_list' %}" class="desktop-menu_a">{% trans "Variedades" %}</a>
                     </li>
                     <li class="desktop-menu_li">
-                        <a href="{% url 'terpene_list' %}" class="desktop-menu_a">Terpenos</a>
+                        <a href="{% url 'terpene_list' %}" class="desktop-menu_a">{% trans "Terpenos" %}</a>
                     </li>
                     <li class="desktop-menu_li">
-                        <a href="{% url 'article_list' %}" class="desktop-menu_a">Artículos</a>
+                        <a href="{% url 'article_list' %}" class="desktop-menu_a">{% trans "Artículos" %}</a>
                     </li>
                     <li class="desktop-menu_li">
-                        <a href="{% url 'global_map_redirect' %}" class="desktop-menu_a">Tiendas/Dispensarios</a>
+                        <a href="{% url 'global_map_redirect' %}" class="desktop-menu_a">{% trans "Tiendas/Dispensarios" %}</a>
                     </li>
                 </ul>
             </nav>
+            <!-- Language Switcher -->
+            <form action="{% url 'set_language' %}" method="post" class="language-switcher">
+                {% csrf_token %}
+                <input name="next" type="hidden" value="{{ request.path }}">
+                <select name="language" onchange="this.form.submit()" class="language-select">
+                    {% get_current_language as CURRENT_LANGUAGE %}
+                    {% get_available_languages as LANGUAGES %}
+                    {% for lang_code, lang_name in LANGUAGES %}
+                        <option value="{{ lang_code }}" {% if lang_code == CURRENT_LANGUAGE %}selected{% endif %}>
+                            {% if lang_code == 'en' %}🇬🇧 EN{% elif lang_code == 'es' %}🇪🇸 ES{% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
         </div>
     </header>
 {% endblock header_block %}
