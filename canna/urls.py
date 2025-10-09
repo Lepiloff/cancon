@@ -17,9 +17,11 @@ Including another URLconf
 
 from django.conf import settings
 from django.conf.urls.static import static
+from django.conf.urls.i18n import i18n_patterns
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.urls import path, include
+from django.views.i18n import set_language
 
 from canna.sitemaps import StrainSitemap, ArticleSitemap
 
@@ -35,6 +37,7 @@ handler404 = 'apps.strains.views.custom_page_not_found_view'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('tinymce/', include('tinymce.urls')),
+    path('i18n/', include('django.conf.urls.i18n')),  # Language switcher
     path('', include('apps.strains.urls')),
     path('store/', include('apps.store.urls')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps},
