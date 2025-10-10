@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'users',
     'apps.strains',
     'apps.store',
+    'apps.translation',  # AI translation service
     'storages',
     'tinymce',
     'django_json_ld',
@@ -198,9 +199,10 @@ TINYMCE_DEFAULT_CONFIG = {
     "custom_undo_redo_levels": 10,
 }
 
-# AWS SQS Configuration (for translation queue)
-AWS_SQS_TRANSLATION_QUEUE_URL = os.getenv(
-    'AWS_SQS_TRANSLATION_QUEUE_URL',
-    ''  # Will be set when AWS is configured
-)
-AWS_REGION = os.getenv('AWS_REGION', 'us-east-1')
+# Translation Configuration
+ENABLE_AUTO_TRANSLATION = os.getenv('ENABLE_AUTO_TRANSLATION', 'true').lower() == 'true'
+TRANSLATION_DIRECTION = os.getenv('TRANSLATION_DIRECTION', 'en-to-es')  # en-to-es or es-to-en
+
+# AWS Configuration (optional - for future SQS/Lambda implementation)
+AWS_SQS_TRANSLATION_QUEUE_URL = os.getenv('AWS_SQS_TRANSLATION_QUEUE_URL', '')
+AWS_REGION = os.getenv('AWS_REGION', 'eu-central-1')

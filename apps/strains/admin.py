@@ -13,7 +13,7 @@ from apps.strains.models import (
     Flavor,
     Terpene,
 )
-from apps.strains.signals import send_to_translation_queue
+from apps.strains.signals import perform_translation
 
 
 class TranslatedModelAdmin(TranslationAdmin):
@@ -65,19 +65,14 @@ class StrainAdmin(TranslatedModelAdmin):
 
     @admin.action(description='Force retranslate selected items')
     def force_retranslate(self, request, queryset):
-        """Send selected items to translation queue"""
+        """Force retranslate selected items"""
         count = 0
         for obj in queryset:
-            fields = obj.get_translatable_fields()
-            if fields:
-                fields['content_hash'] = obj.get_translatable_content_hash()
-                success = send_to_translation_queue('Strain', obj.id, fields)
-                if success:
-                    obj.translation_status = 'pending'
-                    obj.save(update_fields=['translation_status'])
-                    count += 1
+            success = perform_translation(obj, 'Strain')
+            if success:
+                count += 1
 
-        self.message_user(request, f'{count} strains queued for translation')
+        self.message_user(request, f'{count} strains translated successfully')
 
 
 class ArticleImageInline(admin.TabularInline):
@@ -108,19 +103,14 @@ class ArticleAdmin(TranslatedModelAdmin):
 
     @admin.action(description='Force retranslate selected items')
     def force_retranslate(self, request, queryset):
-        """Send selected items to translation queue"""
+        """Force retranslate selected items"""
         count = 0
         for obj in queryset:
-            fields = obj.get_translatable_fields()
-            if fields:
-                fields['content_hash'] = obj.get_translatable_content_hash()
-                success = send_to_translation_queue('Article', obj.id, fields)
-                if success:
-                    obj.translation_status = 'pending'
-                    obj.save(update_fields=['translation_status'])
-                    count += 1
+            success = perform_translation(obj, 'Article')
+            if success:
+                count += 1
 
-        self.message_user(request, f'{count} articles queued for translation')
+        self.message_user(request, f'{count} articles translated successfully')
 
 
 class TerpeneAdmin(TranslatedModelAdmin):
@@ -130,19 +120,14 @@ class TerpeneAdmin(TranslatedModelAdmin):
 
     @admin.action(description='Force retranslate selected items')
     def force_retranslate(self, request, queryset):
-        """Send selected items to translation queue"""
+        """Force retranslate selected items"""
         count = 0
         for obj in queryset:
-            fields = obj.get_translatable_fields()
-            if fields:
-                fields['content_hash'] = obj.get_translatable_content_hash()
-                success = send_to_translation_queue('Terpene', obj.id, fields)
-                if success:
-                    obj.translation_status = 'pending'
-                    obj.save(update_fields=['translation_status'])
-                    count += 1
+            success = perform_translation(obj, 'Terpene')
+            if success:
+                count += 1
 
-        self.message_user(request, f'{count} terpenes queued for translation')
+        self.message_user(request, f'{count} terpenes translated successfully')
 
 
 # Simple admin for translated taxonomy models

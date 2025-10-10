@@ -1,76 +1,143 @@
-import json
+"""
+Translation Signals
+
+Automatically translate content when saved in admin.
+Phase 3: Synchronous translation using OpenAI API (no SQS/Lambda).
+"""
+
 import logging
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from django.conf import settings
+
 from apps.strains.models import Strain, Article, Terpene
+from apps.translation import OpenAITranslator, TranslationConfig
+from apps.translation.base_translator import TranslationError
 
 logger = logging.getLogger(__name__)
 
 
-def send_to_translation_queue(model_name, instance_id, fields_to_translate):
-    """
-    Send translation job to AWS SQS FIFO queue.
+# Check if translations are enabled (can be disabled for testing)
+ENABLE_AUTO_TRANSLATION = getattr(
+    settings,
+    'ENABLE_AUTO_TRANSLATION',
+    True  # Enabled by default
+)
 
-    For local development without AWS, this will just log the request.
+# Translation direction (en-to-es or es-to-en)
+TRANSLATION_DIRECTION = getattr(
+    settings,
+    'TRANSLATION_DIRECTION',
+    'en-to-es'  # Default: English to Spanish
+)
+
+
+def perform_translation(instance, model_name: str) -> bool:
+    """
+    Perform translation for an instance.
 
     Args:
-        model_name: Model class name (e.g., 'Strain')
-        instance_id: Database ID of the instance
-        fields_to_translate: Dict of field names and EN content
+        instance: Model instance to translate
+        model_name: Model name (Strain, Article, Terpene)
+
+    Returns:
+        True if translation succeeded, False otherwise
     """
-    # Check if AWS SQS is configured
-    if not settings.AWS_SQS_TRANSLATION_QUEUE_URL:
-        logger.info(
-            f"[LOCAL DEV] Would send {model_name} #{instance_id} to translation queue. "
-            f"Fields: {list(fields_to_translate.keys())}"
-        )
-        return True
+    if not ENABLE_AUTO_TRANSLATION:
+        logger.info(f'Auto-translation disabled, skipping {model_name} #{instance.id}')
+        return False
 
     try:
-        import boto3
-
-        sqs = boto3.client('sqs', region_name=settings.AWS_REGION)
-
-        message_body = {
-            'model': model_name,
-            'instance_id': instance_id,
-            'fields': fields_to_translate,
-            'source_lang': 'en',
-            'target_lang': 'es',
-        }
-
-        # Send to FIFO queue
-        response = sqs.send_message(
-            QueueUrl=settings.AWS_SQS_TRANSLATION_QUEUE_URL,
-            MessageBody=json.dumps(message_body),
-            MessageGroupId=f'{model_name}-translations',  # Groups messages by model
-            MessageDeduplicationId=f'{model_name}-{instance_id}-{fields_to_translate.get("content_hash", "")}',
+        # Parse translation direction
+        source_lang, target_lang = TranslationConfig.parse_direction(
+            TRANSLATION_DIRECTION
         )
+
+        # Get fields to translate
+        fields_to_translate = {}
+        field_names = TranslationConfig.get_model_fields(model_name)
+
+        for field_name in field_names:
+            source_field = f'{field_name}_{source_lang}'
+            if hasattr(instance, source_field):
+                content = getattr(instance, source_field, '')
+                if content:
+                    fields_to_translate[field_name] = content
+
+        if not fields_to_translate:
+            logger.info(
+                f'No source content to translate for {model_name} #{instance.id}'
+            )
+            return False
 
         logger.info(
-            f"Sent {model_name} #{instance_id} to translation queue. "
-            f"MessageId: {response['MessageId']}"
+            f'Translating {model_name} #{instance.id} ({source_lang} → {target_lang})'
         )
+
+        # Initialize translator and translate
+        translator = OpenAITranslator()
+        translations = translator.translate(
+            model_name,
+            fields_to_translate,
+            source_lang,
+            target_lang,
+        )
+
+        # Save translations
+        translated_fields = []
+        for field_name, translated_text in translations.items():
+            target_field = f'{field_name}_{target_lang}'
+            if hasattr(instance, target_field):
+                setattr(instance, target_field, translated_text)
+                translated_fields.append(target_field)
+
+        # Update translation metadata
+        from django.utils import timezone
+        instance.translation_status = 'synced'
+        instance.translation_source_hash = instance.get_translatable_content_hash()
+        instance.last_translated_at = timezone.now()
+        instance.translation_error = None
+
+        # Save everything at once with update_fields to avoid triggering signals again
+        update_fields = translated_fields + [
+            'translation_status',
+            'translation_source_hash',
+            'last_translated_at',
+            'translation_error'
+        ]
+        instance.save(update_fields=update_fields)
+
+        logger.info(
+            f'Successfully translated {model_name} #{instance.id} '
+            f'({len(translations)} fields)'
+        )
+
         return True
 
+    except TranslationError as e:
+        error_msg = f'Translation failed: {str(e)}'
+        logger.error(f'{model_name} #{instance.id}: {error_msg}')
+        instance.mark_translation_failed(error_msg)
+        return False
+
     except Exception as e:
-        logger.error(f"Failed to send {model_name} #{instance_id} to queue: {e}")
+        error_msg = f'Unexpected error during translation: {str(e)}'
+        logger.exception(f'{model_name} #{instance.id}: {error_msg}')
+        instance.mark_translation_failed(error_msg)
         return False
 
 
-# ============================================================================
-# STRAIN SIGNALS
-# ============================================================================
+# ========== Strain Signals ==========
 
 @receiver(pre_save, sender=Strain)
 def check_strain_translation_needed(sender, instance, **kwargs):
     """
-    Before saving: Check if English content has changed.
-    If changed, mark translation as outdated.
+    Check if strain content has changed and mark as outdated if needed.
+
+    This runs before save to detect content changes.
     """
     if not instance.pk:
-        # New instance - skip
+        # New object, will be handled in post_save
         return
 
     try:
@@ -79,47 +146,43 @@ def check_strain_translation_needed(sender, instance, **kwargs):
         new_hash = instance.get_translatable_content_hash()
 
         if old_hash != new_hash:
-            # Content changed - mark as outdated
+            # Content changed, mark as outdated
             instance.translation_status = 'outdated'
-            instance.translation_source_hash = None
-            logger.info(f"Strain #{instance.pk} marked as outdated due to content change")
-
+            logger.info(
+                f'Strain #{instance.id} content changed, marking as outdated'
+            )
     except sender.DoesNotExist:
         pass
 
 
 @receiver(post_save, sender=Strain)
-def queue_strain_translation(sender, instance, created, **kwargs):
+def auto_translate_strain(sender, instance, created, **kwargs):
     """
-    After saving: Queue translation if needed.
+    Automatically translate strain after save if needed.
+
+    This runs after save to perform translation.
     """
-    if instance.needs_translation():
-        # Get translatable content
-        fields = instance.get_translatable_fields()
+    # Skip if translations are disabled
+    if not ENABLE_AUTO_TRANSLATION:
+        return
 
-        if not fields:
-            logger.warning(f"Strain #{instance.pk} needs translation but has no EN content")
-            return
+    # Check if translation is needed
+    if not instance.needs_translation():
+        logger.debug(f'Strain #{instance.id} does not need translation')
+        return
 
-        # Add content hash for deduplication
-        fields['content_hash'] = instance.get_translatable_content_hash()
-
-        # Send to queue
-        success = send_to_translation_queue('Strain', instance.id, fields)
-
-        if success:
-            # Update status to pending
-            Strain.objects.filter(pk=instance.pk).update(translation_status='pending')
-            logger.info(f"Strain #{instance.pk} queued for translation")
+    # Perform translation
+    logger.info(f'Auto-translating Strain #{instance.id}')
+    perform_translation(instance, 'Strain')
 
 
-# ============================================================================
-# ARTICLE SIGNALS
-# ============================================================================
+# ========== Article Signals ==========
 
 @receiver(pre_save, sender=Article)
 def check_article_translation_needed(sender, instance, **kwargs):
-    """Before saving: Check if English content has changed."""
+    """
+    Check if article content has changed and mark as outdated if needed.
+    """
     if not instance.pk:
         return
 
@@ -130,39 +193,36 @@ def check_article_translation_needed(sender, instance, **kwargs):
 
         if old_hash != new_hash:
             instance.translation_status = 'outdated'
-            instance.translation_source_hash = None
-            logger.info(f"Article #{instance.pk} marked as outdated")
-
+            logger.info(
+                f'Article #{instance.id} content changed, marking as outdated'
+            )
     except sender.DoesNotExist:
         pass
 
 
 @receiver(post_save, sender=Article)
-def queue_article_translation(sender, instance, created, **kwargs):
-    """After saving: Queue translation if needed."""
-    if instance.needs_translation():
-        fields = instance.get_translatable_fields()
+def auto_translate_article(sender, instance, created, **kwargs):
+    """
+    Automatically translate article after save if needed.
+    """
+    if not ENABLE_AUTO_TRANSLATION:
+        return
 
-        if not fields:
-            logger.warning(f"Article #{instance.pk} needs translation but has no EN content")
-            return
+    if not instance.needs_translation():
+        logger.debug(f'Article #{instance.id} does not need translation')
+        return
 
-        fields['content_hash'] = instance.get_translatable_content_hash()
-
-        success = send_to_translation_queue('Article', instance.id, fields)
-
-        if success:
-            Article.objects.filter(pk=instance.pk).update(translation_status='pending')
-            logger.info(f"Article #{instance.pk} queued for translation")
+    logger.info(f'Auto-translating Article #{instance.id}')
+    perform_translation(instance, 'Article')
 
 
-# ============================================================================
-# TERPENE SIGNALS
-# ============================================================================
+# ========== Terpene Signals ==========
 
 @receiver(pre_save, sender=Terpene)
 def check_terpene_translation_needed(sender, instance, **kwargs):
-    """Before saving: Check if English content has changed."""
+    """
+    Check if terpene content has changed and mark as outdated if needed.
+    """
     if not instance.pk:
         return
 
@@ -173,27 +233,24 @@ def check_terpene_translation_needed(sender, instance, **kwargs):
 
         if old_hash != new_hash:
             instance.translation_status = 'outdated'
-            instance.translation_source_hash = None
-            logger.info(f"Terpene #{instance.pk} marked as outdated")
-
+            logger.info(
+                f'Terpene #{instance.id} content changed, marking as outdated'
+            )
     except sender.DoesNotExist:
         pass
 
 
 @receiver(post_save, sender=Terpene)
-def queue_terpene_translation(sender, instance, created, **kwargs):
-    """After saving: Queue translation if needed."""
-    if instance.needs_translation():
-        fields = instance.get_translatable_fields()
+def auto_translate_terpene(sender, instance, created, **kwargs):
+    """
+    Automatically translate terpene after save if needed.
+    """
+    if not ENABLE_AUTO_TRANSLATION:
+        return
 
-        if not fields:
-            logger.warning(f"Terpene #{instance.pk} needs translation but has no EN content")
-            return
+    if not instance.needs_translation():
+        logger.debug(f'Terpene #{instance.id} does not need translation')
+        return
 
-        fields['content_hash'] = instance.get_translatable_content_hash()
-
-        success = send_to_translation_queue('Terpene', instance.id, fields)
-
-        if success:
-            Terpene.objects.filter(pk=instance.pk).update(translation_status='pending')
-            logger.info(f"Terpene #{instance.pk} queued for translation")
+    logger.info(f'Auto-translating Terpene #{instance.id}')
+    perform_translation(instance, 'Terpene')
