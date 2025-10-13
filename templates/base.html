@@ -69,13 +69,28 @@
             <img src="{% static 'img/close.svg' %}" alt="" width="24" height="24" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="menu-btn-close">
         </div>
         <div class="header-menu-wrapper">
-            <!-- Форма поиска -->
-            <form action="{% url 'search' %}" method="get" id="searchForm" class="header__search">
-                <input type="text" name="q" class="header__search_input form-control" placeholder="Search">
-                <button type="submit" class="header__search_submit" data-toggle="modal" data-target="#exampleModal">
-                    <img src="{% static 'img/search.svg' %}" alt="" width="15" height="15" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="img_center">
-                </button>
-            </form>
+            <div class="header-right">
+                <!-- Форма поиска -->
+                <form action="{% url 'search' %}" method="get" id="searchForm" class="header__search">
+                    <input type="text" name="q" class="header__search_input form-control" placeholder="Search">
+                    <button type="submit" class="header__search_submit" data-toggle="modal" data-target="#exampleModal">
+                        <img src="{% static 'img/search.svg' %}" alt="" width="15" height="15" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="img_center">
+                    </button>
+                </form>
+
+                <!-- Language Switcher (toggle pill) -->
+                <div class="language-switcher">
+                    <div class="lang-toggle" role="group" aria-label="Language toggle">
+                        {% for lang_code, _ in LANGUAGES %}
+                            {% if lang_code == CURRENT_LANG %}
+                                <span class="language-current lang-toggle__option is-active">{% if lang_code == 'en' %}🇬🇧 EN{% else %}🇪🇸 ES{% endif %}</span>
+                            {% else %}
+                                <a href="{% alt_url lang_code %}" class="language-link lang-toggle__option is-inactive" data-lang="{{ lang_code }}">{% if lang_code == 'en' %}🇬🇧 EN{% else %}🇪🇸 ES{% endif %}</a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
             <!-- Существующее меню (отображается только на мобильных) -->
             <nav class="menu">
                 <div class="menu_caption">Menu</div>
@@ -111,16 +126,7 @@
                     </li>
                 </ul>
             </nav>
-            <!-- Language Switcher (using alt_url template tag) -->
-            <div class="language-switcher">
-                {% for lang_code, _ in LANGUAGES %}
-                    {% if lang_code == CURRENT_LANG %}
-                        <span class="language-current">{% if lang_code == 'en' %}🇬🇧 EN{% else %}🇪🇸 ES{% endif %}</span>
-                    {% else %}
-                        <a href="{% alt_url lang_code %}" class="language-link">{% if lang_code == 'en' %}🇬🇧 EN{% else %}🇪🇸 ES{% endif %}</a>
-                    {% endif %}
-                {% endfor %}
-            </div>
+            
         </div>
     </header>
 {% endblock header_block %}
@@ -194,6 +200,7 @@
         </script>
 
         <script src="{% static 'js/script.js' %}"></script>
+        <script src="{% static 'js/lang_toggle.js' %}"></script>
     {% endblock common_scripts %}
 
     {% block page_scripts %} {% endblock page_scripts %}
