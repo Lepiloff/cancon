@@ -53,6 +53,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',  # Add for i18n
+    'canna.middleware.LanguageUrlRedirectMiddleware',  # Ensure lang matches URL prefix
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -138,7 +139,11 @@ USE_TZ = True
 # django-modeltranslation settings
 MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
 MODELTRANSLATION_LANGUAGES = ('en', 'es')
-MODELTRANSLATION_FALLBACK_LANGUAGES = ('en',)
+MODELTRANSLATION_FALLBACK_LANGUAGES = {
+    'default': ('en',),
+    'en': ('en', 'es'),
+    'es': ('es', 'en'),
+}
 MODELTRANSLATION_AUTO_POPULATE = True
 
 # Enable language tabs in admin for easier content management
@@ -203,6 +208,5 @@ TINYMCE_DEFAULT_CONFIG = {
 ENABLE_AUTO_TRANSLATION = os.getenv('ENABLE_AUTO_TRANSLATION', 'true').lower() == 'true'
 TRANSLATION_DIRECTION = os.getenv('TRANSLATION_DIRECTION', 'en-to-es')  # en-to-es or es-to-en
 
-# AWS Configuration (optional - for future SQS/Lambda implementation)
-AWS_SQS_TRANSLATION_QUEUE_URL = os.getenv('AWS_SQS_TRANSLATION_QUEUE_URL', '')
-AWS_REGION = os.getenv('AWS_REGION', 'eu-central-1')
+# SEO Configuration
+SITE_DOMAIN = os.getenv('SITE_DOMAIN', 'cannamente.com')  # For sitemap absolute URLs
