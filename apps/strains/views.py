@@ -170,4 +170,3 @@ def terpene_detail(request, slug):
         }
     )
 
-

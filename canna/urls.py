@@ -21,9 +21,9 @@ from django.conf.urls.i18n import i18n_patterns
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.urls import path, include
-from django.views.i18n import set_language
 
 from canna.sitemaps import StrainSitemap, ArticleSitemap
+from canna.views import robots_txt
 
 
 sitemaps = {
@@ -34,16 +34,26 @@ sitemaps = {
 
 handler404 = 'apps.strains.views.custom_page_not_found_view'
 
+# URLs that DON'T need language prefix
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('tinymce/', include('tinymce.urls')),
-    path('i18n/', include('django.conf.urls.i18n')),  # Language switcher
+    path('i18n/', include('django.conf.urls.i18n')),  # Language switcher endpoint
+    path('robots.txt', robots_txt, name='robots_txt'),  # SEO: robots.txt
+]
+
+# Multi-language URLs with i18n_patterns
+# ES (default): /strain/... - NO prefix (preserves existing SEO!)
+# EN (new):     /en/strain/... - WITH /en/ prefix
+urlpatterns += i18n_patterns(
     path('', include('apps.strains.urls')),
     path('store/', include('apps.store.urls')),
-    path('sitemap.xml', sitemap, {'sitemaps': sitemaps},
-         name='django.contrib.sitemaps.views.sitemap'),
-
-]
+    path('sitemap.xml', sitemap, {
+        'sitemaps': sitemaps,
+        'template_name': 'sitemap.xml',  # Custom template with hreflang support
+    }, name='django.contrib.sitemaps.views.sitemap'),
+    prefix_default_language=False,  # Spanish WITHOUT prefix - CRITICAL for SEO!
+)
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
