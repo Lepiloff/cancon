@@ -139,10 +139,10 @@
             <footer class="footer"><div class="container">
     	<div class="footer_row">
 	    	<div class="footer_col footer_col--1 ">
-	    		<a href="{% url 'strain_list' %}" class="footer_a">Variedades</a><br>
-                <a href="{% url 'terpene_list' %}" class="footer_a">Terpenos</a><br>
-	    		<a href="{% url 'article_list' %}" class="footer_a">Artículos</a><br>
-                 <a href="{% url 'global_map_redirect' %}" class="footer_a">Tiendas/Dispensarios</a><br>
+	    		<a href="{% url 'strain_list' %}" class="footer_a">{% trans "Variedades" %}</a><br>
+                <a href="{% url 'terpene_list' %}" class="footer_a">{% trans "Terpenos" %}</a><br>
+	    		<a href="{% url 'article_list' %}" class="footer_a">{% trans "Artículos" %}</a><br>
+                 <a href="{% url 'global_map_redirect' %}" class="footer_a">{% trans "Tiendas/Dispensarios" %}</a><br>
 	    	</div>
             {% block footer_col_2 %}
 
