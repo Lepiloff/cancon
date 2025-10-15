@@ -63,4 +63,7 @@ jobs:
             fi
             docker-compose up -d
             echo "Containers started."
+            echo "Compiling translation messages..."
+            docker-compose exec -T web python manage.py compilemessages
+            echo "Translation messages compiled successfully."
           EOF

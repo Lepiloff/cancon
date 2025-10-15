@@ -249,6 +249,154 @@ A: Yes, just edit the field manually and save.
 
 ---
 
-**Last Updated:** 2025-10-09
-**Version:** 1.0
+## UI Translation System (Django i18n)
+
+**Note:** This section covers **interface translations** (buttons, labels, static text), which is separate from **content translations** (Strains, Articles) described above.
+
+### What is UI Translation?
+
+The UI translation system translates static interface elements:
+- Navigation menu ("Variedades" → "Strains")
+- Buttons ("Ver más" → "See more")
+- Labels ("Categoría" → "Category")
+- Static page text and headings
+- Filter options ("Sin THC" → "No THC")
+
+### For Developers: Local Development Workflow
+
+When adding new templates or modifying static text:
+
+#### 1. **Wrap text in translation tags**
+
+```django
+{% load i18n %}
+<h1>{% trans "Nuevo título" %}</h1>
+<button>{% trans "Guardar" %}</button>
+```
+
+For forms (Python code):
+```python
+from django.utils.translation import gettext_lazy as _
+
+choices=[
+    ('option1', _('Opción 1')),
+]
+```
+
+#### 2. **Extract translatable strings**
+
+```bash
+# Run inside Docker container
+docker-compose exec web python manage.py makemessages -l en
+```
+
+This updates `locale/en/LC_MESSAGES/django.po` with new strings.
+
+#### 3. **Add English translations**
+
+Edit `locale/en/LC_MESSAGES/django.po`:
+```
+#: templates/new_page.html:5
+msgid "Nuevo título"
+msgstr "New Title"  # ← Add translation here
+```
+
+#### 4. **Compile translations**
+
+```bash
+# Compile .po → .mo binary files
+docker-compose exec web python manage.py compilemessages
+```
+
+#### 5. **Restart server to apply changes**
+
+```bash
+docker-compose restart web
+```
+
+### Quick Command Reference
+
+```bash
+# Complete workflow
+docker-compose exec web python manage.py makemessages -l en
+# Edit locale/en/LC_MESSAGES/django.po manually
+docker-compose exec web python manage.py compilemessages
+docker-compose restart web
+```
+
+### Production Deployment (Automatic)
+
+**How it works on production:**
+
+1. Developer commits changes:
+   - Updated templates with `{% trans %}` tags
+   - Updated `locale/en/LC_MESSAGES/django.po` with translations
+   - `.mo` files are **NOT** committed (in `.gitignore`)
+
+2. Push to `master` branch triggers GitHub Actions workflow
+
+3. Deployment process:
+   ```
+   ├─ SSH to EC2 server
+   ├─ Stop Docker containers
+   ├─ Pull latest code (includes .po files)
+   ├─ Start Docker containers
+   └─ Compile translations automatically
+      └─ docker-compose exec -T web python manage.py compilemessages
+   ```
+
+4. `.mo` files are generated on server filesystem
+5. Django loads compiled translations automatically
+
+**Key Points:**
+- ✅ **Commit:** `.po` files (source translations)
+- ❌ **Don't commit:** `.mo` files (binary, auto-generated)
+- 🤖 **Automatic:** Compilation happens during deployment
+- 🔄 **No manual steps:** Translations compile on every deployment
+
+### File Structure
+
+```
+locale/
+└── en/
+    └── LC_MESSAGES/
+        ├── django.po    ✅ Committed (source translations)
+        └── django.mo    ❌ Ignored (.gitignore, auto-generated)
+```
+
+### Terminology Guidelines
+
+**Use "cannabis" not "marijuana":**
+- ✅ "Cannabis Strains Guide"
+- ❌ "Marijuana Strains Guide"
+
+**Reason:** "Cannabis" is more professional, scientific, and legally appropriate.
+
+### Troubleshooting
+
+**Problem:** Translations don't appear on frontend
+**Solution:**
+1. Check if `compilemessages` was run
+2. Restart Django server
+3. Clear browser cache
+4. Verify language code in URL (`/en/...`)
+
+**Problem:** New strings not in django.po
+**Solution:**
+1. Ensure `{% load i18n %}` at top of template
+2. Check `{% trans %}` tag syntax
+3. Run `makemessages` again
+
+**Problem:** Permission denied editing django.po
+**Solution:**
+- File owned by Docker container user
+- Use `docker-compose exec web` commands instead of direct editing
+
+**Problem:** Changes not visible after compilemessages
+**Solution:** Must restart Django server for changes to take effect
+
+---
+
+**Last Updated:** 2025-10-15
+**Version:** 1.1
 **For technical setup:** See `AI_TRANSLATION_SETUP.md`

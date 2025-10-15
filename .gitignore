@@ -12,3 +12,4 @@ json_data/
 .pytest_cache/
 .cursor
 CLAUDE.md
+*.mo
