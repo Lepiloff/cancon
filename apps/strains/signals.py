@@ -18,6 +18,24 @@ from apps.translation.base_translator import TranslationError
 logger = logging.getLogger(__name__)
 
 
+# ========== Helper Functions ==========
+
+def should_skip_translation_check(instance) -> bool:
+    """
+    Check if translation check should be skipped.
+
+    Returns True if skip_translation flag is set (from admin checkbox).
+    This flag is set by admin.save_model() when user checks "Skip translation".
+    """
+    if getattr(instance, '_skip_translation_check', False):
+        model_name = instance.__class__.__name__
+        logger.info(
+            f'{model_name} #{instance.pk or "new"} - skipping translation check (minor edit)'
+        )
+        return True
+    return False
+
+
 # Check if translations are enabled (can be disabled for testing)
 # Auto-disable if OPENAI_API_KEY is not set (e.g., in CI/CD tests)
 ENABLE_AUTO_TRANSLATION = getattr(
@@ -145,6 +163,10 @@ def check_strain_translation_needed(sender, instance, **kwargs):
 
     This runs before save to detect content changes.
     """
+    # Check if skip_translation flag is set (from admin checkbox)
+    if should_skip_translation_check(instance):
+        return  # Skip translation check entirely
+
     if not instance.pk:
         # New object, will be handled in post_save
         return
@@ -192,6 +214,10 @@ def check_article_translation_needed(sender, instance, **kwargs):
     """
     Check if article content has changed and mark as outdated if needed.
     """
+    # Check if skip_translation flag is set (from admin checkbox)
+    if should_skip_translation_check(instance):
+        return  # Skip translation check entirely
+
     if not instance.pk:
         return
 
@@ -232,6 +258,10 @@ def check_terpene_translation_needed(sender, instance, **kwargs):
     """
     Check if terpene content has changed and mark as outdated if needed.
     """
+    # Check if skip_translation flag is set (from admin checkbox)
+    if should_skip_translation_check(instance):
+        return  # Skip translation check entirely
+
     if not instance.pk:
         return
 
