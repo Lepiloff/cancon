@@ -52,7 +52,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.locale.LocaleMiddleware',  # Add for i18n
+    'django.middleware.locale.LocaleMiddleware',  # LocaleMiddleware first
+    'canna.middleware.AdminEnglishMiddleware',  # Override for admin (after LocaleMiddleware)
     'canna.middleware.LanguageUrlRedirectMiddleware',  # Ensure lang matches URL prefix
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

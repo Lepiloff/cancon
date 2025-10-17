@@ -70,11 +70,30 @@ class TranslationMixin(models.Model):
         """
         Generates SHA256 hash for all translatable English fields.
         Used to detect content changes.
+
+        IMPORTANT: Strips HTML tags and normalizes whitespace before hashing.
+        This means changes to HTML formatting (e.g., <h1> to <h2>) won't trigger re-translation.
+        Only actual text content changes will trigger translation.
         """
+        from django.utils.html import strip_tags
+        import re
+
         content = self.get_translatable_fields()
 
+        # Normalize content: strip HTML tags and collapse whitespace
+        normalized = {}
+        for key, value in content.items():
+            if value:
+                # Strip HTML tags
+                clean_text = strip_tags(str(value))
+                # Normalize whitespace (collapse multiple spaces/newlines to single space)
+                clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+                normalized[key] = clean_text
+            else:
+                normalized[key] = ''
+
         # Sort keys for hash stability
-        content_str = json.dumps(content, sort_keys=True, ensure_ascii=False)
+        content_str = json.dumps(normalized, sort_keys=True, ensure_ascii=False)
         return hashlib.sha256(content_str.encode('utf-8')).hexdigest()
 
     def needs_translation(self):
