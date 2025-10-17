@@ -6,17 +6,12 @@
 ## Quick Reference
 
 ### Current Setup
-✅ **Phase 1 Complete**: Manual bilingual editing via admin
-⏳ **Phase 2 Pending**: Automatic AI translation (ES→EN, then EN→ES)
 
-**What's Available Now:**
+**What's Available:**
 - Language tabs in admin forms (EN/ES)
 - Language switcher on frontend (🇬🇧 EN / 🇪🇸 ES)
-- Manual translation via admin tabs
-
-**Current Data State:**
-- Spanish content exists in most fields
-- English fields are empty (awaiting Phase 2 translation)
+- Automatic AI translation (EN→ES and ES→EN)
+- Skip translation checkbox for minor edits
 - Taxonomy (Feelings, Flavors, etc.) has both EN and ES
 
 ---
@@ -51,7 +46,54 @@ In list views, you'll see colored badges:
 - 🔴 **Outdated** - Needs re-translation (content changed)
 - ⚫ **Failed** - Translation error (check admin)
 
-### Force Retranslate (when AWS is configured)
+### Skip Translation Checkbox (NEW!)
+
+**When editing content, you'll see a checkbox at the bottom of the form:**
+
+```
+┌─────────────────────────────────────────────────┐
+│  Title (EN): ...                                │
+│  Description (EN): ...                          │
+│  Text content (EN): ...                         │
+│                                                 │
+│  ☐ Skip translation (minor edit)               │ ← NEW!
+│     ✓ Check this if you made small changes     │
+│     (typo, formatting) and don't need           │
+│     re-translation. Leave unchecked for         │
+│     content changes that need translation.      │
+│                                                 │
+│  [Save]  [Save and continue]  [Delete]          │
+└─────────────────────────────────────────────────┘
+```
+
+**When to check this box:**
+- ✅ Fixed a typo or spelling error
+- ✅ Changed HTML formatting (h1 → h2, bold → italic)
+- ✅ Adjusted spacing or line breaks
+- ✅ Minor style changes
+- ✅ Updated image URLs
+
+**When to leave it UNCHECKED:**
+- ❌ Added new sentences or paragraphs
+- ❌ Changed meaning of text
+- ❌ Updated product information
+- ❌ Modified keywords or descriptions
+
+**What happens when checked:**
+- Translation does NOT run
+- Status stays "Synced" (no re-translation needed)
+- Your changes are saved immediately
+
+**What happens when unchecked:**
+- Translation runs automatically (~30 seconds)
+- Status changes to "Outdated" → "Synced"
+- Other language version is updated
+
+**💡 Pro Tip:** HTML formatting changes (like `<h1>` → `<h2>`) are automatically detected and won't trigger re-translation even if you forget to check the box!
+
+### Force Retranslate
+
+If you need to re-translate an item:
 
 1. Select items in list view
 2. Choose "Force retranslate selected items" from Actions dropdown
@@ -112,40 +154,92 @@ Users can switch languages via dropdown in header:
 
 ## Workflow Guide
 
-### Current Workflow (Manual Translation)
+### Workflow 1: Creating New Content (with Auto-Translation)
 
-1. **Create/Edit in Admin:**
-   - Go to admin → Strains/Articles
-   - Click on item or Add New
+1. **Create new item:**
+   - Go to admin → Strains/Articles/Terpenes
+   - Click "Add New"
 
-2. **Fill in Spanish (ES tab):**
-   - Click ES tab
-   - Fill all fields
-   - Save
-
-3. **Fill in English (EN tab):**
+2. **Fill in English content (EN tab):**
    - Click EN tab
-   - Manually translate content
-   - Save
+   - Write all content in English
+   - Fill all required fields
 
-4. **Verify on Frontend:**
+3. **Save (leave checkbox UNCHECKED):**
+   - Leave "Skip translation" unchecked
+   - Click "Save"
+   - ⏱️ Wait ~30 seconds for AI translation
+
+4. **Review Spanish translation (ES tab):**
+   - Click ES tab
+   - Check translation quality
+   - Edit if needed
+   - Save again (you can check "Skip translation" if only fixing translation)
+
+5. **Verify on Frontend:**
    - Use language switcher to check both versions
-   - Ensure content displays correctly
 
-### Future Workflow (with AI Translation)
+### Workflow 2: Minor Edits (Skip Translation)
 
-**Phase 2: Initial ES→EN translation**
-- Developer runs bulk translation command
-- All existing Spanish content translated to English
+**Example: You found a typo in English content**
 
-**Phase 3: Automatic EN→ES translation**
-1. Admin adds content in **English (EN tab)**
-2. Save
-3. AI automatically translates to Spanish (~30 seconds)
-4. Check translation quality in ES tab
-5. Edit if needed
+1. **Open item for editing:**
+   - Find the item in admin list
+   - Click to edit
 
-**Note:** After Phase 3, always add new content in **English first**.
+2. **Fix the typo:**
+   - EN tab: Fix "teh" → "the"
+
+3. **Check "Skip translation" box:**
+   - ☑ Check the checkbox at bottom
+   - Reason: Typo fix doesn't need re-translation
+
+4. **Save:**
+   - Click "Save"
+   - ✅ Instant save
+
+### Workflow 3: HTML Formatting Changes
+
+**Example: You want to change h1 to h2**
+
+1. **Edit content:**
+   - EN tab: `<h1>Title</h1>` → `<h2>Title</h2>`
+
+2. **Save (checkbox optional):**
+   - You can leave checkbox unchecked
+   - System automatically detects it's only HTML change
+   - Won't trigger re-translation ✅
+
+**Note:** This works for: h1↔h2↔h3, bold↔italic, p↔div, spacing changes
+
+### Workflow 4: Content Updates (Need Translation)
+
+**Example: Adding new paragraph to article**
+
+1. **Edit content:**
+   - EN tab: Add new paragraph with product info
+
+2. **Save (leave checkbox UNCHECKED):**
+   - Don't check "Skip translation"
+   - Click "Save"
+   - ⏱️ Translation runs automatically
+
+3. **Review translation:**
+   - Check ES tab after ~30 seconds
+   - Verify quality
+
+### Quick Decision Chart
+
+**Should I check "Skip translation"?**
+
+```
+Did you change actual TEXT content?
+├─ YES → Leave UNCHECKED (needs translation)
+│   Examples: new sentences, changed wording, updated info
+│
+└─ NO → Check ☑ SKIP (no translation needed)
+    Examples: fixed typo, changed h1→h2, spacing
+```
 
 ---
 
@@ -190,6 +284,25 @@ Before publishing:
 - [ ] Images have alt text
 - [ ] Keywords relevant
 - [ ] Preview on frontend
+- [ ] Translation status is "Synced" (green badge)
+
+### Smart Editing Tips
+
+**💡 Best Practices:**
+- Fix multiple typos at once, then check "Skip translation"
+- HTML formatting changes don't need re-translation
+- Minor edits can be done with checkbox checked
+
+**⚠️ When NOT to use "Skip translation":**
+- Never check it when adding NEW content
+- Don't use for significant text changes
+- Avoid if you changed product specifications
+
+**🎯 Batch Editing:**
+If editing multiple items with same type of change (e.g., fixing same typo across articles):
+1. Fix all items one by one
+2. Check "Skip translation" for each
+3. Saves processing time
 
 ---
 
@@ -199,7 +312,7 @@ Before publishing:
 **Solution:** Model might not be registered for translation. Contact developer.
 
 **Problem:** Translation badge shows "Failed"
-**Solution:** (After AWS setup) Check admin error message. Use "Force retranslate" action.
+**Solution:** Check admin error message. Use "Force retranslate" action to retry.
 
 **Problem:** Content doesn't appear on frontend
 **Solution:**
@@ -215,22 +328,34 @@ Before publishing:
 ## FAQ
 
 **Q: Which language should I edit first?**
-A: Currently, edit Spanish (ES) first since most content is in Spanish. After Phase 3 setup, always edit English (EN) first.
+A: Always edit **English (EN)** first. AI will automatically translate to Spanish.
 
-**Q: Do I need to translate manually?**
-A: For now, yes. After Phase 3 AWS setup, AI will auto-translate EN→ES.
+**Q: When should I check "Skip translation"?**
+A: Check it when making minor edits (typos, formatting) that don't need re-translation.
+
+**Q: What if I forget to check "Skip translation" for HTML changes?**
+A: No problem! The system automatically detects HTML-only changes (h1→h2, bold→italic) and won't trigger re-translation.
 
 **Q: Can I edit AI translations?**
-A: Yes! Always review and edit AI translations for quality and accuracy.
+A: Yes! Always review and edit AI translations for quality and accuracy. When editing the translated version, check "Skip translation" to avoid re-translating back.
 
 **Q: What happens if I edit only one language?**
-A: The other language version will show as "pending" or "outdated". Frontend will show whichever version exists.
+A: The other language version will show as "outdated". You can either let AI re-translate, or manually edit both versions and check "Skip translation".
 
 **Q: How long does AI translation take?**
-A: (After Phase 3) Approximately 30-60 seconds per item.
+A: Approximately 30-60 seconds per item. The page will save immediately; translation happens in the background.
+
+**Q: Will translation work if I save multiple times quickly?**
+A: Yes, but only the last save will trigger translation if content changed. Previous translations may be skipped.
+
+**Q: Does "Skip translation" affect both languages?**
+A: It prevents re-translation of the OTHER language. Your edited language is always saved.
 
 **Q: Can I undo a translation?**
-A: Yes, just edit the field manually and save.
+A: Yes, just edit the field manually in the ES tab and save. Check "Skip translation" to keep your manual edit.
+
+**Q: What happens if translation fails?**
+A: Status badge shows "Failed". You can manually translate, or select item and use "Force retranslate" action.
 
 ---
 
@@ -397,6 +522,22 @@ locale/
 
 ---
 
-**Last Updated:** 2025-10-15
-**Version:** 1.1
+## What's New
+
+### Version 1.2 (2025-10-17)
+- ✅ Added "Skip translation" checkbox for minor edits
+- ✅ Automatic detection of HTML-only changes (no re-translation)
+- ✅ Automatic AI translation (EN↔ES) via OpenAI API
+- ✅ New workflow examples and decision charts
+- ✅ Expanded FAQ section
+- ✅ Removed AWS references (not used in current implementation)
+
+### Version 1.1 (2025-10-15)
+- Initial Django i18n setup
+- UI translation workflow
+
+---
+
+**Last Updated:** 2025-10-17
+**Version:** 1.2
 **For technical setup:** See `AI_TRANSLATION_SETUP.md`
