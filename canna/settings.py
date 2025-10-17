@@ -32,6 +32,7 @@ CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost'
 # Application definition
 
 INSTALLED_APPS = [
+    'modeltranslation',  # MUST be before 'django.contrib.admin'
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     'users',
     'apps.strains',
     'apps.store',
+    'apps.translation',  # AI translation service
     'storages',
     'tinymce',
     'django_json_ld',
@@ -50,6 +52,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',  # Add for i18n
+    'canna.middleware.LanguageUrlRedirectMiddleware',  # Ensure lang matches URL prefix
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -115,13 +119,40 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es'  # Default language for frontend (Spanish UI). Admin uses language tabs.
+
+LANGUAGES = [
+    ('en', 'English'),
+    ('es', 'Español'),
+]
+
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
 
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
+
+# django-modeltranslation settings
+MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
+MODELTRANSLATION_LANGUAGES = ('en', 'es')
+MODELTRANSLATION_FALLBACK_LANGUAGES = {
+    'default': ('en',),
+    'en': ('en', 'es'),
+    'es': ('es', 'en'),
+}
+MODELTRANSLATION_AUTO_POPULATE = True
+
+# Enable language tabs in admin for easier content management
+MODELTRANSLATION_TRANSLATION_FILES = ()
+MODELTRANSLATION_PREPOPULATE_LANGUAGE = 'en'
+
+# Show language switcher in admin interface
+# This adds tabs for each language when editing translatable fields
+MODELTRANSLATION_DEBUG = False
 
 
 USE_S3 = os.getenv('USE_S3') == 'TRUE'
@@ -172,3 +203,10 @@ TINYMCE_DEFAULT_CONFIG = {
     "a11ycheck ltr rtl | showcomments addcomment code",
     "custom_undo_redo_levels": 10,
 }
+
+# Translation Configuration
+ENABLE_AUTO_TRANSLATION = os.getenv('ENABLE_AUTO_TRANSLATION', 'true').lower() == 'true'
+TRANSLATION_DIRECTION = os.getenv('TRANSLATION_DIRECTION', 'en-to-es')  # en-to-es or es-to-en
+
+# SEO Configuration
+SITE_DOMAIN = os.getenv('SITE_DOMAIN', 'cannamente.com')  # For sitemap absolute URLs
