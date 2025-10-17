@@ -49,6 +49,13 @@ def perform_translation(instance, model_name: str) -> bool:
         logger.info(f'Auto-translation disabled, skipping {model_name} #{instance.id}')
         return False
 
+    # Double-check API key exists before attempting translation
+    if not os.getenv('OPENAI_API_KEY'):
+        logger.warning(
+            f'OPENAI_API_KEY not set, skipping translation for {model_name} #{instance.id}'
+        )
+        return False
+
     try:
         # Parse translation direction
         source_lang, target_lang = TranslationConfig.parse_direction(
