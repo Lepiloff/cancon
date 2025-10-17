@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 {% load static %}
-{% load translate from translate %}
+{% load i18n %}
 {% block title %}
-Catálogo de Variedades de Marihuana | Tu Guía Completa
+{% trans "Catálogo de Variedades de Marihuana | Tu Guía Completa" %}
 {% endblock %}
 
 {% block keywords %}
-Catálogo de marihuana, variedades de marihuana, cepas de cannabis, guía de marihuana, cannabis medicinal, cannabis recreativa, índica, sativa, híbrida
+{% trans "Catálogo de marihuana, variedades de marihuana, cepas de cannabis, guía de marihuana, cannabis medicinal, cannabis recreativa, índica, sativa, híbrida" %}
 {% endblock %}
 
 {% block description %}
-Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos de cepas de cannabis para uso medicinal y recreativo. Encuentra la variedad perfecta de índica, sativa o híbrida para tus necesidades. Actualizado y detallado para tu conveniencia.
+{% trans "Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos de cepas de cannabis para uso medicinal y recreativo. Encuentra la variedad perfecta de índica, sativa o híbrida para tus necesidades. Actualizado y detallado para tu conveniencia." %}
 {% endblock %}
 
 {% block content %}
@@ -18,21 +18,21 @@ Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos 
        {% block intro %}
            <section class="intro-section">
             <div class="text-content">
-                <h1>Nuestro Catálogo de Cepas de Marihuana: Diversidad y Calidad</h1>
-                <h2>Descubre la variedad y unicidad de cada cepa de marihuana en nuestro catálogo. Aquí, puedes explorar en detalle las características, beneficios terapéuticos, sabores y niveles de THC de cada cepa. Encuentra la cepa que se ajusta perfectamente a tus necesidades y preferencias.</h2>
+                <h1>{% trans "Nuestro Catálogo de Cepas de Marihuana: Diversidad y Calidad" %}</h1>
+                <h2>{% trans "Descubre la variedad y unicidad de cada cepa de marihuana en nuestro catálogo. Aquí, puedes explorar en detalle las características, beneficios terapéuticos, sabores y niveles de THC de cada cepa. Encuentra la cepa que se ajusta perfectamente a tus necesidades y preferencias." %}</h2>
             </div>
             <div class="image-container">
                 <img src="{% static 'img/footer.svg' %}" alt="">
             </div>
            </section>
        {% endblock intro %}
-    	<div class="h3 filter__title">FILTOROS</div>
+    	<div class="h3 filter__title">{% trans "FILTROS" %}</div>
       {% csrf_token %}
        <form method="get" id="filterForm">
         <div class="filter_row">
             <div class="filter_col">
             <a class="filter_btn" data-toggle="collapse" href="#collapseExample0" role="button" aria-expanded="false" aria-controls="collapseExample0">
-                Tipo
+                {% trans "Tipo" %}
             </a>
             <div class="collapse" id="collapseExample0">
                 <div class="card card-body checkbox_row">
@@ -48,16 +48,15 @@ Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos 
         </div>
             <div class="filter_col">
             <a class="filter_btn" data-toggle="collapse" href="#collapseExample1" role="button" aria-expanded="false" aria-controls="collapseExample1">
-                Sensaciones
+                {% trans "Sensaciones" %}
             </a>
             <div class="collapse" id="collapseExample1">
                 <div class="card card-body checkbox_row">
-                    {% load translate from translate %}
                     {% for choice in form.feelings.field.choices %}
                         <label class="checkbox checkbox_col">
                             <input type="checkbox" class="checkbox_input" name="{{ form.feelings.html_name }}" value="{{ choice.0 }}">
                             <span class="checkbox_ico"></span>
-                            {{ choice.1|translate:feelings_translation }}
+                            {{ choice.1 }}
                         </label>
                     {% endfor %}
                 </div>
@@ -65,7 +64,7 @@ Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos 
         </div>
             <div class="filter_col">
             <a class="filter_btn" data-toggle="collapse" href="#collapseExample2" role="button" aria-expanded="false" aria-controls="collapseExample2">
-                Ayuda con
+                {% trans "Ayuda con" %}
             </a>
             <div class="collapse" id="collapseExample2">
                 <div class="card card-body checkbox_row">
@@ -73,7 +72,7 @@ Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos 
                         <label class="checkbox checkbox_col">
                             <input type="checkbox" class="checkbox_input" name="{{ form.helps_with.html_name }}" value="{{ choice.0 }}">
                             <span class="checkbox_ico"></span>
-                            {{ choice.1|translate:helps_with_translation }}
+                            {{ choice.1 }}
                         </label>
                     {% endfor %}
                 </div>
@@ -81,7 +80,7 @@ Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos 
         </div>
             <div class="filter_col">
             <a class="filter_btn" data-toggle="collapse" href="#collapseExample3" role="button" aria-expanded="false" aria-controls="collapseExample3">
-                Sabores
+                {% trans "Sabores" %}
             </a>
             <div class="collapse" id="collapseExample3">
                 <div class="card card-body checkbox_row">
@@ -89,7 +88,7 @@ Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos 
                         <label class="checkbox checkbox_col">
                             <input type="checkbox" class="checkbox_input" name="{{ form.flavors.html_name }}" value="{{ choice.0 }}">
                             <span class="checkbox_ico"></span>
-                            {{ choice.1|translate:flavors_translation }}
+                            {{ choice.1 }}
                         </label>
                     {% endfor %}
                 </div>
@@ -97,7 +96,7 @@ Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos 
         </div>
             <div class="filter_col">
     <a class="filter_btn" data-toggle="collapse" href="#collapseExample4" role="button" aria-expanded="false" aria-controls="collapseExample4">
-        Nivel de THC
+        {% trans "Nivel de THC" %}
     </a>
     <div class="collapse" id="collapseExample4">
         <div class="card card-body checkbox_row">
@@ -114,13 +113,13 @@ Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos 
         </div>
         </form>
     {% if no_matches %}
-    <p>No hay cepas que coincidan. Nos encanta tu imaginación, pero ninguna variedad coincide con la descripción. Prueba a simplificar tus opciones o empieza de cero borrando los filtros.</p>
+    <p>{% trans "No hay cepas que coincidan. Nos encanta tu imaginación, pero ninguna variedad coincide con la descripción. Prueba a simplificar tus opciones o empieza de cero borrando los filtros." %}</p>
 {% else %}
     	<section class="ctg" id="strainsContainer">
             {% include "strain_items.html" %}
     	</section>
     	<div class="text-center">
-    		<a href="#" class="btn btn--outline">Ver todos</a>
+    		<a href="#" class="btn btn--outline">{% trans "Ver todos" %}</a>
     	</div>
 {% endif %}
     </div>
@@ -128,7 +127,7 @@ Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos 
 
 {% block footer_col_2 %}
     <div class="footer_col footer_col--2">
-Descubre diversas cepas de marihuana en nuestro catálogo. Ofrecemos descripciones detalladas, beneficios terapéuticos y niveles de THC. Encuentra la cepa ideal para ti con nosotros.
+{% trans "Descubre diversas cepas de marihuana en nuestro catálogo. Ofrecemos descripciones detalladas, beneficios terapéuticos y niveles de THC. Encuentra la cepa ideal para ti con nosotros." %}
     </div>
 {% endblock footer_col_2 %}
 

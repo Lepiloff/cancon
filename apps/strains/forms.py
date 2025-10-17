@@ -1,11 +1,17 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 from apps.strains.models import CATEGORY_CHOICES, Feeling, HelpsWith, Flavor
 
 
 class StrainFilterForm(forms.Form):
     category = forms.MultipleChoiceField(choices=CATEGORY_CHOICES, required=False, widget=forms.CheckboxSelectMultiple)
     thc = forms.MultipleChoiceField(
-        choices=[('sin thc', 'Sin THC'), ('bajo thc', 'Bajo'), ('medio thc', 'Medio'), ('alto thc', 'Alto')],
+        choices=[
+            ('sin thc', _('Sin THC')),
+            ('bajo thc', _('Bajo')),
+            ('medio thc', _('Medio')),
+            ('alto thc', _('Alto'))
+        ],
         required=False,
         widget=forms.CheckboxSelectMultiple
     )

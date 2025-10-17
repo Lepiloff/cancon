@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
 {% load json_ld %}
-{% load translate from translate %}
+{% load i18n %}
 {% block title %}
-    {{ strain.name }} cepas de marihuana
+    {{ strain.name }} {% trans "cepas de marihuana" %}
 {% endblock %}
 
 {% block keywords %}
@@ -37,26 +37,26 @@
             <div class="tovar_col tovar_col--r">
                 <table class="tovar__info">
                     <tr>
-                        <td class="tovar__info_th">Categoría:</td>
+                        <td class="tovar__info_th">{% trans "Categoría" %}:</td>
                         <td class="tovar__info_td">{{ strain.category }}</td>
                     </tr>
                     <tr>
-                        <td class="tovar__info_th">Thc:</td>
+                        <td class="tovar__info_th">{% trans "THC" %}:</td>
                         <td class="tovar__info_td">{{ strain.thc|floatformat:"0" }}%</td>
                     </tr>
                     {% if strain.cbd is not none %}
                         <tr>
-                            <td class="tovar__info_th">Cbd:</td>
+                            <td class="tovar__info_th">{% trans "CBD" %}:</td>
                             <td class="tovar__info_td">{{ strain.cbd|floatformat:"0" }}%</td>
                         </tr>
                     {% elif strain.cbg is not none %}
                         <tr>
-                            <td class="tovar__info_th">Cbg:</td>
+                            <td class="tovar__info_th">{% trans "CBG" %}:</td>
                             <td class="tovar__info_td">{{ strain.cbg|floatformat:"0" }}%</td>
                         </tr>
                     {% endif %}
                     <tr>
-                        <td class="tovar__info_th">Valoración:</td>
+                        <td class="tovar__info_th">{% trans "Valoración" %}:</td>
                         <td class="tovar__info_td"><div class="raty raty--tovar" data-score="{{ strain.rating }}" data-readonly="true"></div></td>
                     </tr>
                 </table>
@@ -64,25 +64,25 @@
                         <div class="tovar__param_ico">
                             <img src="{% static 'img/tovar_info1.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
                         </div>
-                        <span>Sensaciones:&nbsp;<span class="color-grey">{% for feeling in strain.feelings.all %}{{ feeling.name|translate:feelings_translation }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
+                        <span>{% trans "Sensaciones" %}:&nbsp;<span class="color-grey">{% for feeling in strain.feelings.all %}{{ feeling.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
                     </div>
                     <div class="tovar__param">
                         <div class="tovar__param_ico">
                             <img src="{% static 'img/tovar_info2.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
                         </div>
-                        <span>Negativos:&nbsp;<span class="color-grey">{% for negative in strain.negatives.all %}{{ negative.name|translate:negatives_translator }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
+                        <span>{% trans "Negativos" %}:&nbsp;<span class="color-grey">{% for negative in strain.negatives.all %}{{ negative.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
                     </div>
                     <div class="tovar__param">
                         <div class="tovar__param_ico">
                             <img src="{% static 'img/tovar_info3.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
                         </div>
-                        <span>Sabores:&nbsp;<span class="color-grey">{% for flavor in strain.flavors.all %}{{ flavor.name|translate:flavors_translation }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
+                        <span>{% trans "Sabores" %}:&nbsp;<span class="color-grey">{% for flavor in strain.flavors.all %}{{ flavor.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
                     </div>
                     <div class="tovar__param">
                         <div class="tovar__param_ico">
                             <img src="{% static 'img/tovar_info4.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
                         </div>
-                        <span>Ayuda con:&nbsp;<span class="color-grey">{% for help in strain.helps_with.all %}{{ help.name|translate:helps_with_translation }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
+                        <span>{% trans "Ayuda con" %}:&nbsp;<span class="color-grey">{% for help in strain.helps_with.all %}{{ help.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
                     </div>
                     <!-- Terpeno dominante -->
                     {% if strain.dominant_terpene %}
@@ -90,17 +90,17 @@
                             <div class="tovar__param_ico">
                                 <img src="{% static 'img/tovar_table_0.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
                             </div>
-                            <span>Terpeno dominante:&nbsp;<span class="color-grey">{{ strain.dominant_terpene.name|translate:terpenes_translation }}</span></span>
+                            <span>{% trans "Terpeno dominante" %}:&nbsp;<span class="color-grey">{{ strain.dominant_terpene.name }}</span></span>
                         </div>
                     {% endif %}
-        
+
                     <!-- OTROS TERPENOS -->
                     {% if strain.other_terpenes.all %}
                         <div class="tovar__param">
                             <div class="tovar__param_ico">
                                 <img src="{% static 'img/tovar_table_0.svg' %}" alt="" width="45" height="45" loading="lazy" decoding="async" style="background-size: cover; background-image: none;">
                             </div>
-                            <span>Otros terpenos:&nbsp;<span class="color-grey">{% for terpene in strain.other_terpenes.all %}{{ terpene.name|translate:terpenes_translation }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
+                            <span>{% trans "Otros terpenos" %}:&nbsp;<span class="color-grey">{% for terpene in strain.other_terpenes.all %}{{ terpene.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></span>
                         </div>
                     {% endif %}
             </div>
@@ -111,12 +111,12 @@
             <div class="tovar_text">{{ strain.text_content|safe }}</div>
             </div>
         
-            <div class="h2">Parámetros similares</div>
+            <div class="h2">{% trans "Parámetros similares" %}</div>
             <section class="ctg">
                 {% include "strain_items.html" %}
             </section>
             <div class="text-center">
-            <a href="{% url 'strain_list' %}" class="btn btn--outline_с">Ver más</a>
+            <a href="{% url 'strain_list' %}" class="btn btn--outline_с">{% trans "Ver más" %}</a>
             </div>
         </div>
     </div>

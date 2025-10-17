@@ -1,18 +1,21 @@
 <!DOCTYPE html>
+{% load i18n %}
+{% load translate %}
+{% get_current_language as LANGUAGE_CODE %}
 <!--[if IE 6]>
-<html id="ie6" dir="ltr" lang="es">
+<html id="ie6" dir="ltr" lang="{{ LANGUAGE_CODE }}">
 <![endif]-->
 <!--[if IE 7]>
-<html id="ie7" dir="ltr" lang="es">
+<html id="ie7" dir="ltr" lang="{{ LANGUAGE_CODE }}">
 <![endif]-->
 <!--[if IE 8]>
-<html id="ie8" dir="ltr" lang="es">
+<html id="ie8" dir="ltr" lang="{{ LANGUAGE_CODE }}">
 <![endif]-->
 <!--[if IE 9]>
-<html id="ie9" dir="ltr" lang="es">
+<html id="ie9" dir="ltr" lang="{{ LANGUAGE_CODE }}">
 <![endif]-->
 <!--[if !(IE 6) | !(IE 7) | !(IE 8) | !(IE 9) ]><!-->
-<html dir="ltr" lang="es">
+<html dir="ltr" lang="{{ LANGUAGE_CODE }}">
 <!--<![endif]-->
 {% load static %}
 <head>
@@ -31,6 +34,26 @@
     <meta name="keywords" content="{% block keywords %}{% endblock %}" />
     <meta name="description" content="{% block description %}{% endblock %}" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- SEO: Multi-language support -->
+    {% get_current_language as CURRENT_LANG %}
+    {% get_available_languages as LANGUAGES %}
+
+    <!-- hreflang tags for SEO (using alt_url template tag) -->
+    {% for lang_code, _ in LANGUAGES %}
+        <link rel="alternate" hreflang="{{ lang_code }}" href="{{ request.scheme }}://{{ request.get_host }}{% alt_url lang_code %}">
+    {% endfor %}
+    <!-- x-default points to Spanish (default language) -->
+    <link rel="alternate" hreflang="x-default" href="{{ request.scheme }}://{{ request.get_host }}{% alt_url 'es' %}">
+
+    <!-- Canonical URL (without query parameters) -->
+    <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+
+    <!-- OpenGraph meta tags -->
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:locale" content="{% if CURRENT_LANG == 'es' %}es_ES{% else %}en_US{% endif %}">
+    <meta property="og:locale:alternate" content="{% if CURRENT_LANG == 'es' %}en_US{% else %}es_ES{% endif %}">
+
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}" />
 </head>
@@ -46,28 +69,43 @@
             <img src="{% static 'img/close.svg' %}" alt="" width="24" height="24" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="menu-btn-close">
         </div>
         <div class="header-menu-wrapper">
-            <!-- Форма поиска -->
-            <form action="{% url 'search' %}" method="get" id="searchForm" class="header__search">
-                <input type="text" name="q" class="header__search_input form-control" placeholder="Search">
-                <button type="submit" class="header__search_submit" data-toggle="modal" data-target="#exampleModal">
-                    <img src="{% static 'img/search.svg' %}" alt="" width="15" height="15" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="img_center">
-                </button>
-            </form>
+            <div class="header-right">
+                <!-- Форма поиска -->
+                <form action="{% url 'search' %}" method="get" id="searchForm" class="header__search">
+                    <input type="text" name="q" class="header__search_input form-control" placeholder="Search">
+                    <button type="submit" class="header__search_submit" data-toggle="modal" data-target="#exampleModal">
+                        <img src="{% static 'img/search.svg' %}" alt="" width="15" height="15" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="img_center">
+                    </button>
+                </form>
+
+                <!-- Language Switcher (toggle pill) -->
+                <div class="language-switcher">
+                    <div class="lang-toggle" role="group" aria-label="Language toggle">
+                        {% for lang_code, _ in LANGUAGES %}
+                            {% if lang_code == CURRENT_LANG %}
+                                <span class="language-current lang-toggle__option is-active">{% if lang_code == 'en' %}🇬🇧 EN{% else %}🇪🇸 ES{% endif %}</span>
+                            {% else %}
+                                <a href="{% alt_url lang_code %}" class="language-link lang-toggle__option is-inactive" data-lang="{{ lang_code }}">{% if lang_code == 'en' %}🇬🇧 EN{% else %}🇪🇸 ES{% endif %}</a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
             <!-- Существующее меню (отображается только на мобильных) -->
             <nav class="menu">
                 <div class="menu_caption">Menu</div>
                 <ul class="menu_ul">
                     <li class="menu_li">
-                        <a href="{% url 'strain_list' %}" class="menu_a">Variedades</a>
+                        <a href="{% url 'strain_list' %}" class="menu_a">{% trans "Variedades" %}</a>
                     </li>
                     <li class="menu_li">
-                        <a href="{% url 'terpene_list' %}" class="menu_a">Terpenos</a>
+                        <a href="{% url 'terpene_list' %}" class="menu_a">{% trans "Terpenos" %}</a>
                     </li>
                     <li class="menu_li">
-                        <a href="{% url 'article_list' %}" class="menu_a">Artículos</a>
+                        <a href="{% url 'article_list' %}" class="menu_a">{% trans "Artículos" %}</a>
                     </li>
                     <li class="menu_li">
-                        <a href="{% url 'global_map_redirect' %}" class="menu_a">Tiendas/Dispensarios</a>
+                        <a href="{% url 'global_map_redirect' %}" class="menu_a">{% trans "Tiendas/Dispensarios" %}</a>
                     </li>
                 </ul>
             </nav>
@@ -75,19 +113,20 @@
             <nav class="desktop-menu">
                 <ul class="desktop-menu_ul">
                     <li class="desktop-menu_li">
-                        <a href="{% url 'strain_list' %}" class="desktop-menu_a">Variedades</a>
+                        <a href="{% url 'strain_list' %}" class="desktop-menu_a">{% trans "Variedades" %}</a>
                     </li>
                     <li class="desktop-menu_li">
-                        <a href="{% url 'terpene_list' %}" class="desktop-menu_a">Terpenos</a>
+                        <a href="{% url 'terpene_list' %}" class="desktop-menu_a">{% trans "Terpenos" %}</a>
                     </li>
                     <li class="desktop-menu_li">
-                        <a href="{% url 'article_list' %}" class="desktop-menu_a">Artículos</a>
+                        <a href="{% url 'article_list' %}" class="desktop-menu_a">{% trans "Artículos" %}</a>
                     </li>
                     <li class="desktop-menu_li">
-                        <a href="{% url 'global_map_redirect' %}" class="desktop-menu_a">Tiendas/Dispensarios</a>
+                        <a href="{% url 'global_map_redirect' %}" class="desktop-menu_a">{% trans "Tiendas/Dispensarios" %}</a>
                     </li>
                 </ul>
             </nav>
+            
         </div>
     </header>
 {% endblock header_block %}
@@ -100,10 +139,10 @@
             <footer class="footer"><div class="container">
     	<div class="footer_row">
 	    	<div class="footer_col footer_col--1 ">
-	    		<a href="{% url 'strain_list' %}" class="footer_a">Variedades</a><br>
-                <a href="{% url 'terpene_list' %}" class="footer_a">Terpenos</a><br>
-	    		<a href="{% url 'article_list' %}" class="footer_a">Artículos</a><br>
-                 <a href="{% url 'global_map_redirect' %}" class="footer_a">Tiendas/Dispensarios</a><br>
+	    		<a href="{% url 'strain_list' %}" class="footer_a">{% trans "Variedades" %}</a><br>
+                <a href="{% url 'terpene_list' %}" class="footer_a">{% trans "Terpenos" %}</a><br>
+	    		<a href="{% url 'article_list' %}" class="footer_a">{% trans "Artículos" %}</a><br>
+                 <a href="{% url 'global_map_redirect' %}" class="footer_a">{% trans "Tiendas/Dispensarios" %}</a><br>
 	    	</div>
             {% block footer_col_2 %}
 
@@ -161,6 +200,7 @@
         </script>
 
         <script src="{% static 'js/script.js' %}"></script>
+        <script src="{% static 'js/lang_toggle.js' %}"></script>
     {% endblock common_scripts %}
 
     {% block page_scripts %} {% endblock page_scripts %}
