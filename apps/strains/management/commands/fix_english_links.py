@@ -166,7 +166,8 @@ class Command(BaseCommand):
         Fix internal links by adding /en/ prefix.
 
         Patterns to fix:
-        - href="/strain/..." → href="/en/strain/..."
+        - Absolute paths: href="/strain/..." → href="/en/strain/..."
+        - Relative paths: href="../../../../strain/..." → href="/en/strain/..."
         - href="/articles/..." → href="/en/articles/..."
         - href="/terpenes/..." → href="/en/terpenes/..."
         - href="/store/..." → href="/en/store/..."
@@ -181,19 +182,36 @@ class Command(BaseCommand):
 
         links_fixed = 0
 
-        # Pattern to match internal links that need fixing
+        # Pattern 1: Absolute paths (href="/strain/...")
         # Matches href="/ but not /en/, /admin/, /static/, /media/, /i18n/, http://, https://
-        # Captures paths starting with: strain, strains, article, articles, terpene, terpenes, store
-        pattern = r'href="(/(?!en/|admin/|static/|media/|i18n/|http|https)(strains?|articles?|terpenes?|store)(?:/[^"]*)?)"'
+        absolute_pattern = r'href="(/(?!en/|admin/|static/|media/|i18n/|http|https)(strains?|articles?|terpenes?|store)(?:/[^"]*)?)"'
 
-        def add_en_prefix(match):
-            """Add /en/ prefix to the captured path"""
+        # Pattern 2: Relative paths (href="../../../strain/...")
+        # Matches href="../any_number_of_dots/strain/..." where strain/article/terpene/store follows
+        relative_pattern = r'href="((?:\.\./)+(strains?|articles?|terpenes?|store)(?:/[^"]*)?)"'
+
+        def add_en_prefix_absolute(match):
+            """Add /en/ prefix to absolute paths"""
             nonlocal links_fixed
             path = match.group(1)
             links_fixed += 1
             return f'href="/en{path}"'
 
-        fixed_content = re.sub(pattern, add_en_prefix, content, flags=re.IGNORECASE)
+        def convert_relative_to_absolute(match):
+            """Convert relative path to absolute with /en/ prefix"""
+            nonlocal links_fixed
+            relative_path = match.group(1)
+            # Extract the meaningful part after all ../
+            # Example: ../../../../strain/gsc/ → strain/gsc/
+            meaningful_part = relative_path.lstrip('./')
+            links_fixed += 1
+            return f'href="/en/{meaningful_part}"'
+
+        # Apply both patterns
+        # First fix absolute paths
+        fixed_content = re.sub(absolute_pattern, add_en_prefix_absolute, content, flags=re.IGNORECASE)
+        # Then fix relative paths
+        fixed_content = re.sub(relative_pattern, convert_relative_to_absolute, fixed_content, flags=re.IGNORECASE)
 
         return fixed_content, links_fixed
 
