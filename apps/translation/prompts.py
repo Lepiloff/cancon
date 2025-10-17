@@ -28,6 +28,9 @@ class TranslationPrompts:
         # Get SEO-optimized terminology rules based on translation direction
         seo_rules = TranslationPrompts._get_seo_terminology_rules(source_lang, target_lang)
 
+        # Get internal links handling rules based on translation direction
+        links_rules = TranslationPrompts._get_internal_links_rules(source_lang, target_lang)
+
         base_prompt = f"""You are a professional translator specializing in cannabis industry content.
 Translate from {source_full} to {target_full}.
 
@@ -36,9 +39,10 @@ CRITICAL RULES:
 2. Preserve ALL HTML tags exactly as they appear (e.g., <p>, <h3>, <strong>, <a>)
 3. Keep measurement units unchanged (%, mg/g, THC, CBD, CBG)
 4. Maintain technical cannabis terminology accuracy
-5. Preserve URLs and links
-6. Keep terpene names in English (Limonene, Myrcene, Pinene, etc.)
-7. Preserve the tone and style of the original text
+5. Keep terpene names in English (Limonene, Myrcene, Pinene, etc.)
+6. Preserve the tone and style of the original text
+
+{links_rules}
 
 FORMATTING RULES:
 8. Use ONLY standard ASCII punctuation marks
@@ -60,6 +64,62 @@ Return raw JSON only.
 {TranslationPrompts._get_model_specific_instructions(model_name)}"""
 
         return base_prompt
+
+    @staticmethod
+    def _get_internal_links_rules(source_lang: str, target_lang: str) -> str:
+        """
+        Get internal links handling rules based on translation direction.
+
+        Important for SEO: Each language version needs language-specific URLs.
+        """
+        if source_lang == 'es' and target_lang == 'en':
+            return """
+INTERNAL LINKS RULES (Spanish → English):
+7. Transform internal links to include /en/ prefix for English version:
+   - href="/strain/..." → href="/en/strain/..."
+   - href="/strains" → href="/en/strains"
+   - href="/articles/..." → href="/en/articles/..."
+   - href="/article/..." → href="/en/article/..."
+   - href="/terpenes/..." → href="/en/terpenes/..."
+   - href="/terpene/..." → href="/en/terpene/..."
+   - href="/store/..." → href="/en/store/..."
+
+8. DO NOT modify external links (starting with http:// or https://)
+9. DO NOT modify links that already have /en/ prefix
+10. DO NOT modify admin, static, or media links (/admin/, /static/, /media/)
+
+Examples:
+- <a href="/strain/northern-lights/">Northern Lights</a>
+  → <a href="/en/strain/northern-lights/">Northern Lights</a>
+
+- <a href="/articles/cannabis-guide/">guide</a>
+  → <a href="/en/articles/cannabis-guide/">guide</a>
+"""
+        elif source_lang == 'en' and target_lang == 'es':
+            return """
+INTERNAL LINKS RULES (English → Spanish):
+7. Transform internal links to REMOVE /en/ prefix for Spanish version:
+   - href="/en/strain/..." → href="/strain/..."
+   - href="/en/strains" → href="/strains"
+   - href="/en/articles/..." → href="/articles/..."
+   - href="/en/article/..." → href="/article/..."
+   - href="/en/terpenes/..." → href="/terpenes/..."
+   - href="/en/terpene/..." → href="/terpene/..."
+   - href="/en/store/..." → href="/store/..."
+
+8. DO NOT modify external links (starting with http:// or https://)
+9. DO NOT modify links that don't have /en/ prefix
+10. DO NOT modify admin, static, or media links (/admin/, /static/, /media/)
+
+Examples:
+- <a href="/en/strain/northern-lights/">Northern Lights</a>
+  → <a href="/strain/northern-lights/">Northern Lights</a>
+
+- <a href="/en/articles/cannabis-guide/">guide</a>
+  → <a href="/articles/cannabis-guide/">guide</a>
+"""
+        else:
+            return ""
 
     @staticmethod
     def _get_seo_terminology_rules(source_lang: str, target_lang: str) -> str:
