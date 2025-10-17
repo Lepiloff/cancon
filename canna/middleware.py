@@ -4,10 +4,46 @@ Middleware for language URL management.
 Ensures that language and URL prefix are always consistent:
 - EN language → must be on /en/ path
 - ES language → must be on path without /en/
+- Admin panel → always English (regardless of LANGUAGE_CODE)
 """
 
 from django.shortcuts import redirect
 from django.utils import translation
+
+
+class AdminEnglishMiddleware:
+    """
+    Force English language for Django admin panel.
+
+    This middleware ensures the admin interface is always in English,
+    regardless of the default LANGUAGE_CODE setting or user preferences.
+
+    IMPORTANT: Must be placed AFTER LocaleMiddleware in MIDDLEWARE settings.
+    This allows LocaleMiddleware to run first, then we override for admin.
+
+    Why this is needed:
+    - Frontend default language: Spanish (LANGUAGE_CODE='es')
+    - Admin interface language: English (better for developers/admins)
+    - Keeps URLs SEO-friendly (Spanish without /es/ prefix)
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Force English for admin panel
+        if request.path.startswith('/admin/'):
+            translation.activate('en')
+            request.LANGUAGE_CODE = 'en'
+
+        response = self.get_response(request)
+
+        # Ensure response has English set for admin
+        # (in case view code changed language during request processing)
+        if request.path.startswith('/admin/'):
+            translation.activate('en')
+
+        return response
 
 
 class LanguageUrlRedirectMiddleware:

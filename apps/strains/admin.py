@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import admin
 from django.utils.html import format_html
 from modeltranslation.admin import TranslationAdmin
@@ -16,8 +17,55 @@ from apps.strains.models import (
 from apps.strains.signals import perform_translation
 
 
+# ========== Admin Forms ==========
+
+
+class TranslatedModelForm(forms.ModelForm):
+    """Base form for models with translation support (DRY principle)."""
+
+    skip_translation = forms.BooleanField(
+        required=False,
+        initial=False,
+        label='Skip translation (minor edit)',
+        help_text='✓ Check this if you made small changes (typo, formatting) and don\'t need re-translation. '
+                  'Leave unchecked for content changes that need translation.',
+    )
+
+
+class StrainAdminForm(TranslatedModelForm):
+    class Meta:
+        model = Strain
+        fields = '__all__'
+
+
+class ArticleAdminForm(TranslatedModelForm):
+    class Meta:
+        model = Article
+        fields = '__all__'
+
+
+class TerpeneAdminForm(TranslatedModelForm):
+    class Meta:
+        model = Terpene
+        fields = '__all__'
+
+
 class TranslatedModelAdmin(TranslationAdmin):
     """Base admin class for models with translation support (DRY principle)"""
+
+    def save_model(self, request, obj, form, change):
+        """
+        Handle skip_translation checkbox for all translated models.
+
+        If checkbox is checked:
+        - Sets flag to bypass translation check in signals
+        - Updates hash to match new content (prevents 'outdated' status)
+        """
+        if form.cleaned_data.get('skip_translation'):
+            obj._skip_translation_check = True
+            obj.translation_source_hash = obj.get_translatable_content_hash()
+
+        super().save_model(request, obj, form, change)
 
     def translation_status_badge(self, obj):
         """Display colored badge for translation status"""
@@ -42,6 +90,7 @@ class AlternativeNameInline(admin.TabularInline):
 
 
 class StrainAdmin(TranslatedModelAdmin):
+    form = StrainAdminForm
     list_display = (
         'name',
         'category',
@@ -81,6 +130,7 @@ class ArticleImageInline(admin.TabularInline):
 
 
 class ArticleAdmin(TranslatedModelAdmin):
+    form = ArticleAdminForm
     inlines = [ArticleImageInline]
     list_display = ('title_display', 'translation_status_badge', 'last_translated_at')
     search_fields = ('title_en', 'title_es')
@@ -114,6 +164,7 @@ class ArticleAdmin(TranslatedModelAdmin):
 
 
 class TerpeneAdmin(TranslatedModelAdmin):
+    form = TerpeneAdminForm
     list_display = ('name', 'translation_status_badge', 'last_translated_at')
     search_fields = ('name',)  # name is NOT translated (Limonene, Myrcene, etc.)
     actions = ['force_retranslate']
