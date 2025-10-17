@@ -6,6 +6,8 @@ from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.template.defaultfilters import slugify
 
+from apps.strains.mixins import TranslationMixin
+
 
 
 CATEGORY_CHOICES = [
@@ -28,7 +30,7 @@ class BaseText(models.Model):
         abstract = True
 
 
-class Strain(BaseText):
+class Strain(BaseText, TranslationMixin):
     name = models.CharField(max_length=255)
     cbd = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     thc = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
@@ -91,7 +93,7 @@ class AlternativeStrainName(models.Model):
         return self.name
 
 
-class Article(BaseText):
+class Article(BaseText, TranslationMixin):
     category = models.ManyToManyField('ArticleCategory')
     slug = models.SlugField(unique=True, default='', blank=True, max_length=255)
     h3_headings = models.JSONField(default=list, blank=True, null=True)
@@ -179,7 +181,7 @@ class Flavor(models.Model):
         return self.name
 
 
-class Terpene(models.Model):
+class Terpene(TranslationMixin, models.Model):
     name = models.CharField(max_length=50, unique=True)
     description = models.TextField(blank=True)
 

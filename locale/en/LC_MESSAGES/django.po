@@ -1,0 +1,256 @@
+# Django translations for Canna project
+# Copyright (C) 2025
+# This file is distributed under the same license as the Canna package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Canna 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-14 16:11+0000\n"
+"PO-Revision-Date: 2025-10-08 12:07+0000\n"
+"Last-Translator: Claude\n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: apps/strains/forms.py:10
+msgid "Sin THC"
+msgstr "No THC"
+
+#: apps/strains/forms.py:11
+msgid "Bajo"
+msgstr "Low"
+
+#: apps/strains/forms.py:12
+msgid "Medio"
+msgstr "Medium"
+
+#: apps/strains/forms.py:13
+msgid "Alto"
+msgstr "High"
+
+#: templates/base.html:99 templates/base.html:116 templates/base.html:142
+msgid "Variedades"
+msgstr "Strains"
+
+#: templates/base.html:102 templates/base.html:119 templates/base.html:143
+msgid "Terpenos"
+msgstr "Terpenes"
+
+#: templates/base.html:105 templates/base.html:122 templates/base.html:144
+#: templates/main.html:30
+msgid "Artículos"
+msgstr "Articles"
+
+#: templates/base.html:108 templates/base.html:125 templates/base.html:145
+msgid "Tiendas/Dispensarios"
+msgstr "Stores/Dispensaries"
+
+#: templates/main.html:5
+msgid ""
+"Cepas de Marihuana: Catálogo Exhaustivo y Recursos Informativos en Cannamente"
+msgstr ""
+"Cannabis Strains: Comprehensive Catalog and Information Resources at Cannamente"
+
+#: templates/main.html:13
+msgid ""
+"Descubre el mundo de la marihuana con Cannamente: un catálogo exhaustivo de "
+"cepas y artículos educativos para expandir tus conocimientos. Únete a "
+"nosotros en esta exploración."
+msgstr ""
+"Discover the world of cannabis with Cannamente: a comprehensive catalog of "
+"strains and educational articles to expand your knowledge. Join us in this "
+"exploration."
+
+#: templates/main.html:19
+msgid "Cannamente: Tu Guía Completa de Cepas de Marihuana"
+msgstr "Cannamente: Your Complete Cannabis Strains Guide"
+
+#: templates/main.html:20
+msgid ""
+"Explora nuestra extensa colección de cepas de marihuana y sumérgete en "
+"nuestro recurso informativo para expandir tus conocimientos. Con Cannamente, "
+"podrás encontrar la cepa perfecta según tus necesidades y gustos. Comienza "
+"tu viaje ahora."
+msgstr ""
+"Explore our extensive collection of cannabis strains and immerse yourself in "
+"our informational resource to expand your knowledge. With Cannamente, you can "
+"find the perfect strain according to your needs and tastes. Start your journey "
+"now."
+
+#: templates/main.html:22
+msgid "Ver todas las cepas"
+msgstr "View all strains"
+
+#: templates/main.html:48
+msgid "Las mejores variedades de cannabis"
+msgstr "The best cannabis varieties"
+
+#: templates/main.html:69
+msgid "Descubre variedades de cannabis TOP"
+msgstr "Discover TOP cannabis varieties"
+
+#: templates/main.html:74 templates/strain.html:119
+msgid "Ver más"
+msgstr "See more"
+
+#: templates/main.html:81
+msgid ""
+"Bienvenidos a nuestro catálogo dedicado a las cepas de marihuana. Descubre "
+"descripciones detalladas y amplía tu conocimiento con nuestros artículos "
+"educativos. Sumérgete en el mundo fascinante de la marihuana con nosotros."
+msgstr ""
+"Welcome to our catalog dedicated to cannabis strains. Discover detailed "
+"descriptions and expand your knowledge with our educational articles. Immerse "
+"yourself in the fascinating world of cannabis with us."
+
+#: templates/strain.html:6
+msgid "cepas de marihuana"
+msgstr "cannabis strains"
+
+#: templates/strain.html:40
+msgid "Categoría"
+msgstr "Category"
+
+#: templates/strain.html:44
+msgid "THC"
+msgstr "THC"
+
+#: templates/strain.html:49
+msgid "CBD"
+msgstr "CBD"
+
+#: templates/strain.html:54
+msgid "CBG"
+msgstr "CBG"
+
+#: templates/strain.html:59
+msgid "Valoración"
+msgstr "Rating"
+
+#: templates/strain.html:67 templates/strains.html:51
+msgid "Sensaciones"
+msgstr "Feelings"
+
+#: templates/strain.html:73
+msgid "Negativos"
+msgstr "Negatives"
+
+#: templates/strain.html:79 templates/strains.html:83
+msgid "Sabores"
+msgstr "Flavors"
+
+#: templates/strain.html:85 templates/strains.html:67
+msgid "Ayuda con"
+msgstr "Helps with"
+
+#: templates/strain.html:93
+msgid "Terpeno dominante"
+msgstr "Dominant terpene"
+
+#: templates/strain.html:103
+msgid "Otros terpenos"
+msgstr "Other terpenes"
+
+#: templates/strain.html:114
+msgid "Parámetros similares"
+msgstr "Similar strains"
+
+#: templates/strain_items.html:51
+msgid "Más información"
+msgstr "More information"
+
+#: templates/strains.html:5
+msgid "Catálogo de Variedades de Marihuana | Tu Guía Completa"
+msgstr "Cannabis Strains Catalog | Your Complete Guide"
+
+#: templates/strains.html:9
+msgid ""
+"Catálogo de marihuana, variedades de marihuana, cepas de cannabis, guía de "
+"marihuana, cannabis medicinal, cannabis recreativa, índica, sativa, híbrida"
+msgstr ""
+"Cannabis catalog, marijuana varieties, cannabis strains, marijuana guide, "
+"medicinal cannabis, recreational cannabis, indica, sativa, hybrid"
+
+#: templates/strains.html:13
+msgid ""
+"Descubre nuestro completo catálogo de variedades de marihuana. Explora "
+"cientos de cepas de cannabis para uso medicinal y recreativo. Encuentra la "
+"variedad perfecta de índica, sativa o híbrida para tus necesidades. "
+"Actualizado y detallado para tu conveniencia."
+msgstr ""
+"Discover our complete catalog of marijuana varieties. Explore hundreds of "
+"cannabis strains for medicinal and recreational use. Find the perfect "
+"indica, sativa, or hybrid variety for your needs. Updated and detailed for "
+"your convenience."
+
+#: templates/strains.html:21
+msgid "Nuestro Catálogo de Cepas de Marihuana: Diversidad y Calidad"
+msgstr "Our Cannabis Strains Catalog: Diversity and Quality"
+
+#: templates/strains.html:22
+msgid ""
+"Descubre la variedad y unicidad de cada cepa de marihuana en nuestro "
+"catálogo. Aquí, puedes explorar en detalle las características, beneficios "
+"terapéuticos, sabores y niveles de THC de cada cepa. Encuentra la cepa que "
+"se ajusta perfectamente a tus necesidades y preferencias."
+msgstr ""
+"Discover the variety and uniqueness of each cannabis strain in our catalog. "
+"Here, you can explore in detail the characteristics, therapeutic benefits, "
+"flavors, and THC levels of each strain. Find the strain that perfectly fits "
+"your needs and preferences."
+
+#: templates/strains.html:29
+msgid "FILTROS"
+msgstr "FILTERS"
+
+#: templates/strains.html:35
+msgid "Tipo"
+msgstr "Type"
+
+#: templates/strains.html:99
+msgid "Nivel de THC"
+msgstr "THC Level"
+
+#: templates/strains.html:116
+msgid ""
+"No hay cepas que coincidan. Nos encanta tu imaginación, pero ninguna "
+"variedad coincide con la descripción. Prueba a simplificar tus opciones o "
+"empieza de cero borrando los filtros."
+msgstr ""
+"No matching strains found. We love your imagination, but no variety matches "
+"the description. Try simplifying your options or start fresh by clearing the "
+"filters."
+
+#: templates/strains.html:122
+msgid "Ver todos"
+msgstr "See all"
+
+#: templates/strains.html:130
+msgid ""
+"Descubre diversas cepas de marihuana en nuestro catálogo. Ofrecemos "
+"descripciones detalladas, beneficios terapéuticos y niveles de THC. "
+"Encuentra la cepa ideal para ti con nosotros."
+msgstr ""
+"Discover various cannabis strains in our catalog. We offer detailed "
+"descriptions, therapeutic benefits, and THC levels. Find the ideal strain "
+"for you with us."
+
+#: users/managers.py:15
+msgid "The Email must be set"
+msgstr "The Email must be set"
+
+#: users/managers.py:31
+msgid "Superuser must have is_staff=True."
+msgstr "Superuser must have is_staff=True."
+
+#: users/managers.py:33
+msgid "Superuser must have is_superuser=True."
+msgstr "Superuser must have is_superuser=True."
+
+#: users/models.py:10
+msgid "email address"
+msgstr "email address"
