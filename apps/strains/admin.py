@@ -17,40 +17,34 @@ from apps.strains.models import (
 from apps.strains.signals import perform_translation
 
 
-# ========== Admin Forms with Skip Translation Checkbox ==========
-
-class SkipTranslationMixin:
-    """Mixin to add skip_translation checkbox to admin forms"""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # Add skip_translation field
-        self.fields['skip_translation'] = forms.BooleanField(
-            required=False,
-            initial=False,
-            label='Skip translation (minor edit)',
-            help_text='✓ Check this if you made small changes (typo, formatting) and don\'t need re-translation. '
-                      'Leave unchecked for content changes that need translation.',
-            widget=forms.CheckboxInput(attrs={
-                'style': 'width: 20px; height: 20px; margin-right: 10px;'
-            })
-        )
+# ========== Admin Forms ==========
 
 
-class StrainAdminForm(SkipTranslationMixin, forms.ModelForm):
+class TranslatedModelForm(forms.ModelForm):
+    """Base form for models with translation support (DRY principle)."""
+
+    skip_translation = forms.BooleanField(
+        required=False,
+        initial=False,
+        label='Skip translation (minor edit)',
+        help_text='✓ Check this if you made small changes (typo, formatting) and don\'t need re-translation. '
+                  'Leave unchecked for content changes that need translation.',
+    )
+
+
+class StrainAdminForm(TranslatedModelForm):
     class Meta:
         model = Strain
         fields = '__all__'
 
 
-class ArticleAdminForm(SkipTranslationMixin, forms.ModelForm):
+class ArticleAdminForm(TranslatedModelForm):
     class Meta:
         model = Article
         fields = '__all__'
 
 
-class TerpeneAdminForm(SkipTranslationMixin, forms.ModelForm):
+class TerpeneAdminForm(TranslatedModelForm):
     class Meta:
         model = Terpene
         fields = '__all__'
