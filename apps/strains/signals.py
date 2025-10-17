@@ -6,6 +6,7 @@ Phase 3: Synchronous translation using OpenAI API (no SQS/Lambda).
 """
 
 import logging
+import os
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from django.conf import settings
@@ -18,10 +19,11 @@ logger = logging.getLogger(__name__)
 
 
 # Check if translations are enabled (can be disabled for testing)
+# Auto-disable if OPENAI_API_KEY is not set (e.g., in CI/CD tests)
 ENABLE_AUTO_TRANSLATION = getattr(
     settings,
     'ENABLE_AUTO_TRANSLATION',
-    True  # Enabled by default
+    bool(os.getenv('OPENAI_API_KEY'))  # Only enable if API key exists
 )
 
 # Translation direction (en-to-es or es-to-en)
