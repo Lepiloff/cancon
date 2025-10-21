@@ -56,10 +56,12 @@
 
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}" />
+    {% if ENABLE_AI_CHAT %}
     <!-- AI Budtender Chat Widget Styles -->
     <link rel="stylesheet" type="text/css" href="{% static 'css/ai-budtender-chat.css' %}" />
+    {% endif %}
 </head>
-<body class="" data-ai-budtender-chat>
+<body class=""{% if ENABLE_AI_CHAT %} data-ai-budtender-chat{% endif %}>
 <main class="page">
 {% block header_block %}
     <header class="header container">
@@ -204,6 +206,7 @@
         <script src="{% static 'js/script.js' %}"></script>
         <script src="{% static 'js/lang_toggle.js' %}"></script>
         
+        {% if ENABLE_AI_CHAT %}
         <!-- AI Budtender Chat Widget -->
         <script>
             // AI Budtender Chat Configuration
@@ -216,6 +219,7 @@
             };
         </script>
         <script src="{% static 'js/ai-budtender-chat.js' %}"></script>
+        {% endif %}
     {% endblock common_scripts %}
 
     {% block page_scripts %} {% endblock page_scripts %}

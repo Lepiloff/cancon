@@ -76,6 +76,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'canna.context_processors.chat_settings',
             ],
         },
     },
@@ -212,3 +213,6 @@ TRANSLATION_DIRECTION = os.getenv('TRANSLATION_DIRECTION', 'en-to-es')  # en-to-
 
 # SEO Configuration
 SITE_DOMAIN = os.getenv('SITE_DOMAIN', 'cannamente.com')  # For sitemap absolute URLs
+
+# AI Budtender Chat Configuration
+ENABLE_AI_CHAT = os.getenv('ENABLE_AI_CHAT', 'false').lower() == 'true'
