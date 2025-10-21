@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
+{% load i18n %}
 {% block title %}
-    Cepas de Marihuana: Catálogo Exhaustivo y Recursos Informativos en Cannamente
+    {% trans "Cepas de Marihuana: Catálogo Exhaustivo y Recursos Informativos en Cannamente" %}
 {% endblock %}
 
 {% block keywords %}
@@ -9,16 +10,16 @@
 {% endblock %}
 
 {% block description %}
-   Descubre el mundo de la marihuana con Cannamente: un catálogo exhaustivo de cepas y artículos educativos para expandir tus conocimientos. Únete a nosotros en esta exploración.{% endblock %}
+   {% trans "Descubre el mundo de la marihuana con Cannamente: un catálogo exhaustivo de cepas y artículos educativos para expandir tus conocimientos. Únete a nosotros en esta exploración." %}{% endblock %}
 {% block content %}
     <div class="container flex-grow">
        {% block intro %}
         <section class="intro-section">
             <div class="text-content">
-                <h1>Cannamente: Tu Guía Completa de Cepas de Marihuana</h1>
-                <h2>Explora nuestra extensa colección de cepas de marihuana y sumérgete en nuestro recurso informativo para expandir tus conocimientos. Con Cannamente, podrás encontrar la cepa perfecta según tus necesidades y gustos. Comienza tu viaje ahora.</h2>
+                <h1>{% trans "Cannamente: Tu Guía Completa de Cepas de Marihuana" %}</h1>
+                <h2>{% trans "Explora nuestra extensa colección de cepas de marihuana y sumérgete en nuestro recurso informativo para expandir tus conocimientos. Con Cannamente, podrás encontrar la cepa perfecta según tus necesidades y gustos. Comienza tu viaje ahora." %}</h2>
                 <div class="text-center">
-                    <a href="{% url 'strain_list' %}" class="btn">Ver todas las cepas</a>
+                    <a href="{% url 'strain_list' %}" class="btn">{% trans "Ver todas las cepas" %}</a>
                 </div>
             </div>
             <div class="image-container">
@@ -26,7 +27,7 @@
             </div>
         </section>
         {% endblock intro %}
-    	<div class="h2">Artículos</div>
+    	<div class="h2">{% trans "Artículos" %}</div>
             <section class="post owl-carousel mb-30">
                 {% for article in articles %}
                     <a href="{% url 'article_detail' slug=article.slug %}" class="post_item">
@@ -44,7 +45,7 @@
                 {% endfor %}
             </section>
 
-    	<div class="h2"> Las mejores variedades de cannabis </div>
+    	<div class="h2">{% trans "Las mejores variedades de cannabis" %}</div>
     	<section class="post post--row mb-30">
     		<a href="https://cannamente.com/articles/top-10-variedades-de-indica-un-viaje-al-corazon-de/" target="_blank" class="post_item post_item--col_3"><span class="post_item_in post_item_in--2">
     			<img src="{% static 'pic/top_10_indica.jpg' %}" alt="" width="380" height="267" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="post_item_img">
@@ -65,19 +66,19 @@
     			</span>
     		</span></a>
     	</section>
-    	<div class="h2">Descubre variedades de cannabis TOP</div>
+    	<div class="h2">{% trans "Descubre variedades de cannabis TOP" %}</div>
         <section class="ctg">
         {% include "strain_items.html" %}
     	</section>
     	<div class="text-center">
-    		<a href="{% url 'strain_list' %}" class="btn btn--outline_с">Ver más</a>
+    		<a href="{% url 'strain_list' %}" class="btn btn--outline_с">{% trans "Ver más" %}</a>
     	</div>
     </div>
 {% endblock content %}
 
 {% block footer_col_2 %}
     <div class="footer_col footer_col--2">
-Bienvenidos a nuestro catálogo dedicado a las cepas de marihuana. Descubre descripciones detalladas y amplía tu conocimiento con nuestros artículos educativos.  Sumérgete en el mundo fascinante de la marihuana con nosotros.
+{% trans "Bienvenidos a nuestro catálogo dedicado a las cepas de marihuana. Descubre descripciones detalladas y amplía tu conocimiento con nuestros artículos educativos. Sumérgete en el mundo fascinante de la marihuana con nosotros." %}
     </div>
 {% endblock footer_col_2 %}
 
