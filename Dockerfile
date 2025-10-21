@@ -6,6 +6,9 @@ FROM python:3.10-alpine
 # Set the working directory
 WORKDIR /app
 
+# Install gettext for Django i18n translation support
+RUN apk add --no-cache gettext
+
 # Copy the requirements file into the container
 COPY requirements.txt .
 

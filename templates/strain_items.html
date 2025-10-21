@@ -1,4 +1,5 @@
 {% load static %}
+{% load i18n %}
 {% for strain in strains %}
 <div class="ctg__item">
     {% if strain.top %}
@@ -47,7 +48,7 @@
           </div>
         {% endif %}
       </div>
-      <a href="{% url 'strain_detail' slug=strain.slug %}" class="btn">Más información</a>
+      <a href="{% url 'strain_detail' slug=strain.slug %}" class="btn">{% trans "Más información" %}</a>
     </div>
 </div>
 {% endfor %}

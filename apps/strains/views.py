@@ -4,13 +4,6 @@ from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.urls import reverse
 
-from apps.strains.localizations import (
-    feelings_translation,
-    helps_with_translation,
-    flavors_translation,
-    negatives_translator,
-    terpenes_translation,
-)
 from apps.strains.forms import StrainFilterForm
 from apps.strains.models import Article, Strain
 from apps.strains.utils import get_related_strains, get_filtered_strains, is_ajax_request
@@ -42,11 +35,6 @@ def strain_detail(request, slug):
     context = {
         'strain': strain,
         'strains': related_strains,
-        'feelings_translation': feelings_translation,
-        'helps_with_translation': helps_with_translation,
-        'flavors_translation': flavors_translation,
-        'negatives_translator': negatives_translator,
-        'terpenes_translation': terpenes_translation,
     }
 
     return render(request, 'strain.html', context)
@@ -90,9 +78,6 @@ def strain_list(request):
         'strains': strains,
         'form': form,
         'no_matches': no_matches,
-        'feelings_translation': feelings_translation,
-        'helps_with_translation': helps_with_translation,
-        'flavors_translation': flavors_translation,
     })
 
 
@@ -184,5 +169,4 @@ def terpene_detail(request, slug):
             'headings': headings
         }
     )
-
 
