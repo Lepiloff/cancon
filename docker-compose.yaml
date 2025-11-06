@@ -2,7 +2,9 @@ version: '3.10'
 
 services:
   db:
-    image: postgres:13
+    build:
+      context: .
+      dockerfile: docker/postgres/Dockerfile
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
