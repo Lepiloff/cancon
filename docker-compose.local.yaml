@@ -1,34 +1,15 @@
 version: '3.8'
 
-services:
-  web:
-    build: .
-    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-    volumes:
-      - .:/app
-      - ./static:/app/staticfiles
-    ports:
-      - "8000:8000"
-    depends_on:
-      - db
-    env_file:
-      - .env
-    environment:
-      USE_S3: ${USE_S3}
-  nginx:
-    image: nginx:1.19.0-alpine
-    volumes:
-      - ./nginx/local.conf:/etc/nginx/conf.d/default.conf
-      - ./static:/app/staticfiles
-    ports:
-      - "8080:80"
-    depends_on:
-      - web
+networks:
+  canna-network-local:
+    driver: bridge
 
+services:
   db:
     build:
       context: .
       dockerfile: docker/postgres/Dockerfile
+    container_name: canna-postgres-local
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
@@ -37,6 +18,47 @@ services:
       - POSTGRES_PASSWORD=mypassword
     ports:
       - "5432:5432"
+    networks:
+      - canna-network-local
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  web:
+    build: .
+    container_name: canna-web-local
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+      - ./static:/app/staticfiles
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      USE_S3: ${USE_S3}
+      POSTGRES_HOST: db
+    networks:
+      - canna-network-local
+
+  nginx:
+    image: nginx:1.19.0-alpine
+    container_name: canna-nginx-local
+    volumes:
+      - ./nginx/local.conf:/etc/nginx/conf.d/default.conf
+      - ./static:/app/staticfiles
+    ports:
+      - "8080:80"
+    depends_on:
+      - web
+    networks:
+      - canna-network-local
+
 volumes:
   postgres_data:
   static_volume:
