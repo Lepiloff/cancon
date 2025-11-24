@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Chat Integration</title>
+    <link rel="stylesheet" href="/static/css/ai-budtender-chat.css">
+</head>
+<body style="margin: 0; padding: 20px; background: #f5f5f5; font-family: Arial, sans-serif;">
+    <h1>AI Budtender Chat Integration Test</h1>
+    <p>This page tests the updated chat widget with optimized canagent API responses.</p>
+    
+    <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+        <h2>Test Instructions:</h2>
+        <ol>
+            <li>Click the green chat bubble in the bottom-right corner</li>
+            <li>Try the quick actions: "Relaxation", "Sleep", "Energy", "Creativity", "Pain Relief"</li>
+            <li>Verify strain cards show:
+                <ul>
+                    <li>THC/CBD/CBG percentages</li>
+                    <li>Effects with energy types (e.g., "Sleepy (relaxing)")</li>
+                    <li>Medical uses (e.g., "Ayuda con: Insomnia, Stress")</li>
+                    <li>Flavors (e.g., "Sabores: earthy, pine")</li>
+                    <li>Clickable cards that open strain pages</li>
+                </ul>
+            </li>
+            <li>Test different intents and verify appropriate strains are recommended</li>
+        </ol>
+    </div>
+
+    <div style="background: white; padding: 20px; border-radius: 10px;">
+        <h2>Expected Behavior:</h2>
+        <ul>
+            <li><strong>Sleep queries</strong> → Indica strains with "Sleepy, Relaxed" effects</li>
+            <li><strong>Energy queries</strong> → Sativa/Hybrid strains with "Energetic, Uplifted" effects</li>
+            <li><strong>Pain queries</strong> → Strains that help with "Pain, Inflammation"</li>
+            <li><strong>Creativity queries</strong> → Strains with "Creative, Focused" effects</li>
+        </ul>
+    </div>
+
+    <!-- Chat widget initialization -->
+    <script>
+        window.AIBudtenderChatConfig = {
+            apiBaseUrl: 'http://localhost:8000'
+        };
+    </script>
+    
+    <!-- Mark page for chat initialization -->
+    <div data-ai-budtender-chat></div>
+    
+    <script src="/static/js/ai-budtender-chat.js"></script>
+</body>
+</html>
