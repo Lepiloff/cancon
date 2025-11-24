@@ -40,6 +40,10 @@ urlpatterns = [
     path('tinymce/', include('tinymce.urls')),
     path('i18n/', include('django.conf.urls.i18n')),  # Language switcher endpoint
     path('robots.txt', robots_txt, name='robots_txt'),  # SEO: robots.txt
+    path('sitemap.xml', sitemap, {
+        'sitemaps': sitemaps,
+        'template_name': 'sitemap.xml',  # Custom template with hreflang support
+    }, name='django.contrib.sitemaps.views.sitemap'),
 ]
 
 # Multi-language URLs with i18n_patterns
@@ -48,10 +52,7 @@ urlpatterns = [
 urlpatterns += i18n_patterns(
     path('', include('apps.strains.urls')),
     path('store/', include('apps.store.urls')),
-    path('sitemap.xml', sitemap, {
-        'sitemaps': sitemaps,
-        'template_name': 'sitemap.xml',  # Custom template with hreflang support
-    }, name='django.contrib.sitemaps.views.sitemap'),
+    path('api/chat/', include('apps.chat_bot.urls')),
     prefix_default_language=False,  # Spanish WITHOUT prefix - CRITICAL for SEO!
 )
 
