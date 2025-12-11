@@ -13,11 +13,12 @@ from django.views.decorators.http import require_http_methods
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.conf import settings
+from django.utils import timezone
 from .models import ChatConfiguration, APIKey, ChatSession, ChatMessage
 import json
 import requests
 import time
-from django.utils import timezone
+import logging
 
 
 def get_client_ip(request):
@@ -138,11 +139,17 @@ class ChatProxyView(View):
             if config.api_key:
                 headers['Authorization'] = f'Bearer {config.api_key}'
             
+            # Determine language for API request
+            client_language = data.get('language')
+            request_language = getattr(request, 'LANGUAGE_CODE', 'es')
+            final_language = client_language or request_language
+
             payload = {
                 'message': message,
                 'history': history[-config.max_history:],  # Limit history
                 'session_id': str(session.session_id),  # Use Django session_id, not client's
-                'source_platform': 'cannamente'  # Platform identification
+                'source_platform': 'cannamente',  # Platform identification
+                'language': final_language  # Language preference
             }
             
             try:
