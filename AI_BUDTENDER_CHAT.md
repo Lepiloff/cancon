@@ -194,7 +194,17 @@ python manage.py migrate
    - Set rate limits and history settings
 4. Optionally create API keys for authentication
 
-### 3. **Canagent Service**
+### 3. **GeoIP2 Setup (Optional - for automatic language detection)**
+1. Download MaxMind GeoLite2-Country database:
+   - Visit: https://dev.maxmind.com/geoip/geolite2-free-geolocation-data
+   - Create free account and download `GeoLite2-Country.mmdb`
+2. Place database file:
+   ```bash
+   cp ~/Downloads/GeoLite2-Country.mmdb /path/to/canna/data/
+   ```
+3. The `GeoLanguageMiddleware` will automatically detect user location and set appropriate language
+
+### 4. **Canagent Service**
 Ensure canagent is running on `localhost:8001` with:
 ```bash
 cd ../canagent
@@ -225,6 +235,8 @@ make start
 - 🔄 Automatic retry on failure
 - 🌐 WebSocket support (optional)
 - 📊 Admin dashboard with statistics
+- 🌍 **Automatic language detection** based on geolocation
+- 🗣️ **Language preference transmission** to AI service
 
 ## 🚀 Usage Examples
 
@@ -263,10 +275,29 @@ Access lightweight analytics through Django Admin → Chat Bot section.
 | Endpoint | Method | Purpose |
 |----------|--------|---------|
 | `/api/chat/config/` | GET | Get chat configuration |
-| `/api/chat/chat/` | POST | Send chat message |
+| `/api/chat/chat/` | POST | Send chat message with language preference |
 | `/api/chat/feedback/` | POST | Submit user feedback |
 | `/api/chat/health/` | GET | Health check status |
 | `/api/chat/stats/` | GET | Usage statistics |
+
+### **Enhanced Chat API Request Format (v3.0)**
+
+```json
+{
+  "message": "What's good for relaxation?",
+  "history": ["previous", "messages"],
+  "session_id": "optional-session-uuid",
+  "language": "es"
+}
+```
+
+**NEW**: `language` field - Auto-detected or manual language preference
+
+**New `language` field behavior:**
+- **Frontend**: Automatically includes `document.documentElement.lang` (from page language)
+- **Backend**: Uses client language or falls back to `request.LANGUAGE_CODE`
+- **GeoLanguageMiddleware**: Sets language based on IP geolocation for new users
+- **Priority**: Manual selection > Cookies > Geolocation > Default (Spanish)
 
 ## 🔍 Troubleshooting
 

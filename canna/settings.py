@@ -53,7 +53,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.locale.LocaleMiddleware',  # LocaleMiddleware first
+    'canna.middleware.GeoLanguageMiddleware',  # IP-based language detection (BEFORE LocaleMiddleware)
+    'django.middleware.locale.LocaleMiddleware',  # LocaleMiddleware processes language preference
     'canna.middleware.AdminEnglishMiddleware',  # Override for admin (after LocaleMiddleware)
     'canna.middleware.LanguageUrlRedirectMiddleware',  # Ensure lang matches URL prefix
     'django.middleware.common.CommonMiddleware',
@@ -156,6 +157,23 @@ MODELTRANSLATION_PREPOPULATE_LANGUAGE = 'en'
 # Show language switcher in admin interface
 # This adds tabs for each language when editing translatable fields
 MODELTRANSLATION_DEBUG = False
+
+# GeoIP2 Configuration for automatic language detection
+GEOIP_PATH = BASE_DIR / "geoip"  # Place MaxMind GeoLite2-Country.mmdb here
+
+# Country to Language Mapping
+# Maps country codes to language preferences for automatic detection
+COUNTRY_LANGUAGE_MAP = {
+    # Spanish-speaking countries
+    "ES": "es", "MX": "es", "AR": "es", "CO": "es", "CL": "es",
+    "PE": "es", "VE": "es", "UY": "es", "PY": "es", "BO": "es",
+    "CR": "es", "GT": "es", "HN": "es", "NI": "es", "SV": "es",
+    "PA": "es", "DO": "es", "PR": "es", "EC": "es", "CU": "es",
+    # All other countries default to English via FALLBACK_LANGUAGE
+}
+
+# Fallback language when country is not found or not in mapping
+FALLBACK_LANGUAGE = "en"
 
 
 USE_S3 = os.getenv('USE_S3') == 'TRUE'
