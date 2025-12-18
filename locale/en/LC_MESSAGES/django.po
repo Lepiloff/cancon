@@ -139,6 +139,10 @@ msgstr "Feelings"
 msgid "Negativos"
 msgstr "Negatives"
 
+#: static/js/ai-budtender-chat.js:385
+msgid "Efectos"
+msgstr "Effects"
+
 #: templates/strain.html:79 templates/strains.html:83
 msgid "Sabores"
 msgstr "Flavors"
