@@ -20,6 +20,7 @@ from django.conf.urls.static import static
 from django.conf.urls.i18n import i18n_patterns
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
+from django.views.i18n import JavaScriptCatalog
 from django.urls import path, include
 
 from canna.sitemaps import StrainSitemap, ArticleSitemap
@@ -50,6 +51,7 @@ urlpatterns = [
 # ES (default): /strain/... - NO prefix (preserves existing SEO!)
 # EN (new):     /en/strain/... - WITH /en/ prefix
 urlpatterns += i18n_patterns(
+    path('jsi18n/', JavaScriptCatalog.as_view(domain='django'), name='javascript-catalog'),
     path('', include('apps.strains.urls')),
     path('store/', include('apps.store.urls')),
     path('api/chat/', include('apps.chat_bot.urls')),
