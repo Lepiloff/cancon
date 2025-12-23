@@ -35,7 +35,7 @@ class Strain(BaseText, TranslationMixin):
     cbd = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     thc = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     cbg = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
-    rating = models.DecimalField(max_digits=3, decimal_places=1)
+    rating = models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)
     img = models.ImageField(upload_to='strains/images', blank=True, null=True)
     img_alt_text = models.CharField(max_length=255, blank=True, null=True)
     category = models.CharField(max_length=10, choices=CATEGORY_CHOICES)
