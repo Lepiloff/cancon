@@ -681,6 +681,7 @@ class TaxonomyTranslator:
             timeout=TranslationConfig.OPENAI_TIMEOUT,
         )
         self.model = TranslationConfig.OPENAI_MODEL
+        print(f'OPEN AI {self.model}')
         self.temperature = 0.2
         self.max_tokens = 500
 
