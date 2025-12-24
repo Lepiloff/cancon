@@ -1,5 +1,8 @@
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.urls import path
+from django.shortcuts import render
+from django.utils import timezone
 from django.utils.html import format_html
 from modeltranslation.admin import TranslationAdmin
 from apps.strains.models import (
@@ -14,7 +17,10 @@ from apps.strains.models import (
     Flavor,
     Terpene,
 )
+from apps.strains.leafly_import import LeaflyCopywriter, CopywritingError
 from apps.strains.signals import perform_translation
+from apps.translation import OpenAITranslator
+from apps.translation.base_translator import TranslationError
 
 
 # ========== Admin Forms ==========
@@ -36,6 +42,39 @@ class StrainAdminForm(TranslatedModelForm):
     class Meta:
         model = Strain
         fields = '__all__'
+
+
+class StrainCopywriterForm(forms.Form):
+    strain = forms.ModelChoiceField(
+        queryset=Strain.objects.order_by('name'),
+        required=False,
+        label='Strain (optional)',
+    )
+    source_text = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 8, 'style': 'width: 100%;'}),
+        label='Source text',
+        help_text='Paste raw text from any site (links will be removed).',
+    )
+    generated_text_en = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'rows': 8, 'style': 'width: 100%;'}),
+        label='Generated text (EN)',
+    )
+    generated_text_es = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'rows': 8, 'style': 'width: 100%;'}),
+        label='Generated text (ES)',
+    )
+    confirm_overwrite = forms.BooleanField(
+        required=False,
+        label='Confirm overwrite',
+        help_text='Check to overwrite the selected strain text.',
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['generated_text_en'].widget.attrs['readonly'] = True
+        self.fields['generated_text_es'].widget.attrs['readonly'] = True
 
 
 class ArticleAdminForm(TranslatedModelForm):
@@ -91,6 +130,7 @@ class AlternativeNameInline(admin.TabularInline):
 
 class StrainAdmin(TranslatedModelAdmin):
     form = StrainAdminForm
+    change_list_template = 'admin/strains/strain/change_list.html'
     list_display = (
         'name',
         'category',
@@ -111,6 +151,109 @@ class StrainAdmin(TranslatedModelAdmin):
     list_editable = ('active', 'main', 'top', 'is_review')
     inlines = [AlternativeNameInline]
     actions = ['force_retranslate']
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                'copywriter/',
+                self.admin_site.admin_view(self.copywriter_view),
+                name='strains_strain_copywriter',
+            ),
+        ]
+        return custom_urls + urls
+
+    def copywriter_view(self, request):
+        form = StrainCopywriterForm()
+        if request.method == 'POST':
+            action = request.POST.get('action')
+            form = StrainCopywriterForm(request.POST)
+
+            if not form.is_valid():
+                self.message_user(
+                    request,
+                    'Please correct the errors below.',
+                    level=messages.ERROR,
+                )
+            else:
+                strain = form.cleaned_data['strain']
+                source_text = form.cleaned_data['source_text']
+                generated_en = (form.cleaned_data.get('generated_text_en') or '').strip()
+                generated_es = (form.cleaned_data.get('generated_text_es') or '').strip()
+
+                if action == 'generate':
+                    try:
+                        copywriter = LeaflyCopywriter()
+                        generated_en = copywriter.rewrite_raw_text(
+                            source_text,
+                            strain_name=strain.name if strain else None,
+                        )
+                        translator = OpenAITranslator()
+                        translations = translator.translate(
+                            'Strain',
+                            {'text_content': generated_en},
+                            'en',
+                            'es',
+                        )
+                        generated_es = (translations.get('text_content') or '').strip()
+                        if not generated_es:
+                            raise TranslationError('Translation returned empty text_content')
+
+                        form = StrainCopywriterForm(initial={
+                            'strain': strain.id if strain else None,
+                            'source_text': source_text,
+                            'generated_text_en': generated_en,
+                            'generated_text_es': generated_es,
+                        })
+                    except (CopywritingError, TranslationError, ValueError) as exc:
+                        self.message_user(request, f'Generation failed: {exc}', level=messages.ERROR)
+
+                elif action == 'apply':
+                    if not strain:
+                        form.add_error('strain', 'Select a strain to overwrite.')
+                    if not form.cleaned_data.get('confirm_overwrite'):
+                        form.add_error('confirm_overwrite', 'Confirmation is required.')
+                    if not generated_en or not generated_es:
+                        form.add_error(None, 'Generate text first before applying.')
+
+                    if not form.errors:
+                        strain.text_content = generated_en
+                        strain.text_content_en = generated_en
+                        strain.text_content_es = generated_es
+                        strain.translation_status = 'synced'
+                        strain.translation_error = None
+                        strain.last_translated_at = timezone.now()
+                        strain.translation_source_hash = strain.get_translatable_content_hash()
+                        strain._skip_translation_check = True
+                        strain.save(update_fields=[
+                            'text_content',
+                            'text_content_en',
+                            'text_content_es',
+                            'translation_status',
+                            'translation_error',
+                            'last_translated_at',
+                            'translation_source_hash',
+                            'updated_at',
+                        ])
+                        self.message_user(
+                            request,
+                            f'Text updated for {strain.name}.',
+                            level=messages.SUCCESS,
+                        )
+
+                else:
+                    self.message_user(
+                        request,
+                        'Unknown action. Use Generate or Apply.',
+                        level=messages.ERROR,
+                    )
+
+        context = {
+            **self.admin_site.each_context(request),
+            'form': form,
+            'title': 'Strain Copywriter',
+        }
+        return render(request, 'admin/strains/strain/copywriter.html', context)
 
     @admin.action(description='Force retranslate selected items')
     def force_retranslate(self, request, queryset):
