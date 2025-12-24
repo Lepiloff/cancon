@@ -1,0 +1,83 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+  <h1>{% trans "Strain Copywriter" %}</h1>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="errornote">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    <fieldset class="module aligned">
+      <div class="form-row">
+        {{ form.strain.label_tag }}<br>
+        {{ form.strain }}
+        {% if form.strain.errors %}
+          <div class="errors">{{ form.strain.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="form-row">
+        {{ form.source_text.label_tag }}
+        {% if form.source_text.help_text %}
+          <div class="help">{{ form.source_text.help_text }}</div>
+        {% endif %}
+        {{ form.source_text }}
+        {% if form.source_text.errors %}
+          <div class="errors">{{ form.source_text.errors }}</div>
+        {% endif %}
+      </div>
+    </fieldset>
+
+    <fieldset class="module aligned">
+      <div class="form-row">
+        {{ form.generated_text_en.label_tag }}
+        {{ form.generated_text_en }}
+        {% if form.generated_text_en.errors %}
+          <div class="errors">{{ form.generated_text_en.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="form-row">
+        {{ form.generated_text_es.label_tag }}
+        {{ form.generated_text_es }}
+        {% if form.generated_text_es.errors %}
+          <div class="errors">{{ form.generated_text_es.errors }}</div>
+        {% endif %}
+      </div>
+    </fieldset>
+
+    <fieldset class="module aligned">
+      <div class="form-row">
+        {{ form.confirm_overwrite }}
+        {{ form.confirm_overwrite.label_tag }}
+        {% if form.confirm_overwrite.help_text %}
+          <div class="help">{{ form.confirm_overwrite.help_text }}</div>
+        {% endif %}
+        {% if form.confirm_overwrite.errors %}
+          <div class="errors">{{ form.confirm_overwrite.errors }}</div>
+        {% endif %}
+      </div>
+    </fieldset>
+
+    <div class="submit-row">
+      <button type="submit" name="action" value="generate" class="default">
+        {% trans "Generate" %}
+      </button>
+      {% if form.strain.value %}
+        <button type="submit" name="action" value="apply">
+          {% trans "Apply to strain" %}
+        </button>
+      {% else %}
+        <button type="button" disabled>
+          {% trans "Apply to strain" %}
+        </button>
+      {% endif %}
+    </div>
+  </form>
+{% endblock %}
