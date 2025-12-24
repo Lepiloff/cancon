@@ -396,10 +396,10 @@ class LeaflyParser:
 
         rating_tag = soup.find(attrs={'data-testid': re.compile('rating', re.I)})
         if rating_tag:
-                return self._parse_decimal_from_text(
-                    rating_tag.get_text(' ', strip=True),
-                    quantize=Decimal('0.1'),
-                )
+            return self._parse_decimal_from_text(
+                rating_tag.get_text(' ', strip=True),
+                quantize=Decimal('0.1'),
+            )
         return None
 
     def _extract_rating_from_json(self, data) -> Optional[Decimal]:
@@ -517,6 +517,55 @@ class LeaflyParser:
 
 
 class LeaflyCopywriter:
+    SYSTEM_PROMPT = (
+        "You are a human editor maintaining a cannabis strain product database."
+        ""
+        "Task:"
+        "Rewrite the provided source description into ONE English paragraph for a product page."
+        ""
+        "Hard rules:"
+        "1) Use ONLY facts explicitly present in the source text."
+        "2) Preserve all strain names and genetics references EXACTLY as written."
+        "3) Output exactly one <p>...</p> block. Length should be close to target_length (+/-10%)."
+        "4) Do NOT include links, URLs, or brand mentions."
+        "5) Use only ASCII punctuation."
+        "6) Identify alternative names ONLY if explicitly stated as 'also known as' or 'aka'."
+        "7) Do not use any HTML tags other than the outer <p> tag."
+        ""
+        "Source note:"
+        "- The source text may be a merged excerpt from two different descriptions."
+        "- It can contain repeated or near-duplicate statements. Deduplicate aggressively."
+        "- It can contain conflicting claims (e.g., sleepy vs energetic). Do NOT reconcile; omit conflicting claims entirely."
+        "- When duplicates exist, prefer medically framed statements (conditions/symptoms/therapeutic context) if they are not contradicted."
+        "- Prefer details that are stated clearly and consistently across the text. If unsure, leave it out."
+        "- Do not mention that multiple sources were used."
+        "- Do NOT include market availability, legal/illegal market, pricing, or distribution context."
+        "- Geographic origin or breeding location is allowed ONLY if stated explicitly as origin/lineage/cultivation history."
+        "Examples:"
+        "- EXCLUDE: \"Skywalker is most commonly found on the West Coast, in Arizona, and in Colorado. "
+        "But it's relatively easy to find on any legal market, as well as the black market in many parts of the country.\""
+        "- ALLOW: \"This strain was first cultivated in California.\""
+        ""
+        "Language constraints:"
+        "- Do NOT use promotional or marketing language."
+        "- Avoid generic SEO phrases such as 'popular choice', 'ideal', 'renowned', or similar wording."
+        "- Do NOT summarize or conclude the paragraph."
+        ""
+        "Style constraints:"
+        "- Write like a human editor updating a product catalog entry."
+        "- Do NOT use an educational or encyclopedic tone."
+        "- Sentence structure should feel slightly uneven."
+        "- Vary sentence length noticeably."
+        "- One sentence may be short or slightly imperfect."
+        "- Avoid perfectly balanced or symmetrical phrasing."
+        "- Do NOT start sentences with 'With', 'Although', or 'However'."
+        ""
+        "Output format:"
+        "Return ONLY a JSON object with the following keys:"
+        "- text_content (string, containing the <p>...</p> paragraph)"
+        "- img_alt_text (string, factual, 8-14 words, no hype or adjectives)"
+        "- alternative_names (array of strings)"
+    )
     def __init__(self):
         TranslationConfig.validate()
         self.client = OpenAI(
@@ -543,41 +592,7 @@ class LeaflyCopywriter:
             'description_source': parsed.description_text,
             'target_length': len(parsed.description_text),
         }
-
-        system_prompt = (
-            "You are a human editor maintaining a cannabis strain product database."
-            ""
-            "Task:"
-            "Rewrite the provided source description into ONE English paragraph for a product page."
-            ""
-            "Hard rules:"
-            "1) Use ONLY facts explicitly present in the source text."
-            "2) Preserve all strain names and genetics references EXACTLY as written."
-            "3) Output exactly one <p>...</p> block. Length should be close to target_length (+/-10%)."
-            "4) Do NOT include links, URLs, or brand mentions."
-            "5) Use only ASCII punctuation."
-            "6) Identify alternative names ONLY if explicitly stated as 'also known as' or 'aka'."
-            ""
-            "Language constraints:"
-            "- Do NOT use promotional or marketing language."
-            "- Avoid generic SEO phrases such as 'popular choice', 'ideal', 'renowned', or similar wording."
-            "- Do NOT summarize or conclude the paragraph."
-            ""
-            "Style constraints:"
-            "- Write like a human editor updating a product catalog entry."
-            "- Do NOT use an educational or encyclopedic tone."
-            "- Sentence structure should feel slightly uneven."
-            "- Vary sentence length noticeably."
-            "- One sentence may be short or slightly imperfect."
-            "- Avoid perfectly balanced or symmetrical phrasing."
-            "- Do NOT start sentences with 'With', 'Although', or 'However'."
-            ""
-            "Output format:"
-            "Return ONLY a JSON object with the following keys:"
-            "- text_content (string, containing the <p>...</p> paragraph)"
-            "- img_alt_text (string, factual, 8-14 words, no hype or adjectives)"
-            "- alternative_names (array of strings)"
-        )
+        system_prompt = self.SYSTEM_PROMPT
 
         user_prompt = json.dumps(payload, ensure_ascii=False, indent=2)
 
@@ -595,6 +610,44 @@ class LeaflyCopywriter:
             raise CopywritingError(str(exc)) from exc
 
         content = response.choices[0].message.content.strip()
+        return self._parse_copywriter_output(content, primary_name=parsed.name)
+
+    def rewrite_raw_text(self, source_text: str, strain_name: Optional[str] = None) -> str:
+        source_text = (source_text or '').strip()
+        if not source_text:
+            raise CopywritingError('Source text is empty')
+
+        payload = {
+            'strain_name': strain_name or '',
+            'description_source': source_text,
+            'target_length': len(source_text),
+        }
+        system_prompt = self.SYSTEM_PROMPT
+
+        user_prompt = json.dumps(payload, ensure_ascii=False, indent=2)
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                temperature=self.temperature,
+                max_tokens=self.max_tokens,
+            )
+        except OpenAIError as exc:
+            raise CopywritingError(str(exc)) from exc
+
+        content = response.choices[0].message.content.strip()
+        output = self._parse_copywriter_output(content, primary_name=strain_name or '')
+        return output['text_content']
+
+    def _parse_copywriter_output(
+        self,
+        content: str,
+        primary_name: Optional[str] = None,
+    ) -> Dict[str, object]:
         content = _strip_code_fences(content)
 
         try:
@@ -614,14 +667,14 @@ class LeaflyCopywriter:
         if not isinstance(alternative_names, list):
             alternative_names = []
         alternative_names = self._clean_alternative_names(
-            parsed.name,
+            primary_name or '',
             [str(name).strip() for name in alternative_names if str(name).strip()],
         )
 
         if not text_content:
             raise CopywritingError('Copywriter returned empty text_content')
-        if not img_alt_text:
-            img_alt_text = f'{parsed.name} weed strain image'
+        if not img_alt_text and primary_name:
+            img_alt_text = f'{primary_name} weed strain image'
 
         return {
             'text_content': text_content,
@@ -681,7 +734,6 @@ class TaxonomyTranslator:
             timeout=TranslationConfig.OPENAI_TIMEOUT,
         )
         self.model = TranslationConfig.OPENAI_MODEL
-        print(f'OPEN AI {self.model}')
         self.temperature = 0.2
         self.max_tokens = 500
 
