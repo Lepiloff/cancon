@@ -120,40 +120,55 @@ class ChatSession(models.Model):
 
 class ChatMessage(models.Model):
     """Store chat messages for analytics and improvement"""
-    
+
     MESSAGE_TYPES = [
         ('user', 'User Message'),
         ('ai', 'AI Response'),
         ('system', 'System Message'),
         ('error', 'Error Message')
     ]
-    
+
     session = models.ForeignKey(ChatSession, on_delete=models.CASCADE, related_name='messages')
     message_type = models.CharField(max_length=10, choices=MESSAGE_TYPES)
     content = models.TextField()
-    
+
     # For AI responses, store recommended strains
     recommended_strains = models.JSONField(blank=True, null=True)
-    
+
     # Context-Aware Architecture v2.0 fields (commented for space optimization)
     # query_type = models.CharField(max_length=20, blank=True, null=True)
     # detected_intent = models.CharField(max_length=50, blank=True, null=True)
     # confidence_score = models.FloatField(blank=True, null=True)
-    
+
     # Performance tracking
     response_time_ms = models.PositiveIntegerField(blank=True, null=True)
     api_response_time_ms = models.PositiveIntegerField(blank=True, null=True)
-    
+
     # Metadata
     timestamp = models.DateTimeField(auto_now_add=True)
     ip_address = models.GenericIPAddressField()
-    
+
     class Meta:
         verbose_name = 'Chat Message'
         verbose_name_plural = 'Chat Messages'
         ordering = ['timestamp']
-    
+
     def __str__(self):
         return f"{self.get_message_type_display()} - {self.content[:50]}..."
 
 
+class ChatRateLimit(models.Model):
+    """Track rate limiting for chat requests by IP address"""
+
+    ip_address = models.GenericIPAddressField(db_index=True, unique=True)
+    request_count = models.PositiveIntegerField(default=0)
+    window_start = models.DateTimeField(auto_now_add=True)
+    last_exceeded_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Chat Rate Limit'
+        verbose_name_plural = 'Chat Rate Limits'
+        ordering = ['-window_start']
+
+    def __str__(self):
+        return f"RateLimit: {self.ip_address} ({self.request_count} requests)"
