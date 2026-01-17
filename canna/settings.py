@@ -234,3 +234,8 @@ SITE_DOMAIN = os.getenv('SITE_DOMAIN', 'cannamente.com')  # For sitemap absolute
 
 # AI Budtender Chat Configuration
 ENABLE_AI_CHAT = os.getenv('ENABLE_AI_CHAT', 'false').lower() == 'true'
+
+# Chat Rate Limiting Configuration
+# Limits chat requests per IP address to prevent abuse
+CHAT_RATE_LIMIT_MAX_REQUESTS = int(os.getenv('CHAT_RATE_LIMIT_MAX_REQUESTS', 10))
+CHAT_RATE_LIMIT_WINDOW_SECONDS = int(os.getenv('CHAT_RATE_LIMIT_WINDOW_SECONDS', 3600))
