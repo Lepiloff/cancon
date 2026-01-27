@@ -166,6 +166,42 @@ canna/
   - Proper request validation
   - IP address logging and tracking
 
+### 5.1 **IP-Based Rate Limiting (Architecture Plan)**
+Goal: limit the number of chat requests per IP and show a clear message when the limit is reached. After hitting the limit, the same IP can use the chat again after 1 hour. The limit is configurable in `settings.py`.
+
+**Key decisions**
+- Scope: only `/api/chat/chat/` is rate-limited (other endpoints untouched).
+- IP source: reuse the same IP detection logic used by `GeoLanguageMiddleware` (X-Forwarded-For -> X-Real-IP -> REMOTE_ADDR).
+- Storage: Redis via Django cache for atomic counters + TTL. Provide a safe fallback for local dev (in-memory cache).
+- Window/block: fixed 1-hour window with TTL-based reset (simple and fast). If limit is exceeded, return `429 Too Many Requests` with `retry_after_seconds`.
+
+**Settings (in `settings.py`)**
+- `CHAT_IP_RATE_LIMIT`: max requests per IP per hour (e.g. 30).
+- `CHAT_IP_RATE_LIMIT_BLOCK_SECONDS`: lockout/TTL in seconds (default 3600).
+- `CHAT_IP_RATE_LIMIT_KEY_PREFIX`: prefix for cache keys (e.g. `chat_ip_rate`).
+- `CACHES`: configure Redis (recommended) or fall back to local memory for dev.
+
+**Backend flow (high level)**
+1. In the chat endpoint (or a dedicated middleware scoped to `/api/chat/chat/`), resolve client IP using the same logic as `GeoLanguageMiddleware`.
+2. Check Redis counters: `count:{ip}` with TTL 1 hour. Use `INCR` (atomic) and set TTL on first hit.
+3. If `count > CHAT_IP_RATE_LIMIT`, set a `blocked:{ip}` key with TTL 1 hour and return:
+   - HTTP 429
+   - JSON: `{ "error": "Rate limit reached", "retry_after_seconds": 3600, "retry_after_human": "1 hour" }`
+4. If allowed, proceed with normal chat flow (session creation + canagent call).
+
+**Frontend behavior**
+- On 429, show a clear message in chat UI, e.g.:
+  - "You reached the chat limit. Please try again in 1 hour."
+- Optional: if `retry_after_seconds` is provided, format the exact wait time.
+
+**Implementation notes**
+- Prefer a small helper (shared with `GeoLanguageMiddleware`) for IP extraction to keep consistency.
+- Add unit tests for:
+  - First request allowed, counter increments.
+  - Limit reached returns 429 and includes retry metadata.
+  - Counter resets after TTL (simulate via cache TTL or time mocking).
+  - IP parsing respects proxy headers.
+
 ### 6. **Error Handling & Reliability**
 - ✅ **Frontend Error Handling**
   - Network connectivity issues
