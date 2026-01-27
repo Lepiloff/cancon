@@ -2,7 +2,10 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from .models import ChatConfiguration, APIKey, ChatSession, ChatMessage
+from django.utils import timezone
+from django.conf import settings
+from datetime import timedelta
+from .models import ChatConfiguration, APIKey, ChatSession, ChatMessage, ChatRateLimit
 
 
 @admin.register(ChatConfiguration)
@@ -146,6 +149,50 @@ class ChatMessageAdmin(admin.ModelAdmin):
             'fields': ['ip_address'],
             'classes': ['collapse']
         })
+    ]
+
+
+@admin.register(ChatRateLimit)
+class ChatRateLimitAdmin(admin.ModelAdmin):
+    list_display = ['ip_address', 'request_count', 'window_start', 'is_expired', 'last_exceeded_at']
+    list_filter = ['last_exceeded_at']
+    search_fields = ['ip_address']
+    readonly_fields = ['ip_address', 'request_count', 'window_start', 'last_exceeded_at']
+    date_hierarchy = 'window_start'
+    ordering = ['-window_start']
+    actions = ['reset_rate_limits', 'delete_expired_records']
+
+    def is_expired(self, obj):
+        """Check if the rate limit window has expired"""
+        window_seconds = getattr(settings, 'CHAT_RATE_LIMIT_WINDOW_SECONDS', 3600)
+        window_start_threshold = timezone.now() - timedelta(seconds=window_seconds)
+        expired = obj.window_start < window_start_threshold
+        if expired:
+            return format_html('<span style="color: #999;">Expired</span>')
+        return format_html('<span style="color: #28a745;">Active</span>')
+    is_expired.short_description = 'Status'
+
+    def has_add_permission(self, request):
+        return False  # Records are created automatically
+
+    @admin.action(description='Reset selected rate limits (set count to 0)')
+    def reset_rate_limits(self, request, queryset):
+        updated = queryset.update(request_count=0, window_start=timezone.now())
+        self.message_user(request, f'Reset {updated} rate limit(s).')
+
+    @admin.action(description='Delete expired rate limit records')
+    def delete_expired_records(self, request, queryset):
+        window_seconds = getattr(settings, 'CHAT_RATE_LIMIT_WINDOW_SECONDS', 3600)
+        window_start_threshold = timezone.now() - timedelta(seconds=window_seconds)
+        expired_records = queryset.filter(window_start__lt=window_start_threshold)
+        count = expired_records.count()
+        expired_records.delete()
+        self.message_user(request, f'Deleted {count} expired rate limit record(s).')
+
+    fieldsets = [
+        ('Rate Limit Info', {
+            'fields': ['ip_address', 'request_count', 'window_start', 'last_exceeded_at']
+        }),
     ]
 
 

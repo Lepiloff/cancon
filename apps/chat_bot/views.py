@@ -15,6 +15,7 @@ from django.views import View
 from django.conf import settings
 from django.utils import timezone
 from .models import ChatConfiguration, APIKey, ChatSession, ChatMessage
+from .rate_limiter import check_rate_limit, RateLimitExceeded, format_retry_after_human
 import json
 import requests
 import time
@@ -75,7 +76,20 @@ class ChatProxyView(View):
                 return JsonResponse({
                     'error': 'Chat service is currently disabled'
                 }, status=503)
-            
+
+            # Check rate limit by IP address
+            client_ip = get_client_ip(request)
+            try:
+                check_rate_limit(client_ip)
+            except RateLimitExceeded as e:
+                # Get language for localized message
+                language = getattr(request, 'LANGUAGE_CODE', 'en')
+                return JsonResponse({
+                    'error': 'Rate limit exceeded. Please try again later.',
+                    'retry_after_seconds': e.retry_after_seconds,
+                    'retry_after_human': format_retry_after_human(e.retry_after_seconds, language)
+                }, status=429)
+
             # Authenticate API key if required
             api_key = None
             if config.api_key:
@@ -96,9 +110,8 @@ class ChatProxyView(View):
             
             if not message:
                 return JsonResponse({'error': 'Message is required'}, status=400)
-            
-            # Get or create chat session
-            client_ip = get_client_ip(request)
+
+            # Get or create chat session (client_ip already retrieved for rate limiting)
             user_agent = request.META.get('HTTP_USER_AGENT', '')
             
             if session_id:
