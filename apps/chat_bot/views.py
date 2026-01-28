@@ -26,9 +26,13 @@ def get_client_ip(request):
     """Get client IP address from request"""
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
+        ip = x_forwarded_for.split(',')[0].strip()
     else:
-        ip = request.META.get('REMOTE_ADDR')
+        x_real_ip = request.META.get('HTTP_X_REAL_IP')
+        if x_real_ip:
+            ip = x_real_ip
+        else:
+            ip = request.META.get('REMOTE_ADDR')
     return ip
 
 
