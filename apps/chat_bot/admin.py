@@ -10,14 +10,14 @@ from .models import ChatConfiguration, APIKey, ChatSession, ChatMessage, ChatRat
 
 @admin.register(ChatConfiguration)
 class ChatConfigurationAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'is_active', 'api_base_url', 'max_history', 'rate_limit', 'updated_at']
+    list_display = ['__str__', 'is_active', 'api_base_url', 'max_history', 'updated_at']
     list_editable = ['is_active']
     fieldsets = [
         ('API Configuration', {
             'fields': ['api_base_url', 'api_key', 'websocket_url']
         }),
         ('Chat Settings', {
-            'fields': ['max_history', 'rate_limit', 'is_active']
+            'fields': ['max_history', 'is_active']
         }),
         ('Timestamps', {
             'fields': ['created_at', 'updated_at'],
