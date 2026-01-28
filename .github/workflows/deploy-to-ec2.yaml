@@ -49,22 +49,22 @@ jobs:
         run: |
           echo "Connecting to EC2 server..."
           set -e  # Прерывание выполнения при любой ошибке
-          trap 'echo "Deployment failed, rolling back..."; ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_IP_ADDRESS }} "cd /home/ubuntu/cancon && docker-compose down && git reset --hard && docker-compose up -d"' ERR
+          trap 'echo "Deployment failed, rolling back..."; ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_IP_ADDRESS }} "cd /home/ubuntu/cancon && docker compose down && git reset --hard && docker compose up -d"' ERR
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_IP_ADDRESS }} << 'EOF'
             set -euo pipefail
             cd /home/ubuntu/cancon
             echo "Navigated to project directory."
-            docker-compose down
+            docker compose down
             git pull origin master
             if [ "${{ steps.check_changes.outputs.rebuild }}" == "true" ]; then
               echo "Rebuilding Docker containers."
-              docker-compose build --no-cache
+              docker compose build --no-cache
             else
               echo "No rebuild needed, restarting containers."
             fi
-            docker-compose up -d
+            docker compose up -d
             echo "Containers started."
             echo "Compiling translation messages..."
-            docker-compose exec -T web python manage.py compilemessages
+            docker compose exec -T web python manage.py compilemessages
             echo "Translation messages compiled successfully."
           EOF
