@@ -166,41 +166,39 @@ canna/
   - Proper request validation
   - IP address logging and tracking
 
-### 5.1 **IP-Based Rate Limiting (Architecture Plan)**
-Goal: limit the number of chat requests per IP and show a clear message when the limit is reached. After hitting the limit, the same IP can use the chat again after 1 hour. The limit is configurable in `settings.py`.
+### 5.1 **IP-Based Rate Limiting (Implemented)**
+Goal: limit the number of chat requests per IP and show a clear message when the limit is reached. After hitting the limit, the same IP can use the chat again after the configured window. The limit is configurable in `settings.py` (or via environment variables).
 
-**Key decisions**
-- Scope: only `/api/chat/chat/` is rate-limited (other endpoints untouched).
-- IP source: reuse the same IP detection logic used by `GeoLanguageMiddleware` (X-Forwarded-For -> X-Real-IP -> REMOTE_ADDR).
-- Storage: Redis via Django cache for atomic counters + TTL. Provide a safe fallback for local dev (in-memory cache).
-- Window/block: fixed 1-hour window with TTL-based reset (simple and fast). If limit is exceeded, return `429 Too Many Requests` with `retry_after_seconds`.
+**Key decisions (current implementation)**
+- Scope: only `/api/chat/chat/` (Django `ChatProxyView`) is rate-limited.
+- IP source: `X-Forwarded-For` (first IP) -> `REMOTE_ADDR`. (`X-Real-IP` is not used in code.)
+- Storage: PostgreSQL via `ChatRateLimit` model with row-level locking for atomic increments.
+- Window: fixed window of `CHAT_RATE_LIMIT_WINDOW_SECONDS` (default 3600). If exceeded, return `429 Too Many Requests` with `retry_after_seconds`, `retry_after_human`, and a standard `Retry-After` header.
 
 **Settings (in `settings.py`)**
-- `CHAT_IP_RATE_LIMIT`: max requests per IP per hour (e.g. 30).
-- `CHAT_IP_RATE_LIMIT_BLOCK_SECONDS`: lockout/TTL in seconds (default 3600).
-- `CHAT_IP_RATE_LIMIT_KEY_PREFIX`: prefix for cache keys (e.g. `chat_ip_rate`).
-- `CACHES`: configure Redis (recommended) or fall back to local memory for dev.
+- `CHAT_RATE_LIMIT_MAX_REQUESTS`: max requests per IP per window (default 10).
+- `CHAT_RATE_LIMIT_WINDOW_SECONDS`: window size in seconds (default 3600).
+These can be provided via environment variables (e.g. `.env` in Docker).
 
 **Backend flow (high level)**
-1. In the chat endpoint (or a dedicated middleware scoped to `/api/chat/chat/`), resolve client IP using the same logic as `GeoLanguageMiddleware`.
-2. Check Redis counters: `count:{ip}` with TTL 1 hour. Use `INCR` (atomic) and set TTL on first hit.
-3. If `count > CHAT_IP_RATE_LIMIT`, set a `blocked:{ip}` key with TTL 1 hour and return:
+1. In `ChatProxyView`, resolve client IP via `get_client_ip`.
+2. `check_rate_limit()` uses a transaction + `select_for_update()` on `ChatRateLimit` for the IP.
+3. If no record, create one with `request_count=1`.
+4. If window expired, reset `request_count` and `window_start`.
+5. If limit exceeded, update `last_exceeded_at`, compute remaining seconds, raise `RateLimitExceeded`.
+6. Response:
    - HTTP 429
-   - JSON: `{ "error": "Rate limit reached", "retry_after_seconds": 3600, "retry_after_human": "1 hour" }`
-4. If allowed, proceed with normal chat flow (session creation + canagent call).
+   - JSON: `{ "error": "Rate limit exceeded", "retry_after_seconds": <seconds>, "retry_after_human": "<human>" }`
+   - Header: `Retry-After: <seconds>`
 
 **Frontend behavior**
-- On 429, show a clear message in chat UI, e.g.:
-  - "You reached the chat limit. Please try again in 1 hour."
-- Optional: if `retry_after_seconds` is provided, format the exact wait time.
+- On 429, the widget shows a localized message using `retry_after_human`.
+- If JSON isn't available, the widget falls back to the `Retry-After` header and formats it client-side.
 
 **Implementation notes**
-- Prefer a small helper (shared with `GeoLanguageMiddleware`) for IP extraction to keep consistency.
-- Add unit tests for:
-  - First request allowed, counter increments.
-  - Limit reached returns 429 and includes retry metadata.
-  - Counter resets after TTL (simulate via cache TTL or time mocking).
-  - IP parsing respects proxy headers.
+- Nginx must route `/api/chat/*` to Django; direct proxy to `canagent-api` bypasses the limiter.
+- Cleanup command is available: `python manage.py cleanup_rate_limits` (optional).
+- Tests live in `apps/chat_bot/tests/test_rate_limiter.py`.
 
 ### 6. **Error Handling & Reliability**
 - ✅ **Frontend Error Handling**
@@ -225,9 +223,11 @@ python manage.py migrate
 1. Access Django admin at `/admin/`
 2. Navigate to "Chat Bot" section
 3. Configure "Chat Configuration":
-   - Set API Base URL: `http://localhost:8001`
+   - Set API Base URL:
+     - Local/dev: `http://localhost:8001`
+     - Docker network: `http://canagent-api:8000`
    - Enable chat widget: ✓
-   - Set rate limits and history settings
+   - Rate limits are configured in `settings.py` / environment variables (not in admin)
 4. Optionally create API keys for authentication
 
 ### 3. **GeoIP2 Setup (Optional - for automatic language detection)**
@@ -241,7 +241,11 @@ python manage.py migrate
 3. The `GeoLanguageMiddleware` will automatically detect user location and set appropriate language
 
 ### 4. **Canagent Service**
-Ensure canagent is running on `localhost:8001` with:
+Ensure canagent is running and reachable at the URL configured in `ChatConfiguration.api_base_url`:
+- Local/dev: `http://localhost:8001`
+- Docker network: `http://canagent-api:8000`
+
+Example (local):
 ```bash
 cd ../canagent
 make start
