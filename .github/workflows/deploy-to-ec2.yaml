@@ -51,6 +51,7 @@ jobs:
           set -e  # Прерывание выполнения при любой ошибке
           trap 'echo "Deployment failed, rolling back..."; ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_IP_ADDRESS }} "cd /home/ubuntu/cancon && docker-compose down && git reset --hard && docker-compose up -d"' ERR
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_IP_ADDRESS }} << 'EOF'
+            set -euo pipefail
             cd /home/ubuntu/cancon
             echo "Navigated to project directory."
             docker-compose down
