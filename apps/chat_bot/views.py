@@ -84,11 +84,14 @@ class ChatProxyView(View):
             except RateLimitExceeded as e:
                 # Get language for localized message
                 language = getattr(request, 'LANGUAGE_CODE', 'en')
-                return JsonResponse({
+                response = JsonResponse({
                     'error': 'Rate limit exceeded. Please try again later.',
                     'retry_after_seconds': e.retry_after_seconds,
                     'retry_after_human': format_retry_after_human(e.retry_after_seconds, language)
                 }, status=429)
+                # Standard hint for clients that don't parse JSON
+                response['Retry-After'] = str(e.retry_after_seconds)
+                return response
 
             # Authenticate API key if required
             api_key = None
