@@ -15,7 +15,7 @@ from django.views import View
 from django.conf import settings
 from django.utils import timezone
 from .models import ChatConfiguration, APIKey, ChatSession, ChatMessage
-from .rate_limiter import check_rate_limit, RateLimitExceeded, format_retry_after_human
+from .rate_limiter import check_rate_limit, RateLimitExceeded
 import json
 import requests
 import time
@@ -86,12 +86,9 @@ class ChatProxyView(View):
             try:
                 check_rate_limit(client_ip)
             except RateLimitExceeded as e:
-                # Get language for localized message
-                language = getattr(request, 'LANGUAGE_CODE', 'en')
                 response = JsonResponse({
                     'error': 'Rate limit exceeded. Please try again later.',
-                    'retry_after_seconds': e.retry_after_seconds,
-                    'retry_after_human': format_retry_after_human(e.retry_after_seconds, language)
+                    'retry_after_seconds': e.retry_after_seconds
                 }, status=429)
                 # Standard hint for clients that don't parse JSON
                 response['Retry-After'] = str(e.retry_after_seconds)
