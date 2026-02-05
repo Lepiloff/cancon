@@ -27,6 +27,17 @@
             </div>
         </section>
         {% endblock intro %}
+        {% if ENABLE_AI_CHAT %}
+        <section class="ai-promo">
+            <img src="{% static 'img/cannamente_bg_THC_CBD_1140x320.png' %}" alt="" class="ai-promo__bg">
+            <div class="ai-promo__content">
+                <h2>AI Assistant for Cannabis Strain Selection</h2>
+                <h3>Personalized recommendations based on effects and terpenes</h3>
+                <button class="ai-promo__btn" id="ai-promo-start-btn">👉 Start Selection</button>
+            </div>
+            <img src="{% static 'img/mascot_cutout (1).png' %}" alt="" class="ai-promo__mascot">
+        </section>
+        {% endif %}
     	<div class="h2">{% trans "Artículos" %}</div>
             <section class="post owl-carousel mb-30">
                 {% for article in articles %}
