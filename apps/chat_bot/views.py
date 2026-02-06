@@ -11,6 +11,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.utils.decorators import method_decorator
+from django.contrib.admin.views.decorators import staff_member_required
 from django.views import View
 from django.conf import settings
 from django.utils import timezone
@@ -114,6 +115,12 @@ class ChatProxyView(View):
             
             if not message:
                 return JsonResponse({'error': 'Message is required'}, status=400)
+
+            max_length = getattr(settings, 'CHAT_MAX_MESSAGE_LENGTH', 2000)
+            if len(message) > max_length:
+                return JsonResponse({
+                    'error': f'Message too long. Maximum {max_length} characters.'
+                }, status=400)
 
             # Get or create chat session (client_ip already retrieved for rate limiting)
             user_agent = request.META.get('HTTP_USER_AGENT', '')
@@ -270,10 +277,10 @@ def chat_health(request):
     })
 
 
+@staff_member_required
 @require_http_methods(["GET"])
 def chat_stats(request):
-    """Get basic chat statistics"""
-    # Simple stats - you might want to add authentication for this
+    """Get basic chat statistics (staff only)"""
     active_sessions = ChatSession.objects.filter(is_active=True).count()
     total_messages = ChatMessage.objects.count()
     total_sessions = ChatSession.objects.count()
