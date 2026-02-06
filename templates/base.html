@@ -222,6 +222,45 @@
 	        <script src="{% static 'js/ai-budtender-chat.js' %}"></script>
 	        <script>
 	            (function() {
+	                // AI Promo translations
+	                const AI_PROMO_TRANSLATIONS = {
+	                    en: {
+	                        title: 'AI Assistant for Cannabis Strain Selection',
+	                        description: 'Personalized recommendations based on effects and terpenes',
+	                        button: '👉 Start Selection'
+	                    },
+	                    es: {
+	                        title: 'Asistente IA para Selección de Cepas de Cannabis',
+	                        description: 'Recomendaciones personalizadas basadas en efectos y terpenos',
+	                        button: '👉 Comenzar Selección'
+	                    }
+	                };
+
+	                // Get current language
+	                function getPageLang() {
+	                    const lang = document.documentElement.lang || 'es';
+	                    const baseLang = lang.split('-')[0].toLowerCase();
+	                    return AI_PROMO_TRANSLATIONS[baseLang] ? baseLang : 'es';
+	                }
+
+	                // Update AI promo texts
+	                function updateAiPromoTexts() {
+	                    const lang = getPageLang();
+	                    const translations = AI_PROMO_TRANSLATIONS[lang];
+
+	                    const promoSection = document.querySelector('.ai-promo');
+	                    if (promoSection) {
+	                        const title = promoSection.querySelector('h2');
+	                        const description = promoSection.querySelector('h3');
+	                        const button = promoSection.querySelector('.ai-promo__btn');
+
+	                        if (title) title.textContent = translations.title;
+	                        if (description) description.textContent = translations.description;
+	                        if (button) button.textContent = translations.button;
+	                    }
+	                }
+
+	                // Initialize
 	                const btn = document.getElementById('ai-promo-start-btn');
 	                if (btn) {
 	                    btn.addEventListener('click', function(e) {
@@ -229,6 +268,9 @@
 	                        if (window.aiBudtenderChat) window.aiBudtenderChat.openChat();
 	                    });
 	                }
+
+	                // Update texts on page load
+	                updateAiPromoTexts();
 	            })();
 	        </script>
 	        {% endif %}
