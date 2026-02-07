@@ -48,7 +48,7 @@ services:
       - canna-network
 
   nginx:
-    image: nginx:1.19-alpine
+    image: nginx:1.27-alpine
     container_name: canna-nginx
     restart: unless-stopped
     volumes:
