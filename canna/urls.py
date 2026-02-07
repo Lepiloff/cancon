@@ -37,7 +37,7 @@ handler404 = 'apps.strains.views.custom_page_not_found_view'
 
 # URLs that DON'T need language prefix
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('manage-canna/', admin.site.urls),
     path('tinymce/', include('tinymce.urls')),
     path('i18n/', include('django.conf.urls.i18n')),  # Language switcher endpoint
     path('robots.txt', robots_txt, name='robots_txt'),  # SEO: robots.txt

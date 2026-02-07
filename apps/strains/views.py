@@ -41,8 +41,11 @@ def strain_detail(request, slug):
 
 
 def strain_list(request):
-    page = request.GET.get('page', 1)
-    offset = (int(page) - 1) * 20
+    try:
+        page = int(request.GET.get('page', 1))
+    except (ValueError, TypeError):
+        page = 1
+    offset = (page - 1) * 20
 
     mutable_params = request.GET.copy()
     for key in mutable_params.keys():

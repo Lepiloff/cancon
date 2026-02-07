@@ -5,6 +5,7 @@ from canna.logging import logger
 
 from django.shortcuts import render, redirect
 from django.templatetags.static import static
+from django.utils.html import escape
 
 from .models import Location, Store, COUNTRY_CHOICES, COUNTRY_COORDINATES
 
@@ -17,11 +18,16 @@ def get_country_info(country_code):
 
 
 def get_city_center_coord() -> tuple:
-    response = requests.get('https://ipinfo.io/json')
-    data = response.json()
-    lat, lon = (data['loc'].split(',')[0], data['loc'].split(',')[1])
-    country = data.get('country', '').lower()
-    return float(lat), float(lon), country
+    try:
+        response = requests.get('https://ipinfo.io/json', timeout=5)
+        data = response.json()
+        loc_parts = data.get('loc', '0,0').split(',')
+        lat = float(loc_parts[0])
+        lon = float(loc_parts[1]) if len(loc_parts) > 1 else 0.0
+        country = data.get('country', '').lower()
+        return lat, lon, country
+    except Exception:
+        return 0.0, 0.0, 'unknown'
 
 
 def map_view(request, country):
@@ -63,16 +69,16 @@ def map_view(request, country):
         )
         popup_html = f"""
         <div style="text-align: center; max-width: 300px;">
-            <img src="{logo_url}" alt="{store.name} logo" style="width: 100px; height: auto; margin-bottom: 10px;">
-            <h4>{store.name}</h4>
-            <p><strong></strong> {store.get_store_type_display()}</p>
-            <p><strong>Ciudad:</strong> {store.location.city}</p>
-            <p><strong>Dirección:</strong> {store.location.address}</p>
-            <p><strong>Teléfono:</strong> {store.phone_number}</p>
-            <p><strong>Email:</strong> {store.email}</p>
+            <img src="{escape(logo_url)}" alt="{escape(store.name)} logo" style="width: 100px; height: auto; margin-bottom: 10px;">
+            <h4>{escape(store.name)}</h4>
+            <p><strong></strong> {escape(store.get_store_type_display())}</p>
+            <p><strong>Ciudad:</strong> {escape(store.location.city)}</p>
+            <p><strong>Dirección:</strong> {escape(store.location.address)}</p>
+            <p><strong>Teléfono:</strong> {escape(store.phone_number or '')}</p>
+            <p><strong>Email:</strong> {escape(store.email or '')}</p>
             <p><strong>Horario:</strong></p>
             <ul style="list-style: none; padding: 0; margin: 0;">
-                {''.join([f'<li style="margin-left: 0; padding-left: 0;">{day}: {hours}</li>' for day, hours in (store.opening_hours or {}).items()])}
+                {''.join([f'<li style="margin-left: 0; padding-left: 0;">{escape(day)}: {escape(hours)}</li>' for day, hours in (store.opening_hours or {}).items()])}
             </ul>
             <a href="#" class="btn " style="margin-top: 10px; display: inline-block;">Ver</a>
         </div>

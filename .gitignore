@@ -1,4 +1,6 @@
 .env
+.env.*
+!.env.example
 .DS_Store
 __pycache__
 .idea/
@@ -10,6 +12,9 @@ postgres-data/
 media/
 json_data/
 .pytest_cache/
+.mypy_cache/
+.playwright-mcp/
 .cursor
 CLAUDE.md
 *.mo
+*.pyc
