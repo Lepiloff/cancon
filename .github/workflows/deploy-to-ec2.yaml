@@ -64,6 +64,9 @@ jobs:
             fi
             docker compose up -d
             echo "Containers started."
+            echo "Collecting static files to S3..."
+            docker compose exec -T web python manage.py collectstatic --noinput
+            echo "Static files collected successfully."
             echo "Compiling translation messages..."
             docker compose exec -T web python manage.py compilemessages
             echo "Translation messages compiled successfully."
