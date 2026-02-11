@@ -763,10 +763,64 @@ class AIBudtenderChat {
         }
     }
 
+    clearStoredSessionData() {
+        localStorage.removeItem('ai-budtender-messages');
+        localStorage.removeItem('ai-budtender-history');
+        localStorage.removeItem('ai-budtender-session-id');
+        localStorage.removeItem('ai-budtender-session-start');
+    }
+
+    hasPersistedSessionData() {
+        return Boolean(
+            localStorage.getItem('ai-budtender-messages') ||
+            localStorage.getItem('ai-budtender-history') ||
+            localStorage.getItem('ai-budtender-session-id')
+        );
+    }
+
+    resolveSessionStartTimestamp() {
+        const rawStart = localStorage.getItem('ai-budtender-session-start');
+        const parsedStart = Number.parseInt(rawStart || '', 10);
+        if (Number.isFinite(parsedStart) && parsedStart > 0) {
+            return parsedStart;
+        }
+
+        const savedMessages = localStorage.getItem('ai-budtender-messages');
+        if (!savedMessages) {
+            return null;
+        }
+
+        let parsedMessages = null;
+        try {
+            parsedMessages = JSON.parse(savedMessages);
+        } catch (error) {
+            return null;
+        }
+
+        if (!Array.isArray(parsedMessages) || parsedMessages.length === 0) {
+            return null;
+        }
+
+        const timestamps = parsedMessages
+            .map((message) => Number(message?.timestamp))
+            .filter((ts) => Number.isFinite(ts) && ts > 0);
+
+        if (timestamps.length === 0) {
+            return null;
+        }
+
+        const inferredStart = Math.min(...timestamps);
+        localStorage.setItem('ai-budtender-session-start', String(inferredStart));
+        return inferredStart;
+    }
+
     loadHistory() {
         try {
             const saved = localStorage.getItem('ai-budtender-history');
-            return saved ? JSON.parse(saved) : [];
+            if (!saved) return [];
+
+            const parsed = JSON.parse(saved);
+            return Array.isArray(parsed) ? parsed : [];
         } catch (error) {
             console.warn('Failed to load chat history:', error);
             return [];
@@ -784,7 +838,10 @@ class AIBudtenderChat {
     loadChatMessages() {
         try {
             const saved = localStorage.getItem('ai-budtender-messages');
-            return saved ? JSON.parse(saved) : [];
+            if (!saved) return [];
+
+            const parsed = JSON.parse(saved);
+            return Array.isArray(parsed) ? parsed : [];
         } catch (error) {
             console.warn('Failed to load chat messages:', error);
             return [];
@@ -796,8 +853,14 @@ class AIBudtenderChat {
             if (this.chatMessages.length > 50) {
                 this.chatMessages = this.chatMessages.slice(-50);
             }
-            if (!localStorage.getItem('ai-budtender-session-start')) {
-                localStorage.setItem('ai-budtender-session-start', String(Date.now()));
+            const rawStart = localStorage.getItem('ai-budtender-session-start');
+            const parsedStart = Number.parseInt(rawStart || '', 10);
+            if (!Number.isFinite(parsedStart) || parsedStart <= 0) {
+                const firstMessageTs = Number(this.chatMessages[0]?.timestamp);
+                const startTs = Number.isFinite(firstMessageTs) && firstMessageTs > 0
+                    ? firstMessageTs
+                    : Date.now();
+                localStorage.setItem('ai-budtender-session-start', String(startTs));
             }
             localStorage.setItem('ai-budtender-messages', JSON.stringify(this.chatMessages));
         } catch (error) {
@@ -826,12 +889,20 @@ class AIBudtenderChat {
 
     checkSessionExpiry() {
         try {
-            const startTime = localStorage.getItem('ai-budtender-session-start');
-            if (startTime && (Date.now() - parseInt(startTime, 10)) > this.sessionTTL) {
-                localStorage.removeItem('ai-budtender-messages');
-                localStorage.removeItem('ai-budtender-history');
-                localStorage.removeItem('ai-budtender-session-id');
-                localStorage.removeItem('ai-budtender-session-start');
+            const startTimestamp = this.resolveSessionStartTimestamp();
+
+            // If we have persisted data but no valid timestamp, data is stale/legacy: clear it.
+            if (!startTimestamp) {
+                if (this.hasPersistedSessionData()) {
+                    this.clearStoredSessionData();
+                }
+                return;
+            }
+
+            const sessionAge = Date.now() - startTimestamp;
+            const maxFutureSkew = 5 * 60 * 1000; // tolerate minor client clock drift
+            if (sessionAge > this.sessionTTL || sessionAge < -maxFutureSkew) {
+                this.clearStoredSessionData();
             }
         } catch (error) {
             console.warn('Failed to check session expiry:', error);
@@ -1195,11 +1266,8 @@ class AIBudtenderChat {
         this.messageHistory = [];
         this.chatMessages = [];
         this.sessionId = null;
-        
-        this.saveHistory();
-        this.saveChatMessages();
-        localStorage.removeItem('ai-budtender-session-id');
-        localStorage.removeItem('ai-budtender-session-start');
+
+        this.clearStoredSessionData();
         
         // Clear displayed messages except welcome
         const messages = this.elements.messages.querySelectorAll('.message:not(.welcome-message)');
