@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+{% load static %}
+{% load json_ld %}
+{% load i18n %}
+
+{% block title %}
+    {{ strain.name }} {% trans "cepas de marihuana" %}
+{% endblock %}
+
+{% block keywords %}
+    {{ strain.keywords }}
+{% endblock %}
+
+{% block description %}
+    {{ strain.description }}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/strain-detail.css' %}" />
+{% endblock %}
+
+{% block content %}
+{% block meta_tags %}
+    {% render_json_ld strain.structured_data %}
+{% endblock %}
+
+<div class="blog">
+    <div class="container flex-grow">
+
+        <!-- Name + Meta on same line -->
+        <div class="sd-header">
+            <h1 class="sd-name">{{ strain.name }}</h1>
+            <div class="sd-meta">
+                <span class="sd-category sd-category--{{ strain.category|lower }}">{{ strain.category }}</span>
+                {% if strain.rating %}
+                <span class="sd-rating-badge" aria-label="{% trans 'Valoración' %}: {{ strain.rating|floatformat:1 }}">
+                    <span class="sd-rating-value">{{ strain.rating|floatformat:1 }}</span>
+                    <span class="sd-rating-star">&#9733;</span>
+                    <span class="sd-info-icon" tabindex="0">
+                        <span class="sd-info-i">i</span>
+                        <span class="sd-tooltip">{% trans "Valoración media basada en datos de recursos especializados de cannabis en internet" %}</span>
+                    </span>
+                </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Top section: Image + Description -->
+        <div class="sd-top">
+            <div class="sd-top__image">
+                {% if strain.img %}
+                <a href="#" data-fancybox="gallery1" class="tovar_imgwrap">
+                    <img src="{{ strain.img.url }}" alt="{{ strain.img_alt_text }}" width="500" height="500" class="tovar_img">
+                </a>
+                {% else %}
+                <a href="#" data-fancybox="gallery1" class="tovar_imgwrap">
+                    <img src="{% static 'img/no_img.png' %}" alt="{{ strain.name }}" width="380" height="267" loading="lazy" decoding="async" class="object_fit" style="background-size: cover; background-image: none;">
+                </a>
+                {% endif %}
+            </div>
+            <div class="sd-top__desc">
+                <div class="tovar_text">{{ strain.text_content|safe }}</div>
+            </div>
+        </div>
+
+        <!-- Cannabinoids -->
+        <div class="sd-section">
+            <h2 class="sd-section__title">{% trans "Cannabinoides" %}</h2>
+            <div class="sd-cannabinoids">
+                {% if strain.thc %}
+                <div class="sd-cann">
+                    <div class="sd-cann__label">THC</div>
+                    <div class="sd-cann__bar">
+                        <div class="sd-cann__fill sd-cann__fill--thc" style="width: {% widthratio strain.thc max_thc 100 %}%"></div>
+                    </div>
+                    <div class="sd-cann__val">{{ strain.thc|floatformat:"0" }}%</div>
+                </div>
+                {% endif %}
+                {% if strain.cbd %}
+                <div class="sd-cann">
+                    <div class="sd-cann__label">CBD</div>
+                    <div class="sd-cann__bar">
+                        <div class="sd-cann__fill sd-cann__fill--cbd" style="width: {% widthratio strain.cbd max_cbd 100 %}%"></div>
+                    </div>
+                    <div class="sd-cann__val">{{ strain.cbd|floatformat:"0" }}%</div>
+                </div>
+                {% endif %}
+                {% if strain.cbg %}
+                <div class="sd-cann">
+                    <div class="sd-cann__label">CBG</div>
+                    <div class="sd-cann__bar">
+                        <div class="sd-cann__fill sd-cann__fill--cbg" style="width: {% widthratio strain.cbg max_cbg 100 %}%"></div>
+                    </div>
+                    <div class="sd-cann__val">{{ strain.cbg|floatformat:"0" }}%</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Terpenes -->
+        {% if strain.dominant_terpene or strain.other_terpenes.all %}
+        <div class="sd-section">
+            <h2 class="sd-section__title">{% trans "Terpenos" %}</h2>
+            <div class="sd-terpenes">
+                {% if strain.dominant_terpene %}
+                <span class="sd-terpene sd-terpene--dominant">
+                    <span class="sd-terpene__dot sd-terpene__dot--dominant"></span>
+                    {{ strain.dominant_terpene.name }}
+                </span>
+                {% endif %}
+                {% for terpene in strain.other_terpenes.all %}
+                <span class="sd-terpene">
+                    <span class="sd-terpene__dot sd-terpene__dot--{{ forloop.counter }}"></span>
+                    {{ terpene.name }}
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Effects -->
+        <div class="sd-section">
+            <h2 class="sd-section__title">{% trans "Efectos y Características" %}</h2>
+            <div class="sd-effects">
+                {% if strain.feelings.all %}
+                <div class="sd-effect-group">
+                    <div class="sd-effect-group__head">
+                        <svg class="sd-effect-icon sd-effect-icon--positive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                        <h3>{% trans "Sensaciones" %}</h3>
+                    </div>
+                    <div class="sd-tags">
+                        {% for feeling in strain.feelings.all %}
+                        <span class="sd-tag sd-tag--positive">{{ feeling.name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if strain.helps_with.all %}
+                <div class="sd-effect-group">
+                    <div class="sd-effect-group__head">
+                        <svg class="sd-effect-icon sd-effect-icon--therapeutic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        <h3>{% trans "Ayuda con" %}</h3>
+                    </div>
+                    <div class="sd-tags">
+                        {% for help in strain.helps_with.all %}
+                        <span class="sd-tag sd-tag--therapeutic">{{ help.name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if strain.negatives.all %}
+                <div class="sd-effect-group">
+                    <div class="sd-effect-group__head">
+                        <svg class="sd-effect-icon sd-effect-icon--negative" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <h3>{% trans "Efectos Adversos" %}</h3>
+                    </div>
+                    <div class="sd-tags">
+                        {% for negative in strain.negatives.all %}
+                        <span class="sd-tag sd-tag--negative">{{ negative.name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if strain.flavors.all %}
+                <div class="sd-effect-group">
+                    <div class="sd-effect-group__head">
+                        <svg class="sd-effect-icon sd-effect-icon--flavor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                        <h3>{% trans "Sabores" %}</h3>
+                    </div>
+                    <div class="sd-tags">
+                        {% for flavor in strain.flavors.all %}
+                        <span class="sd-tag sd-tag--flavor">{{ flavor.name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Genetics Tree (only if parent strain links exist in description) -->
+        <div class="sd-section sd-genetics-wrapper" style="display:none;">
+            <h2 class="sd-section__title">{% trans "Árbol Genético" %}</h2>
+            <div class="sd-genetics">
+                <div class="sd-genetics__parents" id="genetics-parents"></div>
+                <div class="sd-genetics__lines">
+                    <svg class="sd-genetics__svg" viewBox="0 0 300 50" preserveAspectRatio="xMidYMid meet">
+                        <line x1="75" y1="0" x2="75" y2="25" stroke="#4a7c23" stroke-width="2"/>
+                        <line x1="225" y1="0" x2="225" y2="25" stroke="#4a7c23" stroke-width="2"/>
+                        <line x1="75" y1="25" x2="225" y2="25" stroke="#4a7c23" stroke-width="2"/>
+                        <line x1="150" y1="25" x2="150" y2="50" stroke="#4a7c23" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div class="sd-genetics__current">
+                    <div class="sd-genetics__node sd-genetics__node--current">
+                        {{ strain.name }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Similar strains (original block, untouched) -->
+        <div class="h2">{% trans "Parámetros similares" %}</div>
+        <section class="ctg">
+            {% include "strain_items.html" %}
+        </section>
+        <div class="text-center">
+            <a href="{% url 'strain_list' %}" class="btn btn--outline_с">{% trans "Ver más" %}</a>
+        </div>
+
+    </div>
+</div>
+
+<script>
+// Extract parent strain links from description and build genetics tree.
+// How it works:
+// 1. Finds all <a href="/strain/..."> links inside the description text
+// 2. Collects unique parent strain names and URLs
+// 3. If parents found → shows the genetics section and creates link nodes
+// 4. Adjusts SVG connector lines based on number of parents (1, 2, or more)
+(function() {
+    var descEl = document.querySelector('.sd-top__desc');
+    if (!descEl) return;
+
+    var links = descEl.querySelectorAll('a[href*="/strain/"]');
+    if (links.length === 0) return;
+
+    var parents = [];
+    var seen = {};
+    for (var i = 0; i < links.length; i++) {
+        var href = links[i].getAttribute('href');
+        var name = links[i].textContent.trim();
+        if (!seen[href] && name) {
+            seen[href] = true;
+            parents.push({ name: name, url: href });
+        }
+    }
+
+    if (parents.length === 0) return;
+
+    // Show genetics section (hidden by default via style="display:none")
+    var wrapper = document.querySelector('.sd-genetics-wrapper');
+    wrapper.style.display = '';
+
+    // Build parent nodes as clickable links
+    var parentsEl = document.getElementById('genetics-parents');
+    for (var j = 0; j < parents.length; j++) {
+        var node = document.createElement('a');
+        node.href = parents[j].url;
+        node.className = 'sd-genetics__node sd-genetics__node--parent';
+        node.textContent = parents[j].name;
+        parentsEl.appendChild(node);
+    }
+
+    // Adjust SVG connector lines based on parent count
+    var svg = document.querySelector('.sd-genetics__svg');
+    if (parents.length === 1) {
+        // Single parent: just a vertical line
+        svg.innerHTML = '<line x1="150" y1="0" x2="150" y2="50" stroke="#4a7c23" stroke-width="2"/>';
+    } else if (parents.length > 2) {
+        // 3+ parents: evenly spaced vertical + horizontal connectors
+        var w = 300;
+        var gap = w / (parents.length + 1);
+        var lines = '';
+        for (var k = 0; k < parents.length; k++) {
+            var x = gap * (k + 1);
+            lines += '<line x1="' + x + '" y1="0" x2="' + x + '" y2="25" stroke="#4a7c23" stroke-width="2"/>';
+        }
+        lines += '<line x1="' + gap + '" y1="25" x2="' + (gap * parents.length) + '" y2="25" stroke="#4a7c23" stroke-width="2"/>';
+        lines += '<line x1="150" y1="25" x2="150" y2="50" stroke="#4a7c23" stroke-width="2"/>';
+        svg.innerHTML = lines;
+    }
+    // For exactly 2 parents, the default SVG (hardcoded in HTML) is used
+})();
+</script>
+{% endblock content %}
