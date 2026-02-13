@@ -111,6 +111,26 @@ msgstr ""
 msgid "cepas de marihuana"
 msgstr "cannabis strains"
 
+#: templates/strain_modern.html
+msgid "Cannabinoides"
+msgstr "Cannabinoids"
+
+#: templates/strain_modern.html
+msgid "Efectos y Características"
+msgstr "Effects and Characteristics"
+
+#: templates/strain_modern.html
+msgid "Efectos Adversos"
+msgstr "Adverse Effects"
+
+#: templates/strain_modern.html
+msgid "Árbol Genético"
+msgstr "Genetic Tree"
+
+#: templates/strain_modern.html
+msgid "Valoración media basada en datos de recursos especializados de cannabis en internet"
+msgstr "Average rating based on data from specialized cannabis resources on the internet"
+
 #: templates/strain.html:40
 msgid "Categoría"
 msgstr "Category"

@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Q, Max
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.http import HttpResponse
@@ -32,12 +32,20 @@ def strain_detail(request, slug):
         active=True)
     related_strains = get_related_strains(strain)
 
+    # Max cannabinoid values for proportional bar rendering
+    cann_max = Strain.objects.filter(active=True).aggregate(
+        max_thc=Max('thc'), max_cbd=Max('cbd'), max_cbg=Max('cbg')
+    )
+
     context = {
         'strain': strain,
         'strains': related_strains,
+        'max_thc': cann_max['max_thc'] or 1,
+        'max_cbd': cann_max['max_cbd'] or 1,
+        'max_cbg': cann_max['max_cbg'] or 1,
     }
 
-    return render(request, 'strain.html', context)
+    return render(request, 'strain_modern.html', context)
 
 
 def strain_list(request):

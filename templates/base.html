@@ -60,6 +60,8 @@
     <!-- AI Budtender Chat Widget Styles -->
     <link rel="stylesheet" type="text/css" href="{% static 'css/ai-budtender-chat.css' %}" />
     {% endif %}
+
+    {% block extra_css %}{% endblock %}
 </head>
 <body class=""{% if ENABLE_AI_CHAT %} data-ai-budtender-chat{% endif %}>
 <main class="page">
