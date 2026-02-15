@@ -115,10 +115,84 @@ class ArticleSitemap(I18nSitemap):
     priority = 0.8
 
     def items(self):
-        return Article.objects.all().order_by('-id')
+        return Article.objects.exclude(
+            category__name='Terpenes'
+        ).order_by('-id')
 
     def lastmod(self, obj):
         return obj.updated_at if hasattr(obj, 'updated_at') else None
 
     def _location(self, obj, force_lang=None):
         return reverse('article_detail', kwargs={'slug': obj.slug})
+
+
+class TerpeneSitemap(I18nSitemap):
+    changefreq = "monthly"
+    priority = 0.7
+
+    def items(self):
+        return Article.objects.filter(
+            category__name='Terpenes'
+        ).order_by('-id')
+
+    def lastmod(self, obj):
+        return obj.updated_at if hasattr(obj, 'updated_at') else None
+
+    def _location(self, obj, force_lang=None):
+        return reverse('terpene_detail', kwargs={'slug': obj.slug})
+
+
+class StaticPageSitemap(I18nSitemap):
+    changefreq = "monthly"
+
+    _pages = {
+        'main_page': 1.0,
+        'strain_list': 0.9,
+        'article_list': 0.8,
+        'terpene_list': 0.7,
+    }
+
+    def items(self):
+        return list(self._pages.keys())
+
+    def lastmod(self, obj):
+        return None
+
+    def _location(self, obj, force_lang=None):
+        return reverse(obj)
+
+    def get_priority(self, item):
+        return self._pages.get(item, 0.5)
+
+    def get_urls(self, page=1, site=None, protocol=None):
+        urls = []
+        items = self.items()
+
+        for item in items:
+            loc_alternates = []
+            primary_url = None
+
+            for lang in self.languages:
+                with translation.override(lang):
+                    loc = self._location(item, force_lang=lang)
+                    loc_full = self._get_full_url(loc)
+
+                    loc_alternates.append({
+                        'language': lang,
+                        'location': loc_full,
+                    })
+
+                    if lang == 'es':
+                        primary_url = loc_full
+
+            url_entry = {
+                'item': item,
+                'location': primary_url,
+                'lastmod': None,
+                'changefreq': self.changefreq,
+                'priority': str(self.get_priority(item)),
+                'alternates': loc_alternates,
+            }
+            urls.append(url_entry)
+
+        return urls
