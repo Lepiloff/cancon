@@ -11,6 +11,12 @@
 {% block description %}
     {{ article.description }}
 {% endblock %}
+
+{% block og_type %}article{% endblock %}
+{% block og_title %}{{ article.title }} | Cannamente{% endblock %}
+{% block og_description %}{{ article.description }}{% endblock %}
+{% block twitter_title %}{{ article.title }} | Cannamente{% endblock %}
+{% block twitter_description %}{{ article.description }}{% endblock %}
 {% block content %}
     <main class="main">
         <div class="article-page">

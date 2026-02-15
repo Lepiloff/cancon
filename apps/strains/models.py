@@ -67,17 +67,51 @@ class Strain(BaseText, TranslationMixin):
 
     @property
     def structured_data(self):
+        from django.utils.translation import get_language
+        current_lang = get_language() or 'es'
+
         data = {
+            '@context': 'https://schema.org',
             '@type': 'Product',
+            '@id': f'https://cannamente.com/strain/{self.slug}/' if current_lang == 'es'
+                   else f'https://cannamente.com/en/strain/{self.slug}/',
             'name': self.name,
             'description': self.description,
             'image': self.img.url if self.img else None,
             'category': self.get_category_display(),
-            'feelings': [feeling.name for feeling in self.feelings.all()],
-            'negatives': [negative.name for negative in self.negatives.all()],
-            'helpsWith': [helps_with.name for helps_with in self.helps_with.all()],
-            'flavors': [flavor.name for flavor in self.flavors.all()],
+            'inLanguage': current_lang,
         }
+
+        if self.rating:
+            data['aggregateRating'] = {
+                '@type': 'AggregateRating',
+                'ratingValue': str(self.rating),
+                'bestRating': '5',
+                'worstRating': '1',
+            }
+
+        additional_properties = []
+        for feeling in self.feelings.all():
+            additional_properties.append({
+                '@type': 'PropertyValue',
+                'name': 'feeling',
+                'value': feeling.name,
+            })
+        for flavor in self.flavors.all():
+            additional_properties.append({
+                '@type': 'PropertyValue',
+                'name': 'flavor',
+                'value': flavor.name,
+            })
+        for helps in self.helps_with.all():
+            additional_properties.append({
+                '@type': 'PropertyValue',
+                'name': 'helpsWith',
+                'value': helps.name,
+            })
+        if additional_properties:
+            data['additionalProperty'] = additional_properties
+
         return data
 
     def __str__(self):
