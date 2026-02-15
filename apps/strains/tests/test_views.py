@@ -25,7 +25,7 @@ class ViewsTestCase(TestCase):
 
         response = self.client.get(reverse('strain_detail', args=[strain.slug]))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'strain.html')
+        self.assertTemplateUsed(response, 'strain_modern.html')
 
     def test_strain_detail_view_not_exists(self):
         response = self.client.get(reverse('strain_detail', args=['non-existent-slug']))
