@@ -147,7 +147,7 @@ class StrainAdmin(TranslatedModelAdmin):
     )
     search_fields = ('name', 'category')  # name is NOT translated
     list_filter = ('category', 'active')
-    filter_horizontal = ('feelings', 'negatives', 'helps_with', 'flavors')
+    filter_horizontal = ('feelings', 'negatives', 'helps_with', 'flavors', 'parents')
     list_editable = ('active', 'main', 'top', 'is_review')
     inlines = [AlternativeNameInline]
     actions = ['force_retranslate']

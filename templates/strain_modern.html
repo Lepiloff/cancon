@@ -180,18 +180,21 @@
             </div>
         </div>
 
-        <!-- Genetics Tree (only if parent strain links exist in description) -->
-        <div class="sd-section sd-genetics-wrapper" style="display:none;">
+        <!-- Genetics Tree -->
+        {% if strain.parents.all %}
+        <div class="sd-section sd-genetics-wrapper">
             <h2 class="sd-section__title">{% trans "Árbol Genético" %}</h2>
-            <div class="sd-genetics">
-                <div class="sd-genetics__parents" id="genetics-parents"></div>
+            <div class="sd-genetics" id="genetics-tree">
+                <div class="sd-genetics__parents" id="genetics-parents">
+                    {% for parent in strain.parents.all %}
+                    <a href="{% url 'strain_detail' parent.slug %}" class="sd-genetics__node sd-genetics__node--parent">{{ parent.name }}</a>
+                    {% endfor %}
+                    {% if strain.parents.count == 1 %}
+                    <span class="sd-genetics__node sd-genetics__node--unknown" style="background:#9ca3af;font-style:italic;opacity:0.7">{% trans "Desconocido" %}</span>
+                    {% endif %}
+                </div>
                 <div class="sd-genetics__lines">
-                    <svg class="sd-genetics__svg" viewBox="0 0 300 50" preserveAspectRatio="xMidYMid meet">
-                        <line x1="75" y1="0" x2="75" y2="25" stroke="#4a7c23" stroke-width="2"/>
-                        <line x1="225" y1="0" x2="225" y2="25" stroke="#4a7c23" stroke-width="2"/>
-                        <line x1="75" y1="25" x2="225" y2="25" stroke="#4a7c23" stroke-width="2"/>
-                        <line x1="150" y1="25" x2="150" y2="50" stroke="#4a7c23" stroke-width="2"/>
-                    </svg>
+                    <svg class="sd-genetics__svg" id="genetics-svg"></svg>
                 </div>
                 <div class="sd-genetics__current">
                     <div class="sd-genetics__node sd-genetics__node--current">
@@ -200,6 +203,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
 
         <!-- Similar strains (original block, untouched) -->
         <div class="h2">{% trans "Parámetros similares" %}</div>
@@ -213,66 +217,90 @@
     </div>
 </div>
 
+{% if strain.parents.all %}
 <script>
-// Extract parent strain links from description and build genetics tree.
-// How it works:
-// 1. Finds all <a href="/strain/..."> links inside the description text
-// 2. Collects unique parent strain names and URLs
-// 3. If parents found → shows the genetics section and creates link nodes
-// 4. Adjusts SVG connector lines based on number of parents (1, 2, or more)
+// Draw SVG connector lines between parent nodes and child node,
+// measuring actual rendered positions for correct alignment.
 (function() {
-    var descEl = document.querySelector('.sd-top__desc');
-    if (!descEl) return;
+    var svg = document.getElementById('genetics-svg');
+    if (!svg) return;
 
-    var links = descEl.querySelectorAll('a[href*="/strain/"]');
-    if (links.length === 0) return;
-
-    var parents = [];
-    var seen = {};
-    for (var i = 0; i < links.length; i++) {
-        var href = links[i].getAttribute('href');
-        var name = links[i].textContent.trim();
-        if (!seen[href] && name) {
-            seen[href] = true;
-            parents.push({ name: name, url: href });
-        }
-    }
-
-    if (parents.length === 0) return;
-
-    // Show genetics section (hidden by default via style="display:none")
-    var wrapper = document.querySelector('.sd-genetics-wrapper');
-    wrapper.style.display = '';
-
-    // Build parent nodes as clickable links
     var parentsEl = document.getElementById('genetics-parents');
-    for (var j = 0; j < parents.length; j++) {
-        var node = document.createElement('a');
-        node.href = parents[j].url;
-        node.className = 'sd-genetics__node sd-genetics__node--parent';
-        node.textContent = parents[j].name;
-        parentsEl.appendChild(node);
+    var tree = document.getElementById('genetics-tree');
+    var parentNodes = parentsEl.querySelectorAll('.sd-genetics__node');
+    var childNode = tree.querySelector('.sd-genetics__node--current');
+
+    if (parentNodes.length === 0 || !childNode) return;
+
+    function drawLines() {
+        var treeRect = tree.getBoundingClientRect();
+        var svgRect = svg.parentElement.getBoundingClientRect();
+        var w = svgRect.width;
+        var h = 50;
+
+        svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+        svg.setAttribute('width', w);
+        svg.setAttribute('height', h);
+
+        var ns = 'http://www.w3.org/2000/svg';
+        svg.innerHTML = '';
+
+        // Get center-x of each parent node relative to SVG container
+        var centers = [];
+        for (var i = 0; i < parentNodes.length; i++) {
+            var r = parentNodes[i].getBoundingClientRect();
+            centers.push(r.left + r.width / 2 - svgRect.left);
+        }
+
+        // Center-x of the child node
+        var childRect = childNode.getBoundingClientRect();
+        var childCx = childRect.left + childRect.width / 2 - svgRect.left;
+
+        var barY = 25;
+
+        // Vertical lines from each parent down to horizontal bar
+        for (var j = 0; j < centers.length; j++) {
+            var line = document.createElementNS(ns, 'line');
+            line.setAttribute('x1', centers[j]);
+            line.setAttribute('y1', 0);
+            line.setAttribute('x2', centers[j]);
+            line.setAttribute('y2', barY);
+            line.setAttribute('stroke', '#4a7c23');
+            line.setAttribute('stroke-width', '2');
+            svg.appendChild(line);
+        }
+
+        // Horizontal bar connecting all parents
+        if (centers.length > 1) {
+            var hLine = document.createElementNS(ns, 'line');
+            hLine.setAttribute('x1', Math.min.apply(null, centers));
+            hLine.setAttribute('y1', barY);
+            hLine.setAttribute('x2', Math.max.apply(null, centers));
+            hLine.setAttribute('y2', barY);
+            hLine.setAttribute('stroke', '#4a7c23');
+            hLine.setAttribute('stroke-width', '2');
+            svg.appendChild(hLine);
+        }
+
+        // Vertical line from bar center down to child
+        var vLine = document.createElementNS(ns, 'line');
+        vLine.setAttribute('x1', childCx);
+        vLine.setAttribute('y1', centers.length > 1 ? barY : 0);
+        vLine.setAttribute('x2', childCx);
+        vLine.setAttribute('y2', h);
+        vLine.setAttribute('stroke', '#4a7c23');
+        vLine.setAttribute('stroke-width', '2');
+        svg.appendChild(vLine);
     }
 
-    // Adjust SVG connector lines based on parent count
-    var svg = document.querySelector('.sd-genetics__svg');
-    if (parents.length === 1) {
-        // Single parent: just a vertical line
-        svg.innerHTML = '<line x1="150" y1="0" x2="150" y2="50" stroke="#4a7c23" stroke-width="2"/>';
-    } else if (parents.length > 2) {
-        // 3+ parents: evenly spaced vertical + horizontal connectors
-        var w = 300;
-        var gap = w / (parents.length + 1);
-        var lines = '';
-        for (var k = 0; k < parents.length; k++) {
-            var x = gap * (k + 1);
-            lines += '<line x1="' + x + '" y1="0" x2="' + x + '" y2="25" stroke="#4a7c23" stroke-width="2"/>';
-        }
-        lines += '<line x1="' + gap + '" y1="25" x2="' + (gap * parents.length) + '" y2="25" stroke="#4a7c23" stroke-width="2"/>';
-        lines += '<line x1="150" y1="25" x2="150" y2="50" stroke="#4a7c23" stroke-width="2"/>';
-        svg.innerHTML = lines;
+    // Draw after layout is complete
+    if (document.readyState === 'complete') {
+        drawLines();
+    } else {
+        window.addEventListener('load', drawLines);
     }
-    // For exactly 2 parents, the default SVG (hardcoded in HTML) is used
+    window.addEventListener('resize', drawLines);
 })();
 </script>
+{% endif %}
 {% endblock content %}
