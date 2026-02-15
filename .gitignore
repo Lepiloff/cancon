@@ -5,6 +5,7 @@
 __pycache__
 .idea/
 staticfiles/
+static/admin/
 static/tinymce/
 static/modeltranslation/
 data/
@@ -19,3 +20,5 @@ json_data/
 CLAUDE.md
 *.mo
 *.pyc
+.claude/
+scripts/
