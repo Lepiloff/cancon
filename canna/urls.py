@@ -23,13 +23,15 @@ from django.contrib.sitemaps.views import sitemap
 from django.views.i18n import JavaScriptCatalog
 from django.urls import path, include
 
-from canna.sitemaps import StrainSitemap, ArticleSitemap
+from canna.sitemaps import StrainSitemap, ArticleSitemap, TerpeneSitemap, StaticPageSitemap
 from canna.views import robots_txt
 
 
 sitemaps = {
     'strains': StrainSitemap(),
     'articles': ArticleSitemap(),
+    'terpenes': TerpeneSitemap(),
+    'static': StaticPageSitemap(),
 }
 
 

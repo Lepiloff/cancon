@@ -47,8 +47,8 @@ def alt_url(context, lang_code):
     if not request:
         return ''
 
-    # Get current path with query string
-    current_path = request.get_full_path()
+    # Use request.path (without query string) for clean hreflang URLs
+    current_path = request.path
     current_lang = get_language()
 
     # Remove current language prefix if present

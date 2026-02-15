@@ -13,6 +13,11 @@
 {% trans "Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos de cepas de cannabis para uso medicinal y recreativo. Encuentra la variedad perfecta de índica, sativa o híbrida para tus necesidades. Actualizado y detallado para tu conveniencia." %}
 {% endblock %}
 
+{% block og_title %}{% trans "Catálogo de Variedades de Marihuana | Tu Guía Completa" %}{% endblock %}
+{% block og_description %}{% trans "Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos de cepas de cannabis para uso medicinal y recreativo." %}{% endblock %}
+{% block twitter_title %}{% trans "Catálogo de Variedades de Marihuana | Tu Guía Completa" %}{% endblock %}
+{% block twitter_description %}{% trans "Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos de cepas de cannabis para uso medicinal y recreativo." %}{% endblock %}
+
 {% block extra_css %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/strains-filter.css' %}" />
 {% endblock %}
@@ -23,7 +28,7 @@
            <section class="intro-section">
             <div class="text-content">
                 <h1>{% trans "Nuestro Catálogo de Cepas de Marihuana: Diversidad y Calidad" %}</h1>
-                <h2>{% trans "Descubre la variedad y unicidad de cada cepa de marihuana en nuestro catálogo. Aquí, puedes explorar en detalle las características, beneficios terapéuticos, sabores y niveles de THC de cada cepa. Encuentra la cepa que se ajusta perfectamente a tus necesidades y preferencias." %}</h2>
+                <p class="intro-description">{% trans "Descubre la variedad y unicidad de cada cepa de marihuana en nuestro catálogo. Aquí, puedes explorar en detalle las características, beneficios terapéuticos, sabores y niveles de THC de cada cepa. Encuentra la cepa que se ajusta perfectamente a tus necesidades y preferencias." %}</p>
             </div>
             <div class="image-container">
                 <img src="{% static 'img/footer.svg' %}" alt="">
