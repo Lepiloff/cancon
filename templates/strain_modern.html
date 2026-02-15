@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+{% load static %}
+{% load json_ld %}
+{% load i18n %}
+
+{% block title %}
+    {{ strain.name }} {% trans "cepas de marihuana" %}
+{% endblock %}
+
+{% block keywords %}
+    {{ strain.keywords }}
+{% endblock %}
+
+{% block description %}
+    {{ strain.description }}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/strain-detail.css' %}" />
+{% endblock %}
+
+{% block content %}
+{% block meta_tags %}
+    {% render_json_ld strain.structured_data %}
+{% endblock %}
+
+<div class="blog">
+    <div class="container flex-grow">
+
+        <!-- Name + Meta on same line -->
+        <div class="sd-header">
+            <h1 class="sd-name">{{ strain.name }}</h1>
+            <div class="sd-meta">
+                <span class="sd-category sd-category--{{ strain.category|lower }}">{{ strain.category }}</span>
+                {% if strain.rating %}
+                <span class="sd-rating-badge" aria-label="{% trans 'Valoración' %}: {{ strain.rating|floatformat:1 }}">
+                    <span class="sd-rating-value">{{ strain.rating|floatformat:1 }}</span>
+                    <span class="sd-rating-star">&#9733;</span>
+                    <span class="sd-info-icon" tabindex="0">
+                        <span class="sd-info-i">i</span>
+                        <span class="sd-tooltip">{% trans "Valoración media basada en datos de recursos especializados de cannabis en internet" %}</span>
+                    </span>
+                </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Top section: Image + Description -->
+        <div class="sd-top">
+            <div class="sd-top__image">
+                {% if strain.img %}
+                <a href="#" data-fancybox="gallery1" class="tovar_imgwrap">
+                    <img src="{{ strain.img.url }}" alt="{{ strain.img_alt_text }}" width="500" height="500" class="tovar_img">
+                </a>
+                {% else %}
+                <a href="#" data-fancybox="gallery1" class="tovar_imgwrap">
+                    <img src="{% static 'img/no_img.png' %}" alt="{{ strain.name }}" width="380" height="267" loading="lazy" decoding="async" class="object_fit" style="background-size: cover; background-image: none;">
+                </a>
+                {% endif %}
+            </div>
+            <div class="sd-top__desc">
+                <div class="tovar_text">{{ strain.text_content|safe }}</div>
+            </div>
+        </div>
+
+        <!-- Cannabinoids -->
+        <div class="sd-section">
+            <h2 class="sd-section__title">{% trans "Cannabinoides" %}</h2>
+            <div class="sd-cannabinoids">
+                {% if strain.thc %}
+                <div class="sd-cann">
+                    <div class="sd-cann__label">THC</div>
+                    <div class="sd-cann__bar">
+                        <div class="sd-cann__fill sd-cann__fill--thc" style="width: {% widthratio strain.thc max_thc 100 %}%"></div>
+                    </div>
+                    <div class="sd-cann__val">{{ strain.thc|floatformat:"0" }}%</div>
+                </div>
+                {% endif %}
+                {% if strain.cbd %}
+                <div class="sd-cann">
+                    <div class="sd-cann__label">CBD</div>
+                    <div class="sd-cann__bar">
+                        <div class="sd-cann__fill sd-cann__fill--cbd" style="width: {% widthratio strain.cbd max_cbd 100 %}%"></div>
+                    </div>
+                    <div class="sd-cann__val">{{ strain.cbd|floatformat:"0" }}%</div>
+                </div>
+                {% endif %}
+                {% if strain.cbg %}
+                <div class="sd-cann">
+                    <div class="sd-cann__label">CBG</div>
+                    <div class="sd-cann__bar">
+                        <div class="sd-cann__fill sd-cann__fill--cbg" style="width: {% widthratio strain.cbg max_cbg 100 %}%"></div>
+                    </div>
+                    <div class="sd-cann__val">{{ strain.cbg|floatformat:"0" }}%</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Terpenes -->
+        {% if strain.dominant_terpene or strain.other_terpenes.all %}
+        <div class="sd-section">
+            <h2 class="sd-section__title">{% trans "Terpenos" %}</h2>
+            <div class="sd-terpenes">
+                {% if strain.dominant_terpene %}
+                <span class="sd-terpene sd-terpene--dominant">
+                    <span class="sd-terpene__dot sd-terpene__dot--dominant"></span>
+                    {{ strain.dominant_terpene.name }}
+                </span>
+                {% endif %}
+                {% for terpene in strain.other_terpenes.all %}
+                <span class="sd-terpene">
+                    <span class="sd-terpene__dot sd-terpene__dot--{{ forloop.counter }}"></span>
+                    {{ terpene.name }}
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Effects -->
+        <div class="sd-section">
+            <h2 class="sd-section__title">{% trans "Efectos y Características" %}</h2>
+            <div class="sd-effects">
+                {% if strain.feelings.all %}
+                <div class="sd-effect-group">
+                    <div class="sd-effect-group__head">
+                        <svg class="sd-effect-icon sd-effect-icon--positive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                        <h3>{% trans "Sensaciones" %}</h3>
+                    </div>
+                    <div class="sd-tags">
+                        {% for feeling in strain.feelings.all %}
+                        <span class="sd-tag sd-tag--positive">{{ feeling.name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if strain.helps_with.all %}
+                <div class="sd-effect-group">
+                    <div class="sd-effect-group__head">
+                        <svg class="sd-effect-icon sd-effect-icon--therapeutic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        <h3>{% trans "Ayuda con" %}</h3>
+                    </div>
+                    <div class="sd-tags">
+                        {% for help in strain.helps_with.all %}
+                        <span class="sd-tag sd-tag--therapeutic">{{ help.name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if strain.negatives.all %}
+                <div class="sd-effect-group">
+                    <div class="sd-effect-group__head">
+                        <svg class="sd-effect-icon sd-effect-icon--negative" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <h3>{% trans "Efectos Adversos" %}</h3>
+                    </div>
+                    <div class="sd-tags">
+                        {% for negative in strain.negatives.all %}
+                        <span class="sd-tag sd-tag--negative">{{ negative.name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if strain.flavors.all %}
+                <div class="sd-effect-group">
+                    <div class="sd-effect-group__head">
+                        <svg class="sd-effect-icon sd-effect-icon--flavor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                        <h3>{% trans "Sabores" %}</h3>
+                    </div>
+                    <div class="sd-tags">
+                        {% for flavor in strain.flavors.all %}
+                        <span class="sd-tag sd-tag--flavor">{{ flavor.name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Genetics Tree -->
+        {% if strain.parents.all %}
+        <div class="sd-section sd-genetics-wrapper">
+            <h2 class="sd-section__title">{% trans "Árbol Genético" %}</h2>
+            <div class="sd-genetics" id="genetics-tree">
+                <div class="sd-genetics__parents" id="genetics-parents">
+                    {% for parent in strain.parents.all %}
+                    <a href="{% url 'strain_detail' parent.slug %}" class="sd-genetics__node sd-genetics__node--parent">{{ parent.name }}</a>
+                    {% endfor %}
+                    {% if strain.parents.count == 1 %}
+                    <span class="sd-genetics__node sd-genetics__node--unknown" style="background:#9ca3af;font-style:italic;opacity:0.7">{% trans "Desconocido" %}</span>
+                    {% endif %}
+                </div>
+                <div class="sd-genetics__lines">
+                    <svg class="sd-genetics__svg" id="genetics-svg"></svg>
+                </div>
+                <div class="sd-genetics__current">
+                    <div class="sd-genetics__node sd-genetics__node--current">
+                        {{ strain.name }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Similar strains (original block, untouched) -->
+        <div class="h2">{% trans "Parámetros similares" %}</div>
+        <section class="ctg">
+            {% include "strain_items.html" %}
+        </section>
+        <div class="text-center">
+            <a href="{% url 'strain_list' %}" class="btn btn--outline_с">{% trans "Ver más" %}</a>
+        </div>
+
+    </div>
+</div>
+
+{% if strain.parents.all %}
+<script>
+// Draw SVG connector lines between parent nodes and child node,
+// measuring actual rendered positions for correct alignment.
+(function() {
+    var svg = document.getElementById('genetics-svg');
+    if (!svg) return;
+
+    var parentsEl = document.getElementById('genetics-parents');
+    var tree = document.getElementById('genetics-tree');
+    var parentNodes = parentsEl.querySelectorAll('.sd-genetics__node');
+    var childNode = tree.querySelector('.sd-genetics__node--current');
+
+    if (parentNodes.length === 0 || !childNode) return;
+
+    function drawLines() {
+        var treeRect = tree.getBoundingClientRect();
+        var svgRect = svg.parentElement.getBoundingClientRect();
+        var w = svgRect.width;
+        var h = 50;
+
+        svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+        svg.setAttribute('width', w);
+        svg.setAttribute('height', h);
+
+        var ns = 'http://www.w3.org/2000/svg';
+        svg.innerHTML = '';
+
+        // Get center-x of each parent node relative to SVG container
+        var centers = [];
+        for (var i = 0; i < parentNodes.length; i++) {
+            var r = parentNodes[i].getBoundingClientRect();
+            centers.push(r.left + r.width / 2 - svgRect.left);
+        }
+
+        // Center-x of the child node
+        var childRect = childNode.getBoundingClientRect();
+        var childCx = childRect.left + childRect.width / 2 - svgRect.left;
+
+        var barY = 25;
+
+        // Vertical lines from each parent down to horizontal bar
+        for (var j = 0; j < centers.length; j++) {
+            var line = document.createElementNS(ns, 'line');
+            line.setAttribute('x1', centers[j]);
+            line.setAttribute('y1', 0);
+            line.setAttribute('x2', centers[j]);
+            line.setAttribute('y2', barY);
+            line.setAttribute('stroke', '#4a7c23');
+            line.setAttribute('stroke-width', '2');
+            svg.appendChild(line);
+        }
+
+        // Horizontal bar connecting all parents
+        if (centers.length > 1) {
+            var hLine = document.createElementNS(ns, 'line');
+            hLine.setAttribute('x1', Math.min.apply(null, centers));
+            hLine.setAttribute('y1', barY);
+            hLine.setAttribute('x2', Math.max.apply(null, centers));
+            hLine.setAttribute('y2', barY);
+            hLine.setAttribute('stroke', '#4a7c23');
+            hLine.setAttribute('stroke-width', '2');
+            svg.appendChild(hLine);
+        }
+
+        // Vertical line from bar center down to child
+        var vLine = document.createElementNS(ns, 'line');
+        vLine.setAttribute('x1', childCx);
+        vLine.setAttribute('y1', centers.length > 1 ? barY : 0);
+        vLine.setAttribute('x2', childCx);
+        vLine.setAttribute('y2', h);
+        vLine.setAttribute('stroke', '#4a7c23');
+        vLine.setAttribute('stroke-width', '2');
+        svg.appendChild(vLine);
+    }
+
+    // Draw after layout is complete
+    if (document.readyState === 'complete') {
+        drawLines();
+    } else {
+        window.addEventListener('load', drawLines);
+    }
+    window.addEventListener('resize', drawLines);
+})();
+</script>
+{% endif %}
+{% endblock content %}

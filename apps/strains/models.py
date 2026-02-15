@@ -53,6 +53,7 @@ class Strain(BaseText, TranslationMixin):
     other_terpenes = models.ManyToManyField(
         'Terpene', related_name='in_strains', blank=True
     )
+    parents = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='children')
     slug = models.SlugField(unique=True, default='')
     active = models.BooleanField(default=False)
     top = models.BooleanField(default=False)
