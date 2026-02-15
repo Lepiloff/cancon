@@ -1,0 +1,477 @@
+/* ==============================================
+   Strain Detail Page
+   ============================================== */
+
+/* --- Header: Name + Meta inline --- */
+.sd-header {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 16px;
+}
+
+/* --- Name --- */
+.sd-name {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0;
+    width: 300px;
+    flex-shrink: 0;
+    line-height: 1.2;
+    text-decoration: none;
+    border: none;
+}
+
+/* Override any global h1 underline */
+h1.sd-name,
+h1.sd-name:after,
+h1.sd-name:before {
+    text-decoration: none !important;
+    border-bottom: none !important;
+    background-image: none !important;
+}
+
+/* --- Meta: category + rating --- */
+.sd-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sd-category {
+    display: inline-block;
+    padding: 3px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #fff;
+}
+
+.sd-category--indica { background: #6b46c1; }
+.sd-category--sativa { background: #059669; }
+.sd-category--hybrid { background: #dc2626; }
+
+.sd-rating-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 13px;
+    color: #6b7280;
+    position: relative;
+}
+
+.sd-rating-value {
+    font-weight: 700;
+    color: #374151;
+}
+
+.sd-rating-star {
+    color: #f59e0b;
+    font-size: 14px;
+}
+
+.sd-info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid #9ca3af;
+    cursor: help;
+    position: relative;
+    margin-left: 2px;
+}
+
+.sd-info-i {
+    font-size: 10px;
+    font-weight: 700;
+    font-style: italic;
+    color: #9ca3af;
+    line-height: 1;
+}
+
+.sd-tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1f2937;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 400;
+    font-style: normal;
+    white-space: normal;
+    width: 220px;
+    line-height: 1.4;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    pointer-events: none;
+}
+
+.sd-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #1f2937;
+}
+
+.sd-info-icon:hover .sd-tooltip,
+.sd-info-icon:focus .sd-tooltip {
+    display: block;
+}
+
+/* --- Top section: image left + description right --- */
+.sd-top {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+
+.sd-top__image {
+    width: 300px;
+    flex-shrink: 0;
+}
+
+.sd-top__desc {
+    flex: 1;
+    min-width: 0;
+}
+
+.sd-top__desc .tovar_text {
+    font-size: 15px;
+    line-height: 1.65;
+    color: #374151;
+}
+
+.sd-top__desc .tovar_text h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+}
+
+/* Tighter paragraph spacing */
+.sd-top__desc .tovar_text p {
+    margin-bottom: 6px;
+}
+
+.sd-top__desc .tovar_text p:last-child {
+    margin-bottom: 0;
+}
+
+.sd-top__desc .tovar_text a {
+    color: #3C7E80;
+}
+
+.sd-top__desc .tovar_text a:hover {
+    color: #0d95e8;
+}
+
+/* --- Section (no border/underline) --- */
+.sd-section {
+    margin-bottom: 28px;
+    padding-top: 16px;
+}
+
+.sd-section__title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 12px;
+    border: none;
+    text-decoration: none;
+}
+
+/* Kill any inherited underlines on h2 inside sections */
+.sd-section__title::after,
+.sd-section__title::before {
+    display: none !important;
+}
+
+/* --- Cannabinoids --- */
+.sd-cannabinoids {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 420px;
+}
+
+.sd-cann {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sd-cann__label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+    width: 32px;
+    flex-shrink: 0;
+}
+
+.sd-cann__bar {
+    flex: 1;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.sd-cann__fill {
+    height: 100%;
+    border-radius: 4px;
+    min-width: 4px;
+}
+
+.sd-cann__fill--thc { background: #ef4444; }
+.sd-cann__fill--cbd { background: #10b981; }
+.sd-cann__fill--cbg { background: #f59e0b; }
+
+.sd-cann__val {
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+    width: 36px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+/* --- Terpenes (compact inline) --- */
+.sd-terpenes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+}
+
+.sd-terpene {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #374151;
+}
+
+.sd-terpene--dominant {
+    font-weight: 700;
+}
+
+.sd-terpene__dot {
+    display: inline-block;
+    width: 8px;
+    height: 18px;
+    border-radius: 4px;
+}
+
+.sd-terpene__dot--dominant { background: #1e3a5f; }
+.sd-terpene__dot--1 { background: #c2185b; }
+.sd-terpene__dot--2 { background: #c9b700; }
+.sd-terpene__dot--3 { background: #2e7d32; }
+.sd-terpene__dot--4 { background: #e65100; }
+.sd-terpene__dot--5 { background: #4527a0; }
+
+/* --- Effects --- */
+.sd-effects {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.sd-effect-group {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.sd-effect-group__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.sd-effect-group__head h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #374151;
+    margin: 0;
+    border: none;
+    text-decoration: none;
+    line-height: 1;
+    padding-top: 2px;
+}
+
+.sd-effect-group__head h3::after,
+.sd-effect-group__head h3::before {
+    display: none !important;
+}
+
+.sd-effect-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.sd-effect-icon--positive { color: #059669; }
+.sd-effect-icon--therapeutic { color: #2563eb; }
+.sd-effect-icon--negative { color: #dc2626; }
+.sd-effect-icon--flavor { color: #d97706; }
+
+.sd-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.sd-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.sd-tag--positive {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.sd-tag--therapeutic {
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+}
+
+.sd-tag--negative {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.sd-tag--flavor {
+    background: #fffbeb;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+/* --- Genetics Tree --- */
+.sd-genetics {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.sd-genetics__parents {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+}
+
+.sd-genetics__node {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    min-width: 120px;
+    text-align: center;
+    text-decoration: none;
+}
+
+.sd-genetics__node--parent {
+    background: linear-gradient(135deg, #059669, #10b981);
+}
+
+.sd-genetics__node--parent:hover {
+    opacity: 0.85;
+    color: #fff;
+    text-decoration: none;
+}
+
+.sd-genetics__node--unknown {
+    background: #9ca3af;
+    font-style: italic;
+    opacity: 0.7;
+}
+
+.sd-genetics__node--current {
+    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+}
+
+.sd-genetics__lines {
+    width: 100%;
+}
+
+.sd-genetics__svg {
+    width: 100%;
+    height: 50px;
+    display: block;
+}
+
+.sd-genetics__current {
+    display: flex;
+    justify-content: center;
+}
+
+/* --- Responsive: Tablet --- */
+@media screen and (max-width: 768px) {
+    .sd-effects {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- Responsive: Mobile --- */
+@media screen and (max-width: 640px) {
+    .sd-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .sd-name {
+        font-size: 24px;
+        width: auto;
+    }
+
+    /* On mobile: name → meta → image → description (natural flow) */
+    .sd-top {
+        flex-direction: column;
+    }
+
+    .sd-top__image {
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .sd-genetics__parents {
+        gap: 20px;
+    }
+
+    .sd-genetics__node {
+        min-width: 90px;
+        padding: 8px 14px;
+        font-size: 12px;
+    }
+
+    .sd-cannabinoids {
+        max-width: 100%;
+    }
+}
