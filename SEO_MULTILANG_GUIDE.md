@@ -1,4 +1,4 @@
-# SEO Multi-Language Implementation Guide
+ # SEO Multi-Language Implementation Guide
 
 **Критически важно:** Сохранить текущую SEO индексацию испанского контента!
 

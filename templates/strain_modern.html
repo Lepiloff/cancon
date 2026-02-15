@@ -15,6 +15,14 @@
     {{ strain.description }}
 {% endblock %}
 
+{% block og_type %}product{% endblock %}
+{% block og_title %}{{ strain.name }} - {% trans "cepas de marihuana" %} | Cannamente{% endblock %}
+{% block og_description %}{{ strain.description }}{% endblock %}
+{% block og_image %}{% if strain.img %}<meta property="og:image" content="{{ strain.img.url }}">{% else %}<meta property="og:image" content="{% static 'img/cannamente_bg_THC_CBD_1140x320.png' %}">{% endif %}{% endblock %}
+{% block twitter_title %}{{ strain.name }} - {% trans "cepas de marihuana" %} | Cannamente{% endblock %}
+{% block twitter_description %}{{ strain.description }}{% endblock %}
+{% block twitter_image %}{% if strain.img %}<meta name="twitter:image" content="{{ strain.img.url }}">{% else %}<meta name="twitter:image" content="{% static 'img/cannamente_bg_THC_CBD_1140x320.png' %}">{% endif %}{% endblock %}
+
 {% block extra_css %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/strain-detail.css' %}" />
 {% endblock %}
