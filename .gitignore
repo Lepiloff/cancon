@@ -19,3 +19,5 @@ json_data/
 CLAUDE.md
 *.mo
 *.pyc
+.claude/
+scripts/
