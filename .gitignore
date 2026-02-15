@@ -5,6 +5,7 @@
 __pycache__
 .idea/
 staticfiles/
+static/admin/
 static/tinymce/
 static/modeltranslation/
 data/
