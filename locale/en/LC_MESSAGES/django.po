@@ -128,6 +128,10 @@ msgid "Árbol Genético"
 msgstr "Genetic Tree"
 
 #: templates/strain_modern.html
+msgid "Desconocido"
+msgstr "Unknown"
+
+#: templates/strain_modern.html
 msgid "Valoración media basada en datos de recursos especializados de cannabis en internet"
 msgstr "Average rating based on data from specialized cannabis resources on the internet"
 

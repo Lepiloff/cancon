@@ -28,7 +28,7 @@ def main_page(request):
 def strain_detail(request, slug):
     strain = get_object_or_404(
         Strain.objects.prefetch_related('feelings', 'negatives', 'flavors', 'helps_with',
-                                        'dominant_terpene', 'other_terpenes'), slug=slug,
+                                        'dominant_terpene', 'other_terpenes', 'parents'), slug=slug,
         active=True)
     related_strains = get_related_strains(strain)
 

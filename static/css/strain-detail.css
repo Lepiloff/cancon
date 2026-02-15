@@ -406,13 +406,18 @@ h1.sd-name:before {
     text-decoration: none;
 }
 
+.sd-genetics__node--unknown {
+    background: #9ca3af;
+    font-style: italic;
+    opacity: 0.7;
+}
+
 .sd-genetics__node--current {
     background: linear-gradient(135deg, #7c3aed, #8b5cf6);
 }
 
 .sd-genetics__lines {
     width: 100%;
-    max-width: 300px;
 }
 
 .sd-genetics__svg {
