@@ -1,13 +1,19 @@
 {% extends "base.html" %}
 {% load static %}
+{% load i18n %}
 
 {% block title %}
-    Artículos y Noticias sobre Marihuana - Información Actualizada en Cannamente
+    {% trans "Artículos y Noticias sobre Marihuana - Información Actualizada en Cannamente" %}
 {% endblock %}
 
 {% block description %}
-    Descubre las últimas noticias y los artículos más informativos sobre marihuana en Cannamente. Nuestra biblioteca de contenido está diseñada para proporcionarte información precisa y relevante, cubriendo una amplia gama de temas relacionados con la marihuana. Mantente al día con las últimas tendencias, investigaciones, beneficios terapéuticos y mucho más. Únete a nuestra comunidad para expandir tus conocimientos.
+    {% trans "Descubre las últimas noticias y los artículos más informativos sobre marihuana en Cannamente. Nuestra biblioteca de contenido está diseñada para proporcionarte información precisa y relevante, cubriendo una amplia gama de temas relacionados con la marihuana. Mantente al día con las últimas tendencias, investigaciones, beneficios terapéuticos y mucho más. Únete a nuestra comunidad para expandir tus conocimientos." %}
 {% endblock %}
+
+{% block og_title %}{% trans "Artículos y Noticias sobre Marihuana - Información Actualizada en Cannamente" %}{% endblock %}
+{% block og_description %}{% trans "Descubre las últimas noticias y los artículos más informativos sobre marihuana en Cannamente." %}{% endblock %}
+{% block twitter_title %}{% trans "Artículos y Noticias sobre Marihuana - Información Actualizada en Cannamente" %}{% endblock %}
+{% block twitter_description %}{% trans "Descubre las últimas noticias y los artículos más informativos sobre marihuana en Cannamente." %}{% endblock %}
 
 {% block content %}
 
@@ -86,7 +92,7 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    <p>No articles found</p>
+                    <p>{% trans "No articles found" %}</p>
                 {% endif %}
             </div>
         </div>
@@ -95,6 +101,6 @@
 
 {% block footer_col_2 %}
     <div class="footer_col footer_col--2">
-Explora las últimas noticias e información sobre el cannabis en nuestro blog. Mantente al día con tendencias, investigaciones y consejos sobre la marihuana. Amplía tus conocimientos y mantente informado sobre el mundo del cannabis.
+{% trans "Explora las últimas noticias e información sobre el cannabis en nuestro blog. Mantente al día con tendencias, investigaciones y consejos sobre la marihuana. Amplía tus conocimientos y mantente informado sobre el mundo del cannabis." %}
     </div>
 {% endblock footer_col_2 %}

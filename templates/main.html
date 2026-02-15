@@ -11,19 +11,24 @@
 
 {% block description %}
    {% trans "Descubre el mundo de la marihuana con Cannamente: un catálogo exhaustivo de cepas y artículos educativos para expandir tus conocimientos. Únete a nosotros en esta exploración." %}{% endblock %}
+
+{% block og_title %}{% trans "Cepas de Marihuana: Catálogo Exhaustivo y Recursos Informativos en Cannamente" %}{% endblock %}
+{% block og_description %}{% trans "Descubre el mundo de la marihuana con Cannamente: un catálogo exhaustivo de cepas y artículos educativos para expandir tus conocimientos." %}{% endblock %}
+{% block twitter_title %}{% trans "Cepas de Marihuana: Catálogo Exhaustivo y Recursos Informativos en Cannamente" %}{% endblock %}
+{% block twitter_description %}{% trans "Descubre el mundo de la marihuana con Cannamente: un catálogo exhaustivo de cepas y artículos educativos para expandir tus conocimientos." %}{% endblock %}
 {% block content %}
     <div class="container flex-grow">
        {% block intro %}
         <section class="intro-section">
             <div class="text-content">
                 <h1>{% trans "Cannamente: Tu Guía Completa de Cepas de Marihuana" %}</h1>
-                <h2>{% trans "Explora nuestra extensa colección de cepas de marihuana y sumérgete en nuestro recurso informativo para expandir tus conocimientos. Con Cannamente, podrás encontrar la cepa perfecta según tus necesidades y gustos. Comienza tu viaje ahora." %}</h2>
+                <p class="intro-description">{% trans "Explora nuestra extensa colección de cepas de marihuana y sumérgete en nuestro recurso informativo para expandir tus conocimientos. Con Cannamente, podrás encontrar la cepa perfecta según tus necesidades y gustos. Comienza tu viaje ahora." %}</p>
                 <div class="text-center">
                     <a href="{% url 'strain_list' %}" class="btn">{% trans "Ver todas las cepas" %}</a>
                 </div>
             </div>
             <div class="image-container">
-                <img src="{% static 'img/footer.svg' %}" alt="">
+                <img src="{% static 'img/footer.svg' %}" alt="" width="400" height="300" loading="lazy" decoding="async">
             </div>
         </section>
         {% endblock intro %}
@@ -58,20 +63,20 @@
 
     	<div class="h2">{% trans "Las mejores variedades de cannabis" %}</div>
     	<section class="post post--row mb-30">
-    		<a href="https://cannamente.com/articles/top-10-variedades-de-indica-un-viaje-al-corazon-de/" target="_blank" class="post_item post_item--col_3"><span class="post_item_in post_item_in--2">
-    			<img src="{% static 'pic/top_10_indica.jpg' %}" alt="" width="380" height="267" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="post_item_img">
+    		<a href="{% url 'article_detail' slug='top-10-variedades-de-indica-un-viaje-al-corazon-de' %}" class="post_item post_item--col_3"><span class="post_item_in post_item_in--2">
+    			<img src="{% static 'pic/top_10_indica.jpg' %}" alt="Top 10 Indica" width="380" height="267" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="post_item_img">
     			<span class="post_item_descript post_item_descript--2">
     				<span class="post_item_h3">Top 10 Indica</span>
     			</span>
     		</span></a>
-    		<a href="https://cannamente.com/articles/top-10-variedades-de-sativa/" target="_blank" class="post_item post_item--col_3"><span class="post_item_in post_item_in--2">
-    			<img src="{% static 'pic/top_10_sativa.jpg' %}" alt="" width="380" height="267" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="post_item_img">
+    		<a href="{% url 'article_detail' slug='top-10-variedades-de-sativa' %}" class="post_item post_item--col_3"><span class="post_item_in post_item_in--2">
+    			<img src="{% static 'pic/top_10_sativa.jpg' %}" alt="Top 10 Sativa" width="380" height="267" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="post_item_img">
     			<span class="post_item_descript post_item_descript--2">
     				<span class="post_item_h3">Top 10 Sativa</span>
     			</span>
     		</span></a>
-    		<a href="https://cannamente.com/articles/top-10-variedades-de-hibridos/" target="_blank" class="post_item post_item--col_3"><span class="post_item_in post_item_in--2">
-    			<img src="{% static 'pic/top_10_hybrid.jpg' %}" alt="" width="380" height="267" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="post_item_img">
+    		<a href="{% url 'article_detail' slug='top-10-variedades-de-hibridos' %}" class="post_item post_item--col_3"><span class="post_item_in post_item_in--2">
+    			<img src="{% static 'pic/top_10_hybrid.jpg' %}" alt="Top 10 Hybrid" width="380" height="267" loading="lazy" decoding="async" style="background-size: cover; background-image: none;" class="post_item_img">
     			<span class="post_item_descript post_item_descript--2">
     				<span class="post_item_h3">Top 10 Hibrida</span>
     			</span>
