@@ -131,11 +131,22 @@ class GeoLanguageMiddleware:
         self.country_language_map = getattr(settings, 'COUNTRY_LANGUAGE_MAP', {})
         self.fallback_language = getattr(settings, 'FALLBACK_LANGUAGE', 'en')
 
+    # Search engine bots that must crawl both language versions freely
+    BOT_USER_AGENTS = [
+        'googlebot', 'bingbot', 'yandexbot', 'baiduspider',
+        'duckduckbot', 'slurp', 'applebot', 'petalbot',
+        'semrushbot', 'ahrefsbot', 'mj12bot',
+    ]
+
     def __call__(self, request):
         logger = logging.getLogger(__name__)
 
         # Skip for admin, static files, etc.
         if self._should_skip(request.path):
+            return self.get_response(request)
+
+        # Skip for search engine bots — let them crawl both language versions
+        if self._is_bot(request):
             return self.get_response(request)
 
         # Only set language if not already explicitly chosen
@@ -159,6 +170,11 @@ class GeoLanguageMiddleware:
                     return redirect(new_url, permanent=False)
 
         return self.get_response(request)
+
+    def _is_bot(self, request):
+        """Check if request comes from a search engine bot."""
+        ua = request.META.get('HTTP_USER_AGENT', '').lower()
+        return any(bot in ua for bot in self.BOT_USER_AGENTS)
 
     def _should_skip(self, path):
         """Skip certain paths that don't need language detection"""
