@@ -366,6 +366,14 @@ class LeaflyParser:
         )
         description_text = str(description_text).strip()
         review_count = int(strain.get('reviewCount') or 0)
+        if not description_text:
+            # __NEXT_DATA__ has no description — fall through to HTML parser
+            # which may find the description in the DOM (e.g. warhead-type
+            # strains where descriptionPlain is absent from __NEXT_DATA__).
+            return None
+
+        # Validate quality early so sparse strains raise LeaflySkipError
+        # before falling through to the HTML fallback path.
         if name or review_count:
             self._validate_strain_quality(
                 description_text=description_text,
