@@ -11,12 +11,19 @@ from typing import List, Tuple
 class TranslationConfig:
     """Configuration for translation services."""
 
+    # LLM Provider: 'openai' or 'anthropic'
+    LLM_PROVIDER = os.getenv('LLM_PROVIDER', 'openai').lower()
+
     # OpenAI settings
     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
     OPENAI_MODEL = os.getenv('OPENAI_AGENT_MODEL', 'gpt-4o-mini')
     OPENAI_TEMPERATURE = float(os.getenv('AGENT_TEMPERATURE', '0.3'))
     OPENAI_MAX_TOKENS = int(os.getenv('OPENAI_MAX_TOKENS', '4000'))
     OPENAI_TIMEOUT = int(os.getenv('OPENAI_TIMEOUT', '60'))
+
+    # Anthropic settings
+    ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY', '')
+    ANTHROPIC_MODEL = os.getenv('ANTHROPIC_MODEL', 'claude-sonnet-4-20250514')
 
     # Rate limiting
     DEFAULT_PAUSE_SECONDS = float(os.getenv('TRANSLATION_PAUSE_SECONDS', '1.5'))
@@ -40,11 +47,18 @@ class TranslationConfig:
     @classmethod
     def validate(cls) -> None:
         """Validate that all required configuration is present."""
-        if not cls.OPENAI_API_KEY:
-            raise ValueError(
-                "OPENAI_API_KEY environment variable is not set. "
-                "Please add it to your .env file."
-            )
+        if cls.LLM_PROVIDER == 'anthropic':
+            if not cls.ANTHROPIC_API_KEY:
+                raise ValueError(
+                    "ANTHROPIC_API_KEY environment variable is not set. "
+                    "Please add it to your .env file."
+                )
+        else:
+            if not cls.OPENAI_API_KEY:
+                raise ValueError(
+                    "OPENAI_API_KEY environment variable is not set. "
+                    "Please add it to your .env file."
+                )
 
     @classmethod
     def get_model_fields(cls, model_name: str) -> List[str]:

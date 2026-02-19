@@ -1,9 +1,15 @@
+import os
 import time
+from pathlib import Path
 from typing import List
 
 from django.core.management.base import BaseCommand, CommandError
 
 from apps.strains.leafly_import import LeaflyClient, LeaflyImporter
+
+# Persistent skip list — quality-filtered aliases are appended here so the
+# slug scraper can exclude them from leafly_missing_aliases.txt on next run.
+SKIP_FILE = Path(__file__).resolve().parents[4] / 'scripts' / 'output' / 'leafly_skipped_aliases.txt'
 
 
 class CommandReporter:
@@ -64,11 +70,20 @@ class Command(BaseCommand):
             action='store_true',
             help='Run without saving to the database',
         )
+        parser.add_argument(
+            '--limit',
+            type=int,
+            default=0,
+            help='Import at most N aliases (0 = no limit)',
+        )
 
     def handle(self, *args, **options):
         aliases = self._collect_aliases(options)
         if not aliases:
             raise CommandError('No aliases provided')
+
+        if options['limit'] > 0:
+            aliases = aliases[:options['limit']]
 
         reporter = CommandReporter(self.stdout, self.style)
         client = LeaflyClient(timeout=options['timeout'], retries=options['retries'])
@@ -78,23 +93,52 @@ class Command(BaseCommand):
             raise CommandError(str(exc)) from exc
 
         total = len(aliases)
-        results = {'created': 0, 'failed': 0, 'skipped': 0, 'dry-run': 0}
+        results = {'created': 0, 'failed': 0, 'skipped': 0, 'filtered': 0, 'dry-run': 0}
+        filtered_aliases: List[str] = []
 
         for index, alias in enumerate(aliases, start=1):
             reporter.info('start', f'[{index}/{total}] Importing {alias}')
             outcome = importer.import_alias(alias, dry_run=options['dry_run'])
             results[outcome] = results.get(outcome, 0) + 1
 
+            if outcome == 'filtered':
+                filtered_aliases.append(alias)
+
             if index < total and options['pause'] > 0:
                 time.sleep(options['pause'])
 
+        if filtered_aliases and not options['dry_run']:
+            self._append_to_skip_file(filtered_aliases, reporter)
+
         self.stdout.write('')
         self.stdout.write(self.style.SUCCESS('Import summary'))
-        self.stdout.write(f"Created: {results['created']}")
-        self.stdout.write(f"Skipped: {results['skipped']}")
-        self.stdout.write(f"Failed: {results['failed']}")
+        self.stdout.write(f"Created:  {results['created']}")
+        self.stdout.write(f"Skipped:  {results['skipped']}")
+        self.stdout.write(f"Filtered: {results['filtered']}")
+        self.stdout.write(f"Failed:   {results['failed']}")
         if options['dry_run']:
-            self.stdout.write(f"Dry-run: {results['dry-run']}")
+            self.stdout.write(f"Dry-run:  {results['dry-run']}")
+
+    def _append_to_skip_file(self, aliases: List[str], reporter) -> None:
+        """Append quality-filtered aliases to the persistent skip list."""
+        try:
+            SKIP_FILE.parent.mkdir(parents=True, exist_ok=True)
+            # Load existing entries to avoid duplicates
+            existing: set = set()
+            if SKIP_FILE.exists():
+                existing = {
+                    line.strip().lower()
+                    for line in SKIP_FILE.read_text().splitlines()
+                    if line.strip()
+                }
+            new_aliases = [a for a in aliases if a.lower() not in existing]
+            if new_aliases:
+                with SKIP_FILE.open('a') as f:
+                    for alias in new_aliases:
+                        f.write(alias + '\n')
+                reporter.info('skip-file', f'Appended {len(new_aliases)} filtered aliases → {SKIP_FILE}')
+        except OSError as exc:
+            reporter.warning('skip-file', f'Could not write skip file: {exc}')
 
     def _collect_aliases(self, options) -> List[str]:
         aliases = list(options['aliases'])

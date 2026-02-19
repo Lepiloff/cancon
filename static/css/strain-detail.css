@@ -475,3 +475,46 @@ h1.sd-name:before {
         max-width: 100%;
     }
 }
+/* ── AI Review Summary block ─────────────────────────────────────── */
+.sd-review-summary {
+    background: linear-gradient(135deg, #f0f7ea 0%, #e8f5e2 100%);
+    border: 1px solid #c8e6b8;
+    border-radius: 12px;
+    padding: 20px 24px;
+}
+
+.sd-review-summary__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #2d5a1b;
+    font-size: 1.05rem;
+}
+
+.sd-review-summary__icon {
+    color: #4a7c23;
+    flex-shrink: 0;
+}
+
+.sd-review-summary__badge {
+    margin-left: auto;
+    background: #4a7c23;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    line-height: 1.6;
+}
+
+.sd-review-summary__text {
+    color: #374151;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    margin-top: 10px;
+}
+
+.sd-review-summary__text p {
+    margin: 0;
+}
