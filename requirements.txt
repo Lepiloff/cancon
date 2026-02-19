@@ -21,6 +21,7 @@ iniconfig==2.3.0
 jmespath==1.0.1
 packaging==23.2
 loguru==0.7.3
+anthropic>=0.42.0
 openai==2.14.0
 Pillow==10.4.0
 pluggy==1.6.0

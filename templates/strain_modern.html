@@ -71,6 +71,27 @@
             </div>
         </div>
 
+        <!-- AI Review Summary -->
+        {% if strain.review_summary_en %}
+        {% get_current_language as LANGUAGE_CODE %}
+        <div class="sd-section sd-review-summary">
+            <h2 class="sd-section__title sd-review-summary__title">
+                <svg class="sd-review-summary__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                {% if LANGUAGE_CODE == 'en' %}Community Experience{% else %}Experiencia de la Comunidad{% endif %}
+                <span class="sd-review-summary__badge">AI</span>
+            </h2>
+            <div class="sd-review-summary__text">
+                {% if LANGUAGE_CODE == 'en' %}
+                    {{ strain.review_summary_en|safe }}
+                {% elif strain.review_summary_es %}
+                    {{ strain.review_summary_es|safe }}
+                {% else %}
+                    {{ strain.review_summary_en|safe }}
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Cannabinoids -->
         <div class="sd-section">
             <h2 class="sd-section__title">{% trans "Cannabinoides" %}</h2>

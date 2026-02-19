@@ -17,9 +17,9 @@ from apps.strains.models import (
     Flavor,
     Terpene,
 )
-from apps.strains.leafly_import import LeaflyCopywriter, CopywritingError
+from apps.strains.leafly_import import get_copywriter, CopywritingError
 from apps.strains.signals import perform_translation
-from apps.translation import OpenAITranslator
+from apps.translation import get_translator
 from apps.translation.base_translator import TranslationError
 
 
@@ -183,12 +183,12 @@ class StrainAdmin(TranslatedModelAdmin):
 
                 if action == 'generate':
                     try:
-                        copywriter = LeaflyCopywriter()
+                        copywriter = get_copywriter()
                         generated_en = copywriter.rewrite_raw_text(
                             source_text,
                             strain_name=strain.name if strain else None,
                         )
-                        translator = OpenAITranslator()
+                        translator = get_translator()
                         translations = translator.translate(
                             'Strain',
                             {'text_content': generated_en},

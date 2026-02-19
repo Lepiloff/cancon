@@ -13,7 +13,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q, Model
 
 from apps.strains.models import Strain, Article, Terpene
-from apps.translation import OpenAITranslator, TranslationConfig
+from apps.translation import TranslationConfig, get_translator
 from apps.translation.base_translator import TranslationError
 
 logger = logging.getLogger(__name__)
@@ -86,7 +86,7 @@ class Command(BaseCommand):
 
         # Initialize translator
         try:
-            translator = OpenAITranslator()
+            translator = get_translator()
             if not dry_run:
                 if not translator.validate_connection():
                     raise CommandError('Failed to validate OpenAI connection')
@@ -227,7 +227,7 @@ class Command(BaseCommand):
 
     def _translate_objects(
         self,
-        translator: OpenAITranslator,
+        translator,
         objects,
         model_name: str,
         source_lang: str,

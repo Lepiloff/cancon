@@ -8,7 +8,6 @@ from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
 import requests
 from bs4 import BeautifulSoup
-from openai import OpenAI, OpenAIError
 
 from django.db import transaction
 from django.db.models import Q
@@ -23,7 +22,7 @@ from apps.strains.models import (
     Strain,
     Terpene,
 )
-from apps.translation import OpenAITranslator, TranslationConfig
+from apps.translation import TranslationConfig, get_translator
 from apps.translation.base_translator import TranslationError
 
 
@@ -42,6 +41,11 @@ class LeaflyFetchError(Exception):
 
 
 class LeaflyParseError(Exception):
+    pass
+
+
+class LeaflySkipError(Exception):
+    """Raised when a strain has insufficient data and should be skipped."""
     pass
 
 
@@ -84,6 +88,13 @@ class LeaflyClient:
 
     def fetch(self, alias: str) -> str:
         url = f'https://www.leafly.com/strains/{alias}'
+        return self._get(url)
+
+    def fetch_reviews(self, alias: str) -> str:
+        url = f'https://www.leafly.com/strains/{alias}/reviews'
+        return self._get(url)
+
+    def _get(self, url: str) -> str:
         last_error = None
         for attempt in range(self.retries + 1):
             try:
@@ -120,6 +131,18 @@ class LeaflyParser:
     HELPS_WITH_LIMIT = 4
     TERPENES_LIMIT = 3
 
+    # Description quality thresholds — strains failing these are skipped
+    MIN_DESCRIPTION_LENGTH = 150
+    # Minimum reviews needed to generate an AI review summary (not a skip gate)
+    MIN_REVIEW_COUNT = 3
+    PLACEHOLDER_PATTERNS = (
+        "let us know",
+        "leave a review",
+        "if you've smoked",
+        "if you have smoked",
+        "before let us know",
+    )
+
     def parse(self, html: str) -> ParsedLeaflyStrain:
         next_data = self._parse_next_data(html)
         if next_data:
@@ -139,6 +162,8 @@ class LeaflyParser:
         description_text = self._parse_description_text(soup, name)
         if not description_text:
             raise LeaflyParseError('Unable to parse description text')
+
+        self._validate_strain_quality(description_text=description_text, name=name)
 
         rating = self._parse_rating(soup)
         thc = self._parse_percentage(soup, 'THC')
@@ -200,6 +225,65 @@ class LeaflyParser:
             flavors=flavors,
             terpenes=terpenes,
         )
+
+    def _validate_strain_quality(
+        self,
+        description_text: str,
+        name: str,
+        review_count: Optional[int] = None,
+    ) -> None:
+        """Raise LeaflySkipError if the strain description is insufficient for import.
+
+        Review count is NOT a skip gate — a strain with a good description but few
+        reviews is still worth importing (the AI review summary block will just be
+        omitted).  Only description quality determines import eligibility.
+        """
+        desc = (description_text or '').strip()
+        desc_lower = desc.lower()
+
+        if any(pattern in desc_lower for pattern in self.PLACEHOLDER_PATTERNS):
+            raise LeaflySkipError(
+                f'{name}: placeholder description detected'
+            )
+
+        if len(desc) < self.MIN_DESCRIPTION_LENGTH:
+            raise LeaflySkipError(
+                f'{name}: description too short ({len(desc)} chars, min {self.MIN_DESCRIPTION_LENGTH})'
+            )
+
+    def parse_reviews(self, html: str, limit: int = 5) -> List[str]:
+        """Extract user review texts from a Leafly /reviews page.
+
+        Returns a list of up to `limit` non-empty review body strings.
+        Falls back to HTML parsing if __NEXT_DATA__ is absent.
+        """
+        next_data = self._parse_next_data(html)
+        if next_data:
+            reviews = (
+                next_data.get('props', {})
+                .get('pageProps', {})
+                .get('reviews', [])
+            )
+            if isinstance(reviews, list):
+                texts = [
+                    str(r.get('text', '')).strip()
+                    for r in reviews
+                    if isinstance(r, dict) and str(r.get('text', '')).strip()
+                ]
+                return texts[:limit]
+
+        # HTML fallback: look for review text containers
+        soup = BeautifulSoup(html, 'html.parser')
+        texts = []
+        seen: set = set()
+        for node in soup.select('[data-testid="strain-review-body"], .review-body, .reviewBody'):
+            text = node.get_text(' ', strip=True)
+            if text and text.lower() not in seen:
+                seen.add(text.lower())
+                texts.append(text)
+            if len(texts) >= limit:
+                break
+        return texts
 
     def _parse_name(self, soup: BeautifulSoup) -> Optional[str]:
         heading = soup.find('h1')
@@ -273,17 +357,27 @@ class LeaflyParser:
 
         name = strain.get('name')
         category = strain.get('category')
-        if not name or not category:
-            return None
 
-        category = self.CATEGORY_MAP.get(str(category).lower(), category)
-        rating = self._parse_decimal_from_text(strain.get('rating'), Decimal('0.1'))
-
+        # Run quality check early — before structural validation — so sparse
+        # strains raise LeaflySkipError and don't fall through to HTML fallback.
         description_text = (
             strain.get('descriptionPlain')
             or self._strip_html(strain.get('description', ''))
         )
         description_text = str(description_text).strip()
+        review_count = int(strain.get('reviewCount') or 0)
+        if name or review_count:
+            self._validate_strain_quality(
+                description_text=description_text,
+                name=str(name).strip() if name else 'Unknown',
+                review_count=review_count,
+            )
+
+        if not name or not category:
+            return None
+
+        category = self.CATEGORY_MAP.get(str(category).lower(), category)
+        rating = self._parse_decimal_from_text(strain.get('rating'), Decimal('0.1'))
 
         cannabinoids = strain.get('cannabinoids', {}) or {}
         thc = self._parse_decimal_from_text(
@@ -516,132 +610,8 @@ class LeaflyParser:
             return None
 
 
-class LeaflyCopywriter:
-    SYSTEM_PROMPT = (
-        "You are a human editor maintaining a cannabis strain product database."
-        ""
-        "Task:"
-        "Rewrite the provided source description into ONE English paragraph for a product page."
-        ""
-        "Hard rules:"
-        "1) Use ONLY facts explicitly present in the source text."
-        "2) Preserve all strain names and genetics references EXACTLY as written."
-        "3) Output exactly one <p>...</p> block. Length should be close to target_length (+/-10%)."
-        "4) Do NOT include links, URLs, or brand mentions."
-        "5) Use only ASCII punctuation."
-        "6) Identify alternative names ONLY if explicitly stated as 'also known as' or 'aka'."
-        "7) Do not use any HTML tags other than the outer <p> tag."
-        ""
-        "Source note:"
-        "- The source text may be a merged excerpt from two different descriptions."
-        "- It can contain repeated or near-duplicate statements. Deduplicate aggressively."
-        "- It can contain conflicting claims (e.g., sleepy vs energetic). Do NOT reconcile; omit conflicting claims entirely."
-        "- When duplicates exist, prefer medically framed statements (conditions/symptoms/therapeutic context) if they are not contradicted."
-        "- Prefer details that are stated clearly and consistently across the text. If unsure, leave it out."
-        "- Do not mention that multiple sources were used."
-        "- Do NOT include market availability, legal/illegal market, pricing, or distribution context."
-        "- Geographic origin or breeding location is allowed ONLY if stated explicitly as origin/lineage/cultivation history."
-        "Examples:"
-        "- EXCLUDE: \"Skywalker is most commonly found on the West Coast, in Arizona, and in Colorado. "
-        "But it's relatively easy to find on any legal market, as well as the black market in many parts of the country.\""
-        "- ALLOW: \"This strain was first cultivated in California.\""
-        ""
-        "Language constraints:"
-        "- Do NOT use promotional or marketing language."
-        "- Avoid generic SEO phrases such as 'popular choice', 'ideal', 'renowned', or similar wording."
-        "- Do NOT summarize or conclude the paragraph."
-        ""
-        "Style constraints:"
-        "- Write like a human editor updating a product catalog entry."
-        "- Do NOT use an educational or encyclopedic tone."
-        "- Sentence structure should feel slightly uneven."
-        "- Vary sentence length noticeably."
-        "- One sentence may be short or slightly imperfect."
-        "- Avoid perfectly balanced or symmetrical phrasing."
-        "- Do NOT start sentences with 'With', 'Although', or 'However'."
-        ""
-        "Output format:"
-        "Return ONLY a JSON object with the following keys:"
-        "- text_content (string, containing the <p>...</p> paragraph)"
-        "- img_alt_text (string, factual, 8-14 words, no hype or adjectives)"
-        "- alternative_names (array of strings)"
-    )
-    def __init__(self):
-        TranslationConfig.validate()
-        self.client = OpenAI(
-            api_key=TranslationConfig.OPENAI_API_KEY,
-            timeout=TranslationConfig.OPENAI_TIMEOUT,
-        )
-        self.model = TranslationConfig.OPENAI_MODEL
-        self.temperature = TranslationConfig.OPENAI_TEMPERATURE
-        self.max_tokens = TranslationConfig.OPENAI_MAX_TOKENS
-
-    def rewrite(self, parsed: ParsedLeaflyStrain) -> Dict[str, object]:
-        payload = {
-            'strain_name': parsed.name,
-            'category': parsed.category,
-            'rating': str(parsed.rating) if parsed.rating is not None else None,
-            'thc': str(parsed.thc) if parsed.thc is not None else None,
-            'cbd': str(parsed.cbd) if parsed.cbd is not None else None,
-            'cbg': str(parsed.cbg) if parsed.cbg is not None else None,
-            'feelings': parsed.feelings,
-            'negatives': parsed.negatives,
-            'helps_with': parsed.helps_with,
-            'flavors': parsed.flavors,
-            'terpenes': parsed.terpenes,
-            'description_source': parsed.description_text,
-            'target_length': len(parsed.description_text),
-        }
-        system_prompt = self.SYSTEM_PROMPT
-
-        user_prompt = json.dumps(payload, ensure_ascii=False, indent=2)
-
-        try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-                temperature=self.temperature,
-                max_tokens=self.max_tokens,
-            )
-        except OpenAIError as exc:
-            raise CopywritingError(str(exc)) from exc
-
-        content = response.choices[0].message.content.strip()
-        return self._parse_copywriter_output(content, primary_name=parsed.name)
-
-    def rewrite_raw_text(self, source_text: str, strain_name: Optional[str] = None) -> str:
-        source_text = (source_text or '').strip()
-        if not source_text:
-            raise CopywritingError('Source text is empty')
-
-        payload = {
-            'strain_name': strain_name or '',
-            'description_source': source_text,
-            'target_length': len(source_text),
-        }
-        system_prompt = self.SYSTEM_PROMPT
-
-        user_prompt = json.dumps(payload, ensure_ascii=False, indent=2)
-
-        try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-                temperature=self.temperature,
-                max_tokens=self.max_tokens,
-            )
-        except OpenAIError as exc:
-            raise CopywritingError(str(exc)) from exc
-
-        content = response.choices[0].message.content.strip()
-        output = self._parse_copywriter_output(content, primary_name=strain_name or '')
-        return output['text_content']
+class _CopywriterOutputMixin:
+    """Shared output parsing logic for copywriter implementations."""
 
     def _parse_copywriter_output(
         self,
@@ -725,15 +695,296 @@ class LeaflyCopywriter:
             cleaned.append(name)
         return cleaned
 
+    def _build_payload(self, parsed: ParsedLeaflyStrain) -> str:
+        payload = {
+            'strain_name': parsed.name,
+            'category': parsed.category,
+            'rating': str(parsed.rating) if parsed.rating is not None else None,
+            'thc': str(parsed.thc) if parsed.thc is not None else None,
+            'cbd': str(parsed.cbd) if parsed.cbd is not None else None,
+            'cbg': str(parsed.cbg) if parsed.cbg is not None else None,
+            'feelings': parsed.feelings,
+            'negatives': parsed.negatives,
+            'helps_with': parsed.helps_with,
+            'flavors': parsed.flavors,
+            'terpenes': parsed.terpenes,
+            'description_source': parsed.description_text,
+            'target_length': len(parsed.description_text),
+        }
+        return json.dumps(payload, ensure_ascii=False, indent=2)
 
-class TaxonomyTranslator:
+
+COPYWRITER_SYSTEM_PROMPT = (
+    "You are a human editor maintaining a cannabis strain product database."
+    ""
+    "Task:"
+    "Rewrite the provided source description into ONE English paragraph for a product page."
+    ""
+    "Hard rules:"
+    "1) Use ONLY facts explicitly present in the source text."
+    "2) Preserve all strain names and genetics references EXACTLY as written."
+    "3) Output exactly one <p>...</p> block. Length should be close to target_length (+/-10%)."
+    "4) Do NOT include links, URLs, or brand mentions."
+    "5) Use only ASCII punctuation."
+    "6) Identify alternative names ONLY if explicitly stated as 'also known as' or 'aka'."
+    "7) Do not use any HTML tags other than the outer <p> tag."
+    ""
+    "Source note:"
+    "- The source text may be a merged excerpt from two different descriptions."
+    "- It can contain repeated or near-duplicate statements. Deduplicate aggressively."
+    "- It can contain conflicting claims (e.g., sleepy vs energetic). Do NOT reconcile; omit conflicting claims entirely."
+    "- When duplicates exist, prefer medically framed statements (conditions/symptoms/therapeutic context) if they are not contradicted."
+    "- Prefer details that are stated clearly and consistently across the text. If unsure, leave it out."
+    "- Do not mention that multiple sources were used."
+    "- Do NOT include market availability, legal/illegal market, pricing, or distribution context."
+    "- Geographic origin or breeding location is allowed ONLY if stated explicitly as origin/lineage/cultivation history."
+    "Examples:"
+    "- EXCLUDE: \"Skywalker is most commonly found on the West Coast, in Arizona, and in Colorado. "
+    "But it's relatively easy to find on any legal market, as well as the black market in many parts of the country.\""
+    "- ALLOW: \"This strain was first cultivated in California.\""
+    ""
+    "Language constraints:"
+    "- Do NOT use promotional or marketing language."
+    "- Avoid generic SEO phrases such as 'popular choice', 'ideal', 'renowned', or similar wording."
+    "- Do NOT summarize or conclude the paragraph."
+    ""
+    "Style constraints:"
+    "- Write like a human editor updating a product catalog entry."
+    "- Do NOT use an educational or encyclopedic tone."
+    "- Sentence structure should feel slightly uneven."
+    "- Vary sentence length noticeably."
+    "- One sentence may be short or slightly imperfect."
+    "- Avoid perfectly balanced or symmetrical phrasing."
+    "- Do NOT start sentences with 'With', 'Although', or 'However'."
+    ""
+    "Output format:"
+    "Return ONLY a JSON object with the following keys:"
+    "- text_content (string, containing the <p>...</p> paragraph)"
+    "- img_alt_text (string, factual, 8-14 words, no hype or adjectives)"
+    "- alternative_names (array of strings)"
+)
+
+TAXONOMY_SYSTEM_PROMPT = (
+    "Translate cannabis taxonomy terms from English to Spanish.\n"
+    "Rules:\n"
+    "1. Keep acronyms unchanged (e.g., PTSD, ADD/ADHD).\n"
+    "2. Return JSON mapping each input term to its Spanish translation.\n"
+    "3. Use only ASCII punctuation.\n"
+    "4. Do not add extra keys.\n"
+)
+
+REVIEW_SUMMARY_SYSTEM_PROMPT = (
+    "You are an editor summarizing real user cannabis strain reviews for a product page.\n"
+    "\n"
+    "Task:\n"
+    "Read the provided user reviews and write ONE concise English paragraph summarizing "
+    "what users actually experienced with this strain.\n"
+    "\n"
+    "Hard rules:\n"
+    "1) Base the summary ONLY on what users explicitly reported in the reviews.\n"
+    "2) Do NOT invent, assume, or add facts not present in the reviews.\n"
+    "3) Write in the third person: 'Users report...', 'Reviewers noted...', etc.\n"
+    "4) Wrap the paragraph in <p>...</p> tags. No other HTML.\n"
+    "5) Length: 40-80 words.\n"
+    "6) Use only ASCII punctuation.\n"
+    "7) Do NOT mention Leafly, review counts, or specific usernames.\n"
+    "8) Do NOT use marketing language. Write plainly and factually.\n"
+    "\n"
+    "Output format:\n"
+    "Return ONLY the <p>...</p> paragraph — no JSON, no extra text.\n"
+)
+
+
+class LeaflyCopywriter(_CopywriterOutputMixin):
+    SYSTEM_PROMPT = COPYWRITER_SYSTEM_PROMPT
+
     def __init__(self):
         TranslationConfig.validate()
+        from openai import OpenAI
         self.client = OpenAI(
             api_key=TranslationConfig.OPENAI_API_KEY,
             timeout=TranslationConfig.OPENAI_TIMEOUT,
         )
         self.model = TranslationConfig.OPENAI_MODEL
+        self.temperature = TranslationConfig.OPENAI_TEMPERATURE
+        self.max_tokens = TranslationConfig.OPENAI_MAX_TOKENS
+
+    def rewrite(self, parsed: ParsedLeaflyStrain) -> Dict[str, object]:
+        from openai import OpenAIError
+        user_prompt = self._build_payload(parsed)
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": self.SYSTEM_PROMPT},
+                    {"role": "user", "content": user_prompt},
+                ],
+                temperature=self.temperature,
+                max_tokens=self.max_tokens,
+            )
+        except OpenAIError as exc:
+            raise CopywritingError(str(exc)) from exc
+
+        content = response.choices[0].message.content.strip()
+        return self._parse_copywriter_output(content, primary_name=parsed.name)
+
+    def rewrite_raw_text(self, source_text: str, strain_name: Optional[str] = None) -> str:
+        from openai import OpenAIError
+        source_text = (source_text or '').strip()
+        if not source_text:
+            raise CopywritingError('Source text is empty')
+
+        payload = json.dumps({
+            'strain_name': strain_name or '',
+            'description_source': source_text,
+            'target_length': len(source_text),
+        }, ensure_ascii=False, indent=2)
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": self.SYSTEM_PROMPT},
+                    {"role": "user", "content": payload},
+                ],
+                temperature=self.temperature,
+                max_tokens=self.max_tokens,
+            )
+        except OpenAIError as exc:
+            raise CopywritingError(str(exc)) from exc
+
+        content = response.choices[0].message.content.strip()
+        output = self._parse_copywriter_output(content, primary_name=strain_name or '')
+        return output['text_content']
+
+    def summarize_reviews(self, reviews: List[str], strain_name: str) -> str:
+        """Generate an AI review summary from a list of user review texts."""
+        from openai import OpenAIError
+        reviews = [r.strip() for r in reviews if r.strip()]
+        if not reviews:
+            raise CopywritingError('No review texts provided for summarization')
+
+        numbered = '\n'.join(f'{i + 1}. {r}' for i, r in enumerate(reviews))
+        prompt = f'Strain: {strain_name}\n\nUser reviews:\n{numbered}'
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": REVIEW_SUMMARY_SYSTEM_PROMPT},
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=self.temperature,
+                max_tokens=300,
+            )
+        except OpenAIError as exc:
+            raise CopywritingError(str(exc)) from exc
+
+        text = response.choices[0].message.content.strip()
+        return self._ensure_paragraph(self._normalize_ascii_punctuation(text))
+
+
+class ClaudeCopywriter(_CopywriterOutputMixin):
+    """Claude-based copywriter — drop-in replacement for LeaflyCopywriter."""
+    SYSTEM_PROMPT = COPYWRITER_SYSTEM_PROMPT
+
+    def __init__(self):
+        TranslationConfig.validate()
+        import anthropic
+        self.client = anthropic.Anthropic(
+            api_key=TranslationConfig.ANTHROPIC_API_KEY,
+            timeout=TranslationConfig.OPENAI_TIMEOUT,
+        )
+        self.model = TranslationConfig.ANTHROPIC_MODEL
+        self.temperature = TranslationConfig.OPENAI_TEMPERATURE
+        self.max_tokens = TranslationConfig.OPENAI_MAX_TOKENS
+
+    def rewrite(self, parsed: ParsedLeaflyStrain) -> Dict[str, object]:
+        import anthropic
+        user_prompt = self._build_payload(parsed)
+        try:
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                system=self.SYSTEM_PROMPT,
+                messages=[{"role": "user", "content": user_prompt}],
+            )
+        except anthropic.APIError as exc:
+            raise CopywritingError(str(exc)) from exc
+
+        content = response.content[0].text.strip()
+        return self._parse_copywriter_output(content, primary_name=parsed.name)
+
+    def rewrite_raw_text(self, source_text: str, strain_name: Optional[str] = None) -> str:
+        import anthropic
+        source_text = (source_text or '').strip()
+        if not source_text:
+            raise CopywritingError('Source text is empty')
+
+        payload = json.dumps({
+            'strain_name': strain_name or '',
+            'description_source': source_text,
+            'target_length': len(source_text),
+        }, ensure_ascii=False, indent=2)
+
+        try:
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                system=self.SYSTEM_PROMPT,
+                messages=[{"role": "user", "content": payload}],
+            )
+        except anthropic.APIError as exc:
+            raise CopywritingError(str(exc)) from exc
+
+        content = response.content[0].text.strip()
+        output = self._parse_copywriter_output(content, primary_name=strain_name or '')
+        return output['text_content']
+
+    def summarize_reviews(self, reviews: List[str], strain_name: str) -> str:
+        """Generate an AI review summary from a list of user review texts."""
+        import anthropic
+        reviews = [r.strip() for r in reviews if r.strip()]
+        if not reviews:
+            raise CopywritingError('No review texts provided for summarization')
+
+        numbered = '\n'.join(f'{i + 1}. {r}' for i, r in enumerate(reviews))
+        prompt = f'Strain: {strain_name}\n\nUser reviews:\n{numbered}'
+        try:
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=300,
+                temperature=self.temperature,
+                system=REVIEW_SUMMARY_SYSTEM_PROMPT,
+                messages=[{"role": "user", "content": prompt}],
+            )
+        except anthropic.APIError as exc:
+            raise CopywritingError(str(exc)) from exc
+
+        text = response.content[0].text.strip()
+        return self._ensure_paragraph(self._normalize_ascii_punctuation(text))
+
+
+class TaxonomyTranslator:
+    def __init__(self):
+        TranslationConfig.validate()
+        if TranslationConfig.LLM_PROVIDER == 'anthropic':
+            import anthropic
+            self._provider = 'anthropic'
+            self._client = anthropic.Anthropic(
+                api_key=TranslationConfig.ANTHROPIC_API_KEY,
+                timeout=TranslationConfig.OPENAI_TIMEOUT,
+            )
+            self.model = TranslationConfig.ANTHROPIC_MODEL
+        else:
+            from openai import OpenAI
+            self._provider = 'openai'
+            self._client = OpenAI(
+                api_key=TranslationConfig.OPENAI_API_KEY,
+                timeout=TranslationConfig.OPENAI_TIMEOUT,
+            )
+            self.model = TranslationConfig.OPENAI_MODEL
         self.temperature = 0.2
         self.max_tokens = 500
 
@@ -742,30 +993,33 @@ class TaxonomyTranslator:
         if not terms:
             return {}
 
-        system_prompt = (
-            "Translate cannabis taxonomy terms from English to Spanish.\n"
-            "Rules:\n"
-            "1. Keep acronyms unchanged (e.g., PTSD, ADD/ADHD).\n"
-            "2. Return JSON mapping each input term to its Spanish translation.\n"
-            "3. Use only ASCII punctuation.\n"
-            "4. Do not add extra keys.\n"
-        )
+        system_prompt = TAXONOMY_SYSTEM_PROMPT
         user_prompt = json.dumps({'terms': terms}, ensure_ascii=False, indent=2)
 
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-                temperature=self.temperature,
-                max_tokens=self.max_tokens,
-            )
-        except OpenAIError as exc:
+            if self._provider == 'anthropic':
+                response = self._client.messages.create(
+                    model=self.model,
+                    max_tokens=self.max_tokens,
+                    temperature=self.temperature,
+                    system=system_prompt,
+                    messages=[{"role": "user", "content": user_prompt}],
+                )
+                content = response.content[0].text.strip()
+            else:
+                response = self._client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt},
+                    ],
+                    temperature=self.temperature,
+                    max_tokens=self.max_tokens,
+                )
+                content = response.choices[0].message.content.strip()
+        except Exception as exc:
             raise TaxonomyTranslationError(str(exc)) from exc
 
-        content = response.choices[0].message.content.strip()
         content = _strip_code_fences(content)
 
         try:
@@ -784,6 +1038,13 @@ class TaxonomyTranslator:
         return output
 
 
+def get_copywriter():
+    """Factory: return the copywriter matching LLM_PROVIDER env var."""
+    if TranslationConfig.LLM_PROVIDER == 'anthropic':
+        return ClaudeCopywriter()
+    return LeaflyCopywriter()
+
+
 class StrainPersister:
     def __init__(self, taxonomy_translator: TaxonomyTranslator, reporter=None):
         self.taxonomy_translator = taxonomy_translator
@@ -799,6 +1060,7 @@ class StrainPersister:
         parsed: ParsedLeaflyStrain,
         copywriting: Dict[str, object],
         translations: Dict[str, str],
+        review_summary: Optional[Dict[str, str]] = None,
     ) -> Strain:
         with transaction.atomic():
             strain = Strain(
@@ -834,6 +1096,10 @@ class StrainPersister:
             strain.keywords_es = f'{parsed.name}, cannabis, variedad, efectos, sabores'
             strain.text_content_es = translations.get('text_content', '')
             strain.img_alt_text_es = translations.get('img_alt_text', '')
+
+            if review_summary:
+                strain.review_summary_en = review_summary.get('en', '')
+                strain.review_summary_es = review_summary.get('es', '')
 
             strain.translation_status = 'synced'
             strain.translation_source_hash = strain.get_translatable_content_hash()
@@ -1017,15 +1283,15 @@ class LeaflyImporter:
         reporter,
         client: Optional[LeaflyClient] = None,
         parser: Optional[LeaflyParser] = None,
-        copywriter: Optional[LeaflyCopywriter] = None,
-        translator: Optional[OpenAITranslator] = None,
+        copywriter=None,
+        translator=None,
         taxonomy_translator: Optional[TaxonomyTranslator] = None,
     ):
         self.reporter = reporter
         self.client = client or LeaflyClient()
         self.parser = parser or LeaflyParser()
-        self.copywriter = copywriter or LeaflyCopywriter()
-        self.translator = translator or OpenAITranslator()
+        self.copywriter = copywriter or get_copywriter()
+        self.translator = translator or get_translator()
         self.taxonomy_translator = taxonomy_translator or TaxonomyTranslator()
         self.persister = StrainPersister(self.taxonomy_translator, reporter=reporter)
 
@@ -1048,6 +1314,9 @@ class LeaflyImporter:
         try:
             parsed = self.parser.parse(html)
             self.reporter.success('parse', f'Parsed {parsed.name}')
+        except LeaflySkipError as exc:
+            self.reporter.warning('skip', f'{alias} - {exc}')
+            return 'filtered'
         except LeaflyParseError as exc:
             self.reporter.error('parse', f'{alias} - {exc}')
             return 'failed'
@@ -1078,18 +1347,58 @@ class LeaflyImporter:
             self.reporter.error('translate', f'{parsed.name} - {exc}')
             return 'failed'
 
+        # Optional: fetch and summarize community reviews (non-fatal)
+        review_summary = self._fetch_review_summary(alias, parsed.name)
+
         if dry_run:
             self.reporter.info('save', f'Dry run - skipping save for {parsed.name}')
             return 'dry-run'
 
         try:
-            strain = self.persister.persist(parsed, copywriting, translations)
+            strain = self.persister.persist(parsed, copywriting, translations, review_summary)
             self.reporter.success('save', f'Saved {strain.name} (ID {strain.id})')
         except Exception as exc:
             self.reporter.error('save', f'{parsed.name} - {exc}')
             return 'failed'
 
         return 'created'
+
+    def _fetch_review_summary(
+        self, alias: str, strain_name: str
+    ) -> Optional[Dict[str, str]]:
+        """Fetch reviews page, extract texts, generate AI summary. Returns None on any failure."""
+        try:
+            html = self.client.fetch_reviews(alias)
+        except LeaflyFetchError as exc:
+            self.reporter.warning('reviews', f'{alias}: could not fetch reviews — {exc}')
+            return None
+
+        reviews = self.parser.parse_reviews(html, limit=5)
+        if len(reviews) < self.parser.MIN_REVIEW_COUNT:
+            self.reporter.info(
+                'reviews',
+                f'{strain_name}: {len(reviews)} reviews (need {self.parser.MIN_REVIEW_COUNT}), skipping summary',
+            )
+            return None
+
+        try:
+            summary_en = self.copywriter.summarize_reviews(reviews, strain_name)
+        except CopywritingError as exc:
+            self.reporter.warning('reviews', f'{strain_name}: summary generation failed — {exc}')
+            return None
+
+        # Translate summary to Spanish
+        try:
+            translated = self.translator.translate(
+                'Strain', {'review_summary': summary_en}, 'en', 'es'
+            )
+            summary_es = translated.get('review_summary', '')
+        except Exception as exc:
+            self.reporter.warning('reviews', f'{strain_name}: summary translation failed — {exc}')
+            summary_es = ''
+
+        self.reporter.success('reviews', f'{strain_name}: AI review summary generated ({len(reviews)} reviews)')
+        return {'en': summary_en, 'es': summary_es}
 
     def _translate_fields(self, copywriting: Dict[str, object]) -> Dict[str, str]:
         fields = {

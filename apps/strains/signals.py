@@ -12,7 +12,7 @@ from django.dispatch import receiver
 from django.conf import settings
 
 from apps.strains.models import Strain, Article, Terpene
-from apps.translation import OpenAITranslator, TranslationConfig
+from apps.translation import TranslationConfig, get_translator
 from apps.translation.base_translator import TranslationError
 
 logger = logging.getLogger(__name__)
@@ -102,7 +102,7 @@ def perform_translation(instance, model_name: str) -> bool:
         )
 
         # Initialize translator and translate
-        translator = OpenAITranslator()
+        translator = get_translator()
         translations = translator.translate(
             model_name,
             fields_to_translate,
