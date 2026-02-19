@@ -1,5 +1,3 @@
-version: '3.10'
-
 networks:
   canna-network:
     driver: bridge

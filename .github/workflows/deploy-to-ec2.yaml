@@ -30,10 +30,10 @@ jobs:
           CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
           echo "Changed files: $CHANGED_FILES"
           if [[ "$CHANGED_FILES" == *"Dockerfile"* || "$CHANGED_FILES" == *"requirements.txt"* ]]; then
-            echo "::set-output name=rebuild::true"
+            echo "rebuild=true" >> $GITHUB_OUTPUT
             echo "Changes detected in Dockerfile or requirements.txt."
           else
-            echo "::set-output name=rebuild::false"
+            echo "rebuild=false" >> $GITHUB_OUTPUT
             echo "No changes in Dockerfile or requirements.txt."
           fi
         shell: bash
@@ -55,7 +55,8 @@ jobs:
             cd /home/ubuntu/cancon
             echo "Navigated to project directory."
             docker compose down
-            git pull origin master
+            git fetch origin
+            git reset --hard origin/master
             if [ "${{ steps.check_changes.outputs.rebuild }}" == "true" ]; then
               echo "Rebuilding Docker containers."
               docker compose build --no-cache
@@ -67,7 +68,4 @@ jobs:
             echo "Collecting static files to S3..."
             docker compose exec -T web python manage.py collectstatic --noinput
             echo "Static files collected successfully."
-            echo "Compiling translation messages..."
-            docker compose exec -T web python manage.py compilemessages
-            echo "Translation messages compiled successfully."
           EOF
