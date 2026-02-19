@@ -238,14 +238,14 @@
 	                // AI Promo translations
 	                const AI_PROMO_TRANSLATIONS = {
 	                    en: {
-	                        title: 'AI Assistant for Cannabis Strain Selection',
-	                        description: 'Personalized recommendations based on effects and terpenes',
-	                        button: '👉 Start Selection'
+	                        title: 'AI Budtender: Your Personal Cannabis Advisor',
+	                        description: 'Tell the AI Budtender what you need: relaxation, creativity, pain relief, better sleep, and get instant strain recommendations backed by terpene and cannabinoid data.',
+	                        button: 'Ask the AI Budtender'
 	                    },
 	                    es: {
-	                        title: 'Asistente IA para Selección de Cepas de Cannabis',
-	                        description: 'Recomendaciones personalizadas basadas en efectos y terpenos',
-	                        button: '👉 Comenzar Selección'
+	                        title: 'AI Budtender: Tu Asesor Personal de Cannabis',
+	                        description: 'Dile al AI Budtender lo que necesitas: relajacion, creatividad, alivio del dolor, mejor sueno, y obtiene recomendaciones de variedades basadas en terpenos y cannabinoides.',
+	                        button: 'Pregunta al AI Budtender'
 	                    }
 	                };
 
@@ -264,7 +264,7 @@
 	                    const promoSection = document.querySelector('.ai-promo');
 	                    if (promoSection) {
 	                        const title = promoSection.querySelector('h2');
-	                        const description = promoSection.querySelector('h3');
+	                        const description = promoSection.querySelector('.ai-promo__content p');
 	                        const button = promoSection.querySelector('.ai-promo__btn');
 
 	                        if (title) title.textContent = translations.title;

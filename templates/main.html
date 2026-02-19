@@ -2,45 +2,68 @@
 {% load static %}
 {% load i18n %}
 {% block title %}
-    {% trans "Cepas de Marihuana: Catálogo Exhaustivo y Recursos Informativos en Cannamente" %}
+    {% trans "AI Budtender y Base de Datos de Variedades de Cannabis | Cannamente" %}
 {% endblock %}
 
 {% block keywords %}
-
+    {% trans "AI budtender, variedades de cannabis, marihuana, recomendaciones de cannabis, buscador de variedades, terpenos, THC, CBD" %}
 {% endblock %}
 
 {% block description %}
-   {% trans "Descubre el mundo de la marihuana con Cannamente: un catálogo exhaustivo de cepas y artículos educativos para expandir tus conocimientos. Únete a nosotros en esta exploración." %}{% endblock %}
+    {% trans "Conoce al AI Budtender: recomendaciones personalizadas de variedades de cannabis con inteligencia artificial. Mas de 500 variedades con efectos, terpenos y datos de THC/CBD." %}{% endblock %}
 
-{% block og_title %}{% trans "Cepas de Marihuana: Catálogo Exhaustivo y Recursos Informativos en Cannamente" %}{% endblock %}
-{% block og_description %}{% trans "Descubre el mundo de la marihuana con Cannamente: un catálogo exhaustivo de cepas y artículos educativos para expandir tus conocimientos." %}{% endblock %}
-{% block twitter_title %}{% trans "Cepas de Marihuana: Catálogo Exhaustivo y Recursos Informativos en Cannamente" %}{% endblock %}
-{% block twitter_description %}{% trans "Descubre el mundo de la marihuana con Cannamente: un catálogo exhaustivo de cepas y artículos educativos para expandir tus conocimientos." %}{% endblock %}
+{% block og_title %}{% trans "AI Budtender y Base de Datos de Variedades de Cannabis | Cannamente" %}{% endblock %}
+{% block og_description %}{% trans "Recomendaciones personalizadas de variedades de cannabis con nuestro AI Budtender. Explora por efectos, terpenos y niveles de THC/CBD." %}{% endblock %}
+{% block twitter_title %}{% trans "AI Budtender y Base de Datos de Variedades de Cannabis | Cannamente" %}{% endblock %}
+{% block twitter_description %}{% trans "Recomendaciones personalizadas de variedades de cannabis con nuestro AI Budtender. Explora por efectos, terpenos y niveles de THC/CBD." %}{% endblock %}
 {% block content %}
+    {% if ENABLE_AI_CHAT %}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "AI Budtender by Cannamente",
+        "applicationCategory": "HealthApplication",
+        "operatingSystem": "Web",
+        "description": "{% trans "AI-powered cannabis strain recommendation engine. Get personalized suggestions based on desired effects, flavors, terpenes, and medical needs." %}",
+        "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "provider": {
+            "@type": "Organization",
+            "name": "Cannamente",
+            "url": "{{ request.scheme }}://{{ request.get_host }}"
+        }
+    }
+    </script>
+    {% endif %}
     <div class="container flex-grow">
        {% block intro %}
         <section class="intro-section">
             <div class="text-content">
-                <h1>{% trans "Cannamente: Tu Guía Completa de Cepas de Marihuana" %}</h1>
-                <p class="intro-description">{% trans "Explora nuestra extensa colección de cepas de marihuana y sumérgete en nuestro recurso informativo para expandir tus conocimientos. Con Cannamente, podrás encontrar la cepa perfecta según tus necesidades y gustos. Comienza tu viaje ahora." %}</p>
+                <h1>{% trans "AI Budtender: Encuentra tu Variedad de Cannabis Perfecta" %}</h1>
+                <p class="intro-description">{% trans "Cannamente combina una base de datos completa de variedades de cannabis con un AI Budtender que recomienda variedades segun tus efectos, sabores y necesidades. Describe lo que buscas y obtiene recomendaciones instantaneas y personalizadas." %}</p>
                 <div class="text-center">
                     <a href="{% url 'strain_list' %}" class="btn">{% trans "Ver todas las cepas" %}</a>
                 </div>
             </div>
             <div class="image-container">
-                <img src="{% static 'img/footer.svg' %}" alt="" width="400" height="300" loading="lazy" decoding="async">
+                <img src="{% static 'img/footer.svg' %}" alt="{% trans 'Herramienta AI Budtender para recomendar variedades de cannabis' %}" width="400" height="300" loading="lazy" decoding="async">
             </div>
         </section>
         {% endblock intro %}
         {% if ENABLE_AI_CHAT %}
         <section class="ai-promo">
-            <img src="{% static 'img/cannamente_bg_THC_CBD_1140x320.png' %}" alt="" class="ai-promo__bg">
+            <img src="{% static 'img/cannamente_bg_THC_CBD_1140x320.png' %}" alt="{% trans 'AI Budtender - recomendaciones personalizadas de cannabis' %}" class="ai-promo__bg">
             <div class="ai-promo__content">
-                <h2>Asistente IA para Selección de Cepas de Cannabis</h2>
-                <h3>Recomendaciones personalizadas basadas en efectos y terpenos</h3>
-                <button class="ai-promo__btn" id="ai-promo-start-btn">👉 Comenzar Selección</button>
+                <h2>{% trans "AI Budtender: Tu Asesor Personal de Cannabis" %}</h2>
+                <p class="ai-promo__desc">{% trans "Dile al AI Budtender lo que necesitas: relajacion, creatividad, alivio del dolor, mejor sueno, y obtiene recomendaciones de variedades basadas en terpenos y cannabinoides." %}</p>
+                <button class="ai-promo__btn" id="ai-promo-start-btn">{% trans "Pregunta al AI Budtender" %}</button>
             </div>
-            <img src="{% static 'img/mascot_cutout (1).png' %}" alt="" class="ai-promo__mascot">
+            <img src="{% static 'img/mascot_cutout (1).png' %}" alt="{% trans 'Mascota AI Budtender de Cannamente' %}" class="ai-promo__mascot">
         </section>
         {% endif %}
     	<div class="h2">{% trans "Artículos" %}</div>
@@ -94,7 +117,7 @@
 
 {% block footer_col_2 %}
     <div class="footer_col footer_col--2">
-{% trans "Bienvenidos a nuestro catálogo dedicado a las cepas de marihuana. Descubre descripciones detalladas y amplía tu conocimiento con nuestros artículos educativos. Sumérgete en el mundo fascinante de la marihuana con nosotros." %}
+{% trans "Cannamente es una base de datos de variedades de cannabis con un AI Budtender que te da recomendaciones personalizadas. Explora variedades, perfiles de terpenos y encuentra dispensarios cerca de ti." %}
     </div>
 {% endblock footer_col_2 %}
 

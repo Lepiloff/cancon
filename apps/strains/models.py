@@ -59,6 +59,8 @@ class Strain(BaseText, TranslationMixin):
     top = models.BooleanField(default=False)
     main = models.BooleanField(default=False)
     is_review = models.BooleanField(default=False)
+    review_summary_en = models.TextField(blank=True, null=True)
+    review_summary_es = models.TextField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
         if not self.slug:

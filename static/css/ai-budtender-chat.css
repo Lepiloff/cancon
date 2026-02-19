@@ -447,7 +447,7 @@
   height: 320px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   overflow: hidden;
   margin: 20px 0 30px;
   border-radius: 12px;
@@ -477,6 +477,8 @@
   text-align: center;
   padding: 0 40px;
   margin-top: -60px;
+  max-width: 58%;
+  margin-left: 5%;
 }
 
 .ai-promo__content h2 {
@@ -494,6 +496,13 @@
   color: #555;
   border: none;
   padding-bottom: 0;
+}
+
+.ai-promo__desc {
+  margin: 0 0 24px;
+  font-size: 15px;
+  font-weight: 400;
+  color: #555;
 }
 
 .ai-promo__btn {
