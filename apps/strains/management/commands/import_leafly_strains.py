@@ -94,21 +94,21 @@ class Command(BaseCommand):
 
         total = len(aliases)
         results = {'created': 0, 'failed': 0, 'skipped': 0, 'filtered': 0, 'dry-run': 0}
-        filtered_aliases: List[str] = []
+        exclude_aliases: List[str] = []  # aliases to add to skip file (filtered + skipped-by-name-mismatch)
 
         for index, alias in enumerate(aliases, start=1):
             reporter.info('start', f'[{index}/{total}] Importing {alias}')
             outcome = importer.import_alias(alias, dry_run=options['dry_run'])
             results[outcome] = results.get(outcome, 0) + 1
 
-            if outcome == 'filtered':
-                filtered_aliases.append(alias)
+            if outcome in ('filtered', 'skipped'):
+                exclude_aliases.append(alias)
 
             if index < total and options['pause'] > 0:
                 time.sleep(options['pause'])
 
-        if filtered_aliases and not options['dry_run']:
-            self._append_to_skip_file(filtered_aliases, reporter)
+        if exclude_aliases and not options['dry_run']:
+            self._append_to_skip_file(exclude_aliases, reporter)
 
         self.stdout.write('')
         self.stdout.write(self.style.SUCCESS('Import summary'))
