@@ -135,6 +135,9 @@ class LeaflyParser:
     MIN_DESCRIPTION_LENGTH = 150
     # Minimum reviews needed to generate an AI review summary (not a skip gate)
     MIN_REVIEW_COUNT = 3
+    # Strains with fewer editorial chars but ≥ this many reviews are still imported;
+    # the review summary compensates for the thin description.
+    MIN_REVIEW_COUNT_FOR_IMPORT = 5
     PLACEHOLDER_PATTERNS = (
         "let us know",
         "leave a review",
@@ -145,11 +148,30 @@ class LeaflyParser:
 
     def parse(self, html: str) -> ParsedLeaflyStrain:
         next_data = self._parse_next_data(html)
+        review_count_fallback = 0
         if next_data:
             parsed = self._parse_from_next_data(next_data)
             if parsed:
                 return parsed
 
+            # __NEXT_DATA__ is present but has no editorial description (warhead-
+            # type strains). Try a hybrid parse: scored effects/terpenes/flavors
+            # come from __NEXT_DATA__, description is extracted from the HTML DOM.
+            review_count_fallback = self._get_review_count_from_next_data(next_data)
+            name_hint = self._get_name_from_next_data(next_data) or ''
+            soup_hint = BeautifulSoup(html, 'html.parser')
+            html_desc = self._clean_description(
+                self._parse_description_text(soup_hint, name_hint)
+            )
+            if html_desc:
+                hybrid = self._parse_from_next_data(
+                    next_data, description_override=html_desc
+                )
+                if hybrid:
+                    return hybrid
+
+        # Full HTML fallback — used when __NEXT_DATA__ is absent or structurally
+        # incomplete (no name / category even after the hybrid attempt).
         soup = BeautifulSoup(html, 'html.parser')
         name = self._parse_name(soup)
         if not name:
@@ -159,11 +181,17 @@ class LeaflyParser:
         if not category:
             raise LeaflyParseError('Unable to parse strain category')
 
-        description_text = self._parse_description_text(soup, name)
+        description_text = self._clean_description(
+            self._parse_description_text(soup, name)
+        )
         if not description_text:
             raise LeaflyParseError('Unable to parse description text')
 
-        self._validate_strain_quality(description_text=description_text, name=name)
+        self._validate_strain_quality(
+            description_text=description_text,
+            name=name,
+            review_count=review_count_fallback,
+        )
 
         rating = self._parse_rating(soup)
         thc = self._parse_percentage(soup, 'THC')
@@ -232,21 +260,18 @@ class LeaflyParser:
         name: str,
         review_count: Optional[int] = None,
     ) -> None:
-        """Raise LeaflySkipError if the strain description is insufficient for import.
+        """Raise LeaflySkipError if the strain has insufficient data for import.
 
-        Review count is NOT a skip gate — a strain with a good description but few
-        reviews is still worth importing (the AI review summary block will just be
-        omitted).  Only description quality determines import eligibility.
+        Description is cleaned of placeholder sentences before this is called, so
+        we only need to check length.  If the cleaned description is short but the
+        strain has enough community reviews (MIN_REVIEW_COUNT_FOR_IMPORT), we still
+        import it — the AI review summary compensates for the thin editorial text.
         """
         desc = (description_text or '').strip()
-        desc_lower = desc.lower()
-
-        if any(pattern in desc_lower for pattern in self.PLACEHOLDER_PATTERNS):
-            raise LeaflySkipError(
-                f'{name}: placeholder description detected'
-            )
 
         if len(desc) < self.MIN_DESCRIPTION_LENGTH:
+            if review_count and review_count >= self.MIN_REVIEW_COUNT_FOR_IMPORT:
+                return  # reviews compensate for the short description
             raise LeaflySkipError(
                 f'{name}: description too short ({len(desc)} chars, min {self.MIN_DESCRIPTION_LENGTH})'
             )
@@ -333,6 +358,43 @@ class LeaflyParser:
             return longest_name_text.strip()
         return longest_text.strip()
 
+    def _clean_description(self, text: str) -> str:
+        """Strip call-to-action / placeholder sentences from a description.
+
+        Leafly often appends "If you've smoked this strain, let us know!" after
+        the real description.  We split on sentence boundaries and drop any
+        sentence that contains a placeholder pattern, then return the remainder.
+        """
+        sentences = re.split(r'(?<=[.!?])\s+', (text or '').strip())
+        clean = [
+            s for s in sentences
+            if not any(p in s.lower() for p in self.PLACEHOLDER_PATTERNS)
+        ]
+        return ' '.join(clean).strip()
+
+    def _get_review_count_from_next_data(self, next_data: dict) -> int:
+        """Extract reviewCount from a parsed __NEXT_DATA__ dict (0 if absent)."""
+        strain = (
+            next_data.get('props', {})
+            .get('pageProps', {})
+            .get('strain', {})
+        )
+        if not isinstance(strain, dict):
+            return 0
+        return int(strain.get('reviewCount') or 0)
+
+    def _get_name_from_next_data(self, next_data: dict) -> Optional[str]:
+        """Extract strain name from a parsed __NEXT_DATA__ dict (None if absent)."""
+        strain = (
+            next_data.get('props', {})
+            .get('pageProps', {})
+            .get('strain', {})
+        )
+        if not isinstance(strain, dict):
+            return None
+        name = strain.get('name')
+        return str(name).strip() if name else None
+
     def _parse_next_data(self, html: str) -> Optional[dict]:
         match = re.search(
             r'__NEXT_DATA__\" type=\"application/json\">(.*?)</script>',
@@ -346,7 +408,17 @@ class LeaflyParser:
         except json.JSONDecodeError:
             return None
 
-    def _parse_from_next_data(self, data: dict) -> Optional[ParsedLeaflyStrain]:
+    def _parse_from_next_data(
+        self,
+        data: dict,
+        description_override: Optional[str] = None,
+    ) -> Optional[ParsedLeaflyStrain]:
+        """Parse a strain from __NEXT_DATA__.
+
+        Pass ``description_override`` (already cleaned) to use a description
+        sourced from HTML when __NEXT_DATA__ has no editorial description text
+        but does carry rich scored effect/terpene/flavor data (warhead-type).
+        """
         strain = (
             data.get('props', {})
             .get('pageProps', {})
@@ -357,23 +429,24 @@ class LeaflyParser:
 
         name = strain.get('name')
         category = strain.get('category')
-
-        # Run quality check early — before structural validation — so sparse
-        # strains raise LeaflySkipError and don't fall through to HTML fallback.
-        description_text = (
-            strain.get('descriptionPlain')
-            or self._strip_html(strain.get('description', ''))
-        )
-        description_text = str(description_text).strip()
         review_count = int(strain.get('reviewCount') or 0)
+
+        if description_override is not None:
+            description_text = description_override
+        else:
+            # Run quality check early — before structural validation — so sparse
+            # strains raise LeaflySkipError without falling to the HTML fallback.
+            description_text = self._clean_description(
+                str(
+                    strain.get('descriptionPlain')
+                    or self._strip_html(strain.get('description', ''))
+                ).strip()
+            )
+
         if not description_text:
-            # __NEXT_DATA__ has no description — fall through to HTML parser
-            # which may find the description in the DOM (e.g. warhead-type
-            # strains where descriptionPlain is absent from __NEXT_DATA__).
+            # No description available — signal caller to try HTML description.
             return None
 
-        # Validate quality early so sparse strains raise LeaflySkipError
-        # before falling through to the HTML fallback path.
         if name or review_count:
             self._validate_strain_quality(
                 description_text=description_text,
