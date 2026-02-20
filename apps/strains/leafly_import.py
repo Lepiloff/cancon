@@ -1401,7 +1401,7 @@ class LeaflyImporter:
             return 'filtered'
         except LeaflyParseError as exc:
             self.reporter.error('parse', f'{alias} - {exc}')
-            return 'failed'
+            return 'parse-failed'
 
         if self._exists_by_name_or_alias(parsed.name):
             self.reporter.warning('check', f'Skipping {parsed.name} (already exists)')
