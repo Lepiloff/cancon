@@ -89,14 +89,22 @@ def fetch_page(page: int, retries: int = 3) -> dict | None:
     return None
 
 
+_SLUG_TRACKING_SUFFIX = re.compile(r'_[a-z0-9]{8,}$')
+
+
+def _clean_slug(slug: str) -> str:
+    """Strip Leafly internal tracking suffixes (e.g. gush-mints_jjxwupg0jdi → gush-mints)."""
+    return _SLUG_TRACKING_SUFFIX.sub('', slug)
+
+
 def extract_slugs(next_data: dict) -> list[str]:
     try:
         strains = next_data['props']['pageProps']['data']['strains']
-        return [s['slug'] for s in strains if s.get('slug')]
+        return [_clean_slug(s['slug']) for s in strains if s.get('slug')]
     except (KeyError, TypeError):
         try:
             strains = next_data['props']['pageProps']['strains']
-            return [s['slug'] for s in strains if s.get('slug')]
+            return [_clean_slug(s['slug']) for s in strains if s.get('slug')]
         except (KeyError, TypeError):
             return []
 
