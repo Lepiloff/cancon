@@ -360,7 +360,6 @@ orange-crush
 strawberry-diesel
 strawberry-lemonade
 alien-mints
-gush-mints_jjxwupg0jdi
 sour-og
 space-runtz
 mac-and-cheese
@@ -1694,7 +1693,7 @@ haze-berry
 ice-cream-sherbet
 candy-cream
 kitchen-sink
-g-spot_gcgsxwpagaa
+g-spot
 santa-maria
 lemon-freeze-pop
 killer-cupcakes
@@ -3620,7 +3619,7 @@ member-og
 jungle-punch-8
 super-blue-dream
 strawberry-sorbet
-queso_4woqza5fauk
+queso
 gorilla-balls
 arjans-ultra-haze-1
 clockwork-orange
@@ -3694,7 +3693,6 @@ funky-pine
 colt-45
 nightmare-og
 red-lebanese
-g-spot
 c-banana
 citrus-berry
 powernap
@@ -5696,7 +5694,6 @@ apple-custard
 blueberry-triple-og
 cindy-haze
 first-lady-of-the-west-coast-kush
-lsd-25_yuhlzwivwei
 beyond-blueberry-20
 dutch-dynasty
 gorilla-snot
@@ -5767,7 +5764,6 @@ bubba-x-skunk
 afberry
 cookie-pebbles-og
 cannadential
-limelight_wikxcd7wcgy
 swiss-gold
 aurora-haze
 strawberry-guava-smalls
@@ -6049,7 +6045,6 @@ oregon-pinot-noir
 zerculese
 white-crack
 lemon-sugar-kush
-holy-moly_ubdxjtdfam8
 endless-sky
 lime-drop
 ice-cream-project
@@ -7896,7 +7891,6 @@ flo-walker
 cherry-impossible
 pure-krush
 pineapple-tart-spicoli
-sting-a-ling_bexpkefch28
 cookie-lady
 blue-trane
 essential-release
