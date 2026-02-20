@@ -93,15 +93,15 @@ class Command(BaseCommand):
             raise CommandError(str(exc)) from exc
 
         total = len(aliases)
-        results = {'created': 0, 'failed': 0, 'skipped': 0, 'filtered': 0, 'dry-run': 0}
-        exclude_aliases: List[str] = []  # aliases to add to skip file (filtered + skipped-by-name-mismatch)
+        results = {'created': 0, 'failed': 0, 'skipped': 0, 'filtered': 0, 'parse-failed': 0, 'dry-run': 0}
+        exclude_aliases: List[str] = []  # aliases to add to skip file (filtered + skipped-by-name-mismatch + parse-failed)
 
         for index, alias in enumerate(aliases, start=1):
             reporter.info('start', f'[{index}/{total}] Importing {alias}')
             outcome = importer.import_alias(alias, dry_run=options['dry_run'])
             results[outcome] = results.get(outcome, 0) + 1
 
-            if outcome in ('filtered', 'skipped'):
+            if outcome in ('filtered', 'skipped', 'parse-failed'):
                 exclude_aliases.append(alias)
 
             if index < total and options['pause'] > 0:
@@ -112,12 +112,13 @@ class Command(BaseCommand):
 
         self.stdout.write('')
         self.stdout.write(self.style.SUCCESS('Import summary'))
-        self.stdout.write(f"Created:  {results['created']}")
-        self.stdout.write(f"Skipped:  {results['skipped']}")
-        self.stdout.write(f"Filtered: {results['filtered']}")
-        self.stdout.write(f"Failed:   {results['failed']}")
+        self.stdout.write(f"Created:      {results['created']}")
+        self.stdout.write(f"Skipped:      {results['skipped']}")
+        self.stdout.write(f"Filtered:     {results['filtered']}")
+        self.stdout.write(f"Parse-failed: {results['parse-failed']}")
+        self.stdout.write(f"Failed:       {results['failed']}")
         if options['dry_run']:
-            self.stdout.write(f"Dry-run:  {results['dry-run']}")
+            self.stdout.write(f"Dry-run:      {results['dry-run']}")
 
     def _append_to_skip_file(self, aliases: List[str], reporter) -> None:
         """Append quality-filtered aliases to the persistent skip list."""
