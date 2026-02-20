@@ -2,6 +2,7 @@ import json
 import random
 import re
 import time
+import traceback
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
@@ -1410,7 +1411,7 @@ class LeaflyImporter:
             copywriting = self.copywriter.rewrite(parsed)
             self.reporter.success('copy', f'Copywritten {parsed.name}')
         except CopywritingError as exc:
-            self.reporter.error('copy', f'{parsed.name} - {exc}')
+            self.reporter.error('copy', f'{parsed.name} - {exc}\n{traceback.format_exc()}')
             return 'failed'
 
         if self._exists_by_name_or_alias_list(copywriting.get('alternative_names', [])):
@@ -1425,7 +1426,7 @@ class LeaflyImporter:
             translations = self._translate_fields(copywriting)
             self.reporter.success('translate', f'Translated {parsed.name}')
         except TranslationError as exc:
-            self.reporter.error('translate', f'{parsed.name} - {exc}')
+            self.reporter.error('translate', f'{parsed.name} - {exc}\n{traceback.format_exc()}')
             return 'failed'
 
         # Optional: fetch and summarize community reviews (non-fatal)
@@ -1439,7 +1440,7 @@ class LeaflyImporter:
             strain = self.persister.persist(parsed, copywriting, translations, review_summary)
             self.reporter.success('save', f'Saved {strain.name} (ID {strain.id})')
         except Exception as exc:
-            self.reporter.error('save', f'{parsed.name} - {exc}')
+            self.reporter.error('save', f'{parsed.name} - {exc}\n{traceback.format_exc()}')
             return 'failed'
 
         return 'created'
