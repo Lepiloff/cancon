@@ -51,53 +51,43 @@ class AdminEnglishMiddleware:
 
 class LanguageUrlRedirectMiddleware:
     """
-    Redirect to ensure language matches URL prefix.
+    Ensure URL prefix is the single source of truth for language.
 
-    This middleware prevents confusion when:
-    1. User has EN in session/cookie but visits ES URL → redirect to /en/
-    2. User has ES in session/cookie but visits EN URL → redirect to ES URL
+    Instead of redirecting based on session/cookie/Accept-Language,
+    this middleware FORCES the language to match the URL:
+    - /en/... path → activate English
+    - path without /en/ → activate Spanish (default)
 
-    This is critical for:
-    - SEO: Each URL should always serve the same language
-    - Cache: Prevent mixed language caching
-    - User experience: URL clearly indicates language
+    No redirects are issued. The URL determines the language, period.
+    This prevents search engine bots from being redirected away from
+    canonical Spanish URLs due to Accept-Language: en headers.
     """
 
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        # Normalize language like 'en-us' -> 'en'
-        current_lang = (translation.get_language() or '').split('-')[0]
         path = request.path
 
         # Skip for non-multilingual URLs
         if self._should_skip(path):
             return self.get_response(request)
 
-        # EN language but on ES path (without /en/) → redirect to /en/
-        if current_lang == 'en' and not (path == '/en' or path.startswith('/en/')):
-            return redirect(f'/en{path}', permanent=True)
-
-        # ES language but on EN path (with /en/) → redirect to ES path
-        if current_lang == 'es' and (path == '/en' or path.startswith('/en/')):
-            # Remove '/en' prefix
-            new_path = path[3:] or '/'
-            return redirect(new_path, permanent=True)
+        # URL is the source of truth for language
+        if path == '/en' or path.startswith('/en/'):
+            # /en/ prefix → English
+            if translation.get_language() != 'en':
+                translation.activate('en')
+                request.LANGUAGE_CODE = 'en'
+        else:
+            # No prefix → Spanish (default)
+            if translation.get_language() != 'es':
+                translation.activate('es')
+                request.LANGUAGE_CODE = 'es'
 
         return self.get_response(request)
 
     def _should_skip(self, path):
-        """
-        Check if URL should skip language redirect.
-
-        Skip for:
-        - Admin panel
-        - i18n endpoint (language switcher)
-        - Static files
-        - Media files
-        - Tinymce
-        """
         skip_prefixes = [
             '/admin/',
             '/i18n/',
@@ -155,19 +145,10 @@ class GeoLanguageMiddleware:
         if not has_explicit:
             detected_language = self._get_language_by_geo(request)
             if detected_language:
+                # Only save preference in session — do NOT redirect.
+                # The URL is the source of truth for language.
+                # User can switch language manually via the language switcher.
                 self._set_language_preference(request, detected_language)
-
-                # Redirect to correct URL prefix based on detected language
-                if detected_language == 'en' and not (request.path.startswith('/en/') or request.path == '/en'):
-                    # English detected but on Spanish URL → redirect to /en/
-                    new_url = f'/en{request.path}'
-                    return redirect(new_url, permanent=False)
-
-                elif detected_language == 'es' and (request.path.startswith('/en/') or request.path == '/en'):
-                    # Spanish detected but on English URL → redirect to Spanish URL
-                    new_url = request.path[3:] if request.path.startswith('/en/') else '/'
-                    new_url = new_url or '/'  # Ensure we don't get empty string
-                    return redirect(new_url, permanent=False)
 
         return self.get_response(request)
 
