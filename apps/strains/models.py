@@ -84,14 +84,6 @@ class Strain(BaseText, TranslationMixin):
             'inLanguage': current_lang,
         }
 
-        if self.rating:
-            data['aggregateRating'] = {
-                '@type': 'AggregateRating',
-                'ratingValue': str(self.rating),
-                'bestRating': '5',
-                'worstRating': '1',
-            }
-
         additional_properties = []
         for feeling in self.feelings.all():
             additional_properties.append({
