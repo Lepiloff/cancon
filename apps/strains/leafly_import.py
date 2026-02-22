@@ -1414,12 +1414,20 @@ class LeaflyImporter:
             self.reporter.error('copy', f'{parsed.name} - {exc}\n{traceback.format_exc()}')
             return 'failed'
 
-        if self._exists_by_name_or_alias_list(copywriting.get('alternative_names', [])):
-            self.reporter.warning(
-                'check',
-                f'Skipping {parsed.name} (alternative name already exists)',
-            )
-            return 'skipped'
+        # Filter out alternative names that conflict with existing strains
+        # instead of skipping the entire import
+        alt_names = copywriting.get('alternative_names', [])
+        if alt_names:
+            clean_names = []
+            for alt in alt_names:
+                if self._exists_by_name_or_alias(alt):
+                    self.reporter.warning(
+                        'check',
+                        f'Dropping conflicting alternative name "{alt}" for {parsed.name}',
+                    )
+                else:
+                    clean_names.append(alt)
+            copywriting['alternative_names'] = clean_names
 
         translations = {}
         try:
