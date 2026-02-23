@@ -23,4 +23,8 @@ CLAUDE.md
 .claude/
 # scripts: track Python files and curated output data, ignore derived/env-specific files
 scripts/output/leafly_missing_aliases.txt
+scripts/output/leafly_skipped_aliases.txt
+scripts/output/auto_import.log
+scripts/output/auto_import.pid
+scripts/output/STOP_IMPORT
 scripts/output/batches/
