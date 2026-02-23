@@ -101,7 +101,7 @@ class Command(BaseCommand):
             outcome = importer.import_alias(alias, dry_run=options['dry_run'])
             results[outcome] = results.get(outcome, 0) + 1
 
-            if outcome in ('filtered', 'skipped', 'parse-failed'):
+            if outcome in ('filtered', 'skipped', 'parse-failed', 'failed'):
                 exclude_aliases.append(alias)
 
             if index < total and options['pause'] > 0:
