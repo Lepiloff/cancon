@@ -1500,6 +1500,11 @@ class LeaflyImporter:
     def _exists_by_name_or_alias(self, name: str) -> bool:
         if Strain.objects.filter(name__iexact=name).exists():
             return True
+        # Check by slug to catch unicode variants (e.g. "Piña Collision" vs "Pina Collision")
+        from django.template.defaultfilters import slugify
+        slug = slugify(name)
+        if slug and Strain.objects.filter(slug=slug).exists():
+            return True
         if AlternativeStrainName.objects.filter(name__iexact=name).exists():
             return True
         return False
