@@ -113,7 +113,7 @@ if [[ ! -f "$ALIAS_FILE" ]]; then
     exit 1
 fi
 
-TOTAL_ALIASES=$(grep -c . "$ALIAS_FILE" 2>/dev/null || echo 0)
+TOTAL_ALIASES=$(grep -c '[^[:space:]]' "$ALIAS_FILE" 2>/dev/null || echo 0)
 log "Total aliases in file: $TOTAL_ALIASES"
 
 if [[ "$TOTAL_ALIASES" -eq 0 ]]; then
@@ -141,7 +141,7 @@ while true; do
     # Check how many aliases remain (re-read file each batch since import
     # appends filtered/skipped aliases to the skip file, and we may want
     # to re-scrape periodically to refresh the list)
-    REMAINING=$(grep -c . "$ALIAS_FILE" 2>/dev/null || echo 0)
+    REMAINING=$(grep -c '[^[:space:]]' "$ALIAS_FILE" 2>/dev/null || echo 0)
     if [[ "$REMAINING" -eq 0 ]]; then
         log "No more aliases to import. All done!"
         break
