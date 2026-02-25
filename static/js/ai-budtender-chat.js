@@ -443,47 +443,182 @@ class AIBudtenderChat {
     async sendMessage(text = null) {
         const message = text || this.elements.input.value.trim();
         if (!message) return;
-        
-        // Clear input if no text provided
+
         if (!text) {
             this.elements.input.value = '';
             this.autoResizeTextarea();
         }
-        
-        // Add user message to chat
+
         this.addMessage('user', message);
-        
-        // Show typing indicator
         this.showTypingIndicator();
-        
-        // Disable input while processing
         this.setInputState(false);
-        
+
         try {
-            // Send to API
-            const response = await this.callAPI(message);
-            
-            // Hide typing indicator
-            this.hideTypingIndicator();
-            
-            // Context-Aware Architecture v2.0 - Handle enhanced response
-            this.handleContextAwareResponse(response);
-            
-            // Add AI response with context indicators
-            this.addMessage('ai', response.response, response.recommended_strains, false, response);
-            
-            // Update message history
-            this.messageHistory.push(message, response.response);
-            this.trimHistory();
-            this.saveHistory();
-            
-        } catch (error) {
-            console.error('Chat error:', error);
-            this.hideTypingIndicator();
-            this.addMessage('ai', this.getErrorMessage(error), null, true);
+            await this._sendStreaming(message);
+        } catch (streamErr) {
+            // Streaming failed — fall back to regular blocking API call
+            console.warn('Streaming failed, falling back to regular API:', streamErr.message);
+            try {
+                const response = await this.callAPI(message);
+                this.hideTypingIndicator();
+                this.handleContextAwareResponse(response);
+                this.addMessage('ai', response.response, response.recommended_strains, false, response);
+                this.messageHistory.push(message, response.response);
+                this.trimHistory();
+                this.saveHistory();
+            } catch (fallbackErr) {
+                console.error('Chat error (fallback):', fallbackErr);
+                this.hideTypingIndicator();
+                this.addMessage('ai', this.getErrorMessage(fallbackErr), null, true);
+            }
         } finally {
             this.setInputState(true);
         }
+    }
+
+    /**
+     * Primary path: SSE streaming via /api/chat/stream/.
+     * Shows strain cards as soon as metadata arrives, then streams text.
+     */
+    async _sendStreaming(message) {
+        const url = '/api/chat/stream/';
+        const headers = { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+                          document.querySelector('meta[name=csrf-token]')?.content ||
+                          this.getCookie('csrftoken');
+        if (csrfToken) headers['X-CSRFToken'] = csrfToken;
+        if (this.options.apiKey) headers['Authorization'] = `Bearer ${this.options.apiKey}`;
+
+        const payload = {
+            message,
+            language: document.documentElement.lang || 'es',
+            source_platform: 'cannamente',
+        };
+        if (this.sessionId) payload.session_id = this.sessionId;
+
+        const fetchResp = await fetch(url, { method: 'POST', headers, body: JSON.stringify(payload) });
+        if (!fetchResp.ok) throw new Error(`Stream request failed: ${fetchResp.status}`);
+
+        const reader   = fetchResp.body.getReader();
+        const decoder  = new TextDecoder();
+        let   buffer   = '';
+        let   metadata = null;
+        let   streamEl = null;   // The live message bubble DOM element
+        let   textNode = null;   // Text node inside the bubble we update
+        let   accumText = '';
+
+        const readChunk = async () => {
+            // eslint-disable-next-line no-constant-condition
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value, { stream: true });
+
+                const lines = buffer.split('\n');
+                buffer = lines.pop(); // keep partial last line
+
+                for (const line of lines) {
+                    if (!line.startsWith('data: ')) continue;
+                    let chunk;
+                    try { chunk = JSON.parse(line.slice(6)); } catch { continue; }
+
+                    if (chunk.type === 'error') {
+                        throw new Error(chunk.message || 'Stream error');
+                    }
+
+                    if (chunk.type === 'metadata') {
+                        metadata = chunk.data || {};
+                        // Store session ID immediately
+                        if (metadata.session_id) {
+                            this.sessionId = metadata.session_id;
+                            this.saveSessionId();
+                        }
+                        // Replace typing indicator with an empty streaming bubble
+                        this.hideTypingIndicator();
+                        const created = this._createStreamingBubble(metadata.recommended_strains || []);
+                        streamEl  = created.bubble;
+                        textNode  = created.textNode;
+                        this.scrollToBottom();
+                    }
+
+                    if (chunk.type === 'response_chunk' && chunk.text) {
+                        accumText += chunk.text;
+                        if (textNode) textNode.textContent = accumText;
+                        this.scrollToBottom();
+                    }
+
+                    if (chunk.type === 'done') {
+                        this._finalizeStreamingBubble(streamEl, textNode, accumText, metadata);
+                        this.messageHistory.push(message, accumText);
+                        this.trimHistory();
+                        this.saveHistory();
+                        return; // Stream finished
+                    }
+                }
+            }
+            // Reader ended without 'done' — finalise anyway
+            if (streamEl) this._finalizeStreamingBubble(streamEl, textNode, accumText, metadata);
+            if (accumText) { this.messageHistory.push(message, accumText); this.trimHistory(); this.saveHistory(); }
+        };
+
+        await readChunk();
+    }
+
+    /** Create an AI bubble with a blinking cursor. Returns {bubble, textNode}. */
+    _createStreamingBubble(strains) {
+        const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+        let strainsHTML = '';
+        if (strains && strains.length > 0) {
+            strainsHTML = `<div class="strain-recommendations">${strains.map(s => this.createStrainCard(s)).join('')}</div>`;
+        }
+
+        const bubble = document.createElement('div');
+        bubble.className = 'message ai';
+        bubble.innerHTML = `
+            <div class="message-avatar">🤖</div>
+            <div class="message-content streaming" id="stream-content">
+                <span class="stream-text"></span><span class="streaming-cursor"></span>
+                ${strainsHTML}
+                <div class="message-time">${time}</div>
+            </div>`;
+
+        this.elements.messages.appendChild(bubble);
+
+        // Get the text span so we can update it efficiently
+        const textSpan = bubble.querySelector('.stream-text');
+        // We'll update textSpan.textContent rather than a raw text node
+        return { bubble, textNode: textSpan };
+    }
+
+    /** Remove cursor, run context-aware hooks, persist to chatMessages. */
+    _finalizeStreamingBubble(bubble, _textSpan, finalText, metadata) {
+        if (!bubble) return;
+        // Remove blinking cursor
+        const cursor = bubble.querySelector('.streaming-cursor');
+        if (cursor) cursor.remove();
+        // Mark content as no longer streaming
+        const content = bubble.querySelector('.message-content');
+        if (content) content.classList.remove('streaming');
+
+        // Context-aware post-processing (quick actions, indicators)
+        if (metadata) this.handleContextAwareResponse(metadata);
+
+        // Save to persistent chat history
+        const messageData = {
+            type: 'ai',
+            content: finalText,
+            strains: metadata?.recommended_strains || null,
+            isError: false,
+            timestamp: Date.now(),
+            contextData: metadata,
+        };
+        this.chatMessages.push(messageData);
+        this.saveChatMessages();
+
+        if (metadata) this.handleContextAwareMessage(metadata);
+        if (!this.isOpen) this.showNotification();
+        this.scrollToBottom();
     }
 
     async callAPI(message) {
