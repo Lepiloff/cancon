@@ -7,7 +7,7 @@ STORAGE ARCHITECTURE:
 - Message content storage: DISABLED to save database space (see commented code blocks)
 """
 
-from django.http import JsonResponse
+from django.http import JsonResponse, StreamingHttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.utils.decorators import method_decorator
@@ -254,6 +254,126 @@ class ChatProxyView(View):
         except Exception as e:
             return JsonResponse({'error': 'Internal server error'}, status=500)
 
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ChatStreamView(View):
+    """
+    SSE streaming proxy: forwards /api/v1/chat/ask/stream from canagent to the browser.
+
+    Protocol (matches canagent SSE format):
+      data: {"type": "metadata", "data": {...strains, session_id, ...}}
+      data: {"type": "response_chunk", "text": "..."}
+      data: {"type": "done"}
+    """
+
+    def post(self, request):
+        try:
+            config = ChatConfiguration.get_config()
+            if not config.is_active:
+                def _disabled():
+                    yield f'data: {json.dumps({"type": "error", "message": "Chat service is currently disabled"})}\n\n'
+                return StreamingHttpResponse(_disabled(), content_type='text/event-stream', status=503)
+
+            client_ip = get_client_ip(request)
+            try:
+                check_rate_limit(client_ip)
+            except RateLimitExceeded as e:
+                def _rate_limited():
+                    yield f'data: {json.dumps({"type": "error", "message": "Rate limit exceeded", "retry_after": e.retry_after_seconds})}\n\n'
+                resp = StreamingHttpResponse(_rate_limited(), content_type='text/event-stream', status=429)
+                resp['Retry-After'] = str(e.retry_after_seconds)
+                return resp
+
+            try:
+                data = json.loads(request.body)
+                message = data.get('message', '').strip()
+                session_id = data.get('session_id')
+            except json.JSONDecodeError:
+                def _bad_json():
+                    yield f'data: {json.dumps({"type": "error", "message": "Invalid JSON"})}\n\n'
+                return StreamingHttpResponse(_bad_json(), content_type='text/event-stream', status=400)
+
+            if not message:
+                def _no_message():
+                    yield f'data: {json.dumps({"type": "error", "message": "Message is required"})}\n\n'
+                return StreamingHttpResponse(_no_message(), content_type='text/event-stream', status=400)
+
+            # Create / retrieve Django session for analytics
+            user_agent = request.META.get('HTTP_USER_AGENT', '')
+            if session_id:
+                try:
+                    django_session = ChatSession.objects.get(session_id=session_id, is_active=True)
+                except ChatSession.DoesNotExist:
+                    django_session = None
+            else:
+                django_session = None
+
+            if not django_session:
+                django_session = ChatSession.objects.create(
+                    user=request.user if request.user.is_authenticated else None,
+                    ip_address=client_ip,
+                    user_agent=user_agent,
+                )
+
+            canagent_url = f"{config.api_base_url}/api/v1/chat/ask/stream"
+            headers = {'Content-Type': 'application/json'}
+            if config.api_key:
+                headers['Authorization'] = f'Bearer {config.api_key}'
+
+            client_language = data.get('language')
+            final_language = client_language or getattr(request, 'LANGUAGE_CODE', 'es')
+
+            payload = {
+                'message': message,
+                'session_id': str(django_session.session_id),
+                'language': final_language,
+                'source_platform': 'cannamente',
+            }
+
+            def event_stream():
+                try:
+                    with requests.post(
+                        canagent_url,
+                        json=payload,
+                        headers=headers,
+                        timeout=60,
+                        stream=True,
+                    ) as r:
+                        for raw_line in r.iter_lines(decode_unicode=True):
+                            if raw_line:
+                                yield f"{raw_line}\n\n"
+                                # Update Django session analytics on metadata chunk
+                                if raw_line.startswith('data: '):
+                                    try:
+                                        chunk = json.loads(raw_line[6:])
+                                        if chunk.get('type') == 'metadata':
+                                            meta = chunk.get('data', {})
+                                            canagent_sid = meta.get('session_id')
+                                            if canagent_sid and str(django_session.session_id) != canagent_sid:
+                                                django_session.session_id = canagent_sid
+                                            django_session.message_count += 2
+                                            if meta.get('language'):
+                                                django_session.language = meta.get('language')
+                                            django_session.save(update_fields=[
+                                                'session_id', 'message_count', 'last_activity_at', 'language'
+                                            ])
+                                    except Exception:
+                                        pass
+                except requests.exceptions.RequestException as e:
+                    yield f'data: {json.dumps({"type": "error", "message": f"AI service unavailable: {str(e)}"})}\n\n'
+
+            response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+            response['Cache-Control'] = 'no-cache'
+            response['X-Accel-Buffering'] = 'no'
+            response['Access-Control-Allow-Origin'] = '*'
+            return response
+
+        except Exception as e:
+            logger.exception("ChatStreamView error")
+            def _err():
+                yield f'data: {json.dumps({"type": "error", "message": "Internal server error"})}\n\n'
+            return StreamingHttpResponse(_err(), content_type='text/event-stream', status=500)
 
 
 @require_http_methods(["GET"])
