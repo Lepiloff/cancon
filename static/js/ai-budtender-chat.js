@@ -538,13 +538,15 @@ class AIBudtenderChat {
                         const created = this._createStreamingBubble(metadata.recommended_strains || []);
                         streamEl  = created.bubble;
                         textNode  = created.textNode;
-                        this.scrollToBottom();
+                        // Scroll to TOP of bubble so text is visible, not the bottom cards
+                        streamEl.scrollIntoView({ block: 'start', behavior: 'smooth' });
                     }
 
                     if (chunk.type === 'response_chunk' && chunk.text) {
                         accumText += chunk.text;
                         if (textNode) textNode.textContent = accumText;
-                        this.scrollToBottom();
+                        // Follow the cursor (text area), not the bottom of cards
+                        if (textNode) textNode.scrollIntoView({ block: 'nearest', behavior: 'instant' });
                     }
 
                     if (chunk.type === 'done') {
