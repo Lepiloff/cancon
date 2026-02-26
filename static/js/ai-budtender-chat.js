@@ -1368,9 +1368,8 @@ class AIBudtenderChat {
         const indicator = document.createElement('div');
         indicator.className = `session-indicator ${type}`;
         indicator.textContent = message;
-        
+
         this.elements.messages.appendChild(indicator);
-        this.scrollToBottom();
         
         // Auto-remove after 5 seconds
         setTimeout(() => {
