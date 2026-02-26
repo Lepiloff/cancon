@@ -26,61 +26,55 @@ class I18nSitemap(Sitemap):
         """
         Override to add hreflang alternates to each URL.
 
+        Generates a separate <url> entry for EACH language version so that
+        Google treats each language version as its own canonical URL.
+        Without this, Google sees only the Spanish URL as primary and marks
+        English pages as "duplicate with non-matching canonical".
+
         Returns URLs with structure:
         {
-            'location': 'https://cannament.com/strain/northern-lights/',
+            'location': 'https://cannamente.com/en/strain/northern-lights/',
             'lastmod': datetime(...),
             'alternates': [
-                {'language': 'es', 'location': 'https://...'},
-                {'language': 'en', 'location': 'https://...'},
+                {'language': 'es', 'location': 'https://cannamente.com/strain/northern-lights/'},
+                {'language': 'en', 'location': 'https://cannamente.com/en/strain/northern-lights/'},
             ]
         }
         """
         urls = []
-        latest_lastmod = None
-        all_items_lastmod = True
 
         # Get all items once
         items = self.items()
 
         for item in items:
-            # Generate URLs for all languages
+            # Build full alternates list (same for all language entries of this item)
+            lang_urls = {}
             loc_alternates = []
-            primary_url = None
 
             for lang in self.languages:
                 with translation.override(lang):
-                    # Use reverse() in language context
                     loc = self._location(item, force_lang=lang)
                     loc_full = self._get_full_url(loc)
-
+                    lang_urls[lang] = loc_full
                     loc_alternates.append({
                         'language': lang,
                         'location': loc_full,
                     })
 
-                    # Primary URL is Spanish (default)
-                    if lang == 'es':
-                        primary_url = loc_full
-
-            # Get lastmod
             lastmod = self.lastmod(item)
-            if all_items_lastmod:
-                all_items_lastmod = lastmod is not None
-                if lastmod and (latest_lastmod is None or lastmod > latest_lastmod):
-                    latest_lastmod = lastmod
 
-            # Build URL entry
-            url_entry = {
-                'item': item,
-                'location': primary_url,
-                'lastmod': lastmod,
-                'changefreq': self.changefreq,
-                'priority': str(self.priority if self.priority is not None else ''),
-                'alternates': loc_alternates,
-            }
-
-            urls.append(url_entry)
+            # Create a separate sitemap entry for each language version
+            # so Google recognises each as a valid canonical URL
+            for lang in self.languages:
+                url_entry = {
+                    'item': item,
+                    'location': lang_urls[lang],
+                    'lastmod': lastmod,
+                    'changefreq': self.changefreq,
+                    'priority': str(self.priority if self.priority is not None else ''),
+                    'alternates': loc_alternates,
+                }
+                urls.append(url_entry)
 
         return urls
 
@@ -169,30 +163,28 @@ class StaticPageSitemap(I18nSitemap):
         items = self.items()
 
         for item in items:
+            lang_urls = {}
             loc_alternates = []
-            primary_url = None
 
             for lang in self.languages:
                 with translation.override(lang):
                     loc = self._location(item, force_lang=lang)
                     loc_full = self._get_full_url(loc)
-
+                    lang_urls[lang] = loc_full
                     loc_alternates.append({
                         'language': lang,
                         'location': loc_full,
                     })
 
-                    if lang == 'es':
-                        primary_url = loc_full
-
-            url_entry = {
-                'item': item,
-                'location': primary_url,
-                'lastmod': None,
-                'changefreq': self.changefreq,
-                'priority': str(self.get_priority(item)),
-                'alternates': loc_alternates,
-            }
-            urls.append(url_entry)
+            for lang in self.languages:
+                url_entry = {
+                    'item': item,
+                    'location': lang_urls[lang],
+                    'lastmod': None,
+                    'changefreq': self.changefreq,
+                    'priority': str(self.get_priority(item)),
+                    'alternates': loc_alternates,
+                }
+                urls.append(url_entry)
 
         return urls
