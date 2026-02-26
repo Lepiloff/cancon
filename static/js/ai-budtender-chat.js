@@ -185,6 +185,15 @@ function _(text) {
     return (typeof gettext === 'function') ? gettext(text) : text;
 }
 
+// Convert basic markdown to HTML (for LLM responses)
+function parseMarkdown(str) {
+    if (typeof str !== 'string') return '';
+    return str
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')  // **bold**
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')              // *italic*
+        .replace(/\n/g, '<br>');                            // newlines
+}
+
 // Sanitize HTML to prevent XSS - strips all tags except safe formatting
 function sanitizeHTML(str) {
     if (typeof str !== 'string') return '';
@@ -603,6 +612,12 @@ class AIBudtenderChat {
         const content = bubble.querySelector('.message-content');
         if (content) content.classList.remove('streaming');
 
+        // Convert accumulated markdown to HTML in the stream-text span
+        const textSpan = bubble.querySelector('.stream-text');
+        if (textSpan && finalText) {
+            textSpan.innerHTML = sanitizeRichHTML(parseMarkdown(finalText));
+        }
+
         // Context-aware post-processing (quick actions, indicators)
         if (metadata) this.handleContextAwareResponse(metadata);
 
@@ -706,8 +721,8 @@ class AIBudtenderChat {
             minute: '2-digit'
         });
 
-        // Sanitize content: escape user messages, allow safe HTML in AI responses
-        const safeContent = type === 'user' ? sanitizeHTML(content) : sanitizeRichHTML(content);
+        // Sanitize content: escape user messages, parse markdown + allow safe HTML in AI responses
+        const safeContent = type === 'user' ? sanitizeHTML(content) : sanitizeRichHTML(parseMarkdown(content));
 
         let strainsHTML = '';
         if (strains && strains.length > 0) {
@@ -1084,7 +1099,7 @@ class AIBudtenderChat {
             minute: '2-digit'
         });
 
-        const safeContent = type === 'user' ? sanitizeHTML(content) : sanitizeRichHTML(content);
+        const safeContent = type === 'user' ? sanitizeHTML(content) : sanitizeRichHTML(parseMarkdown(content));
 
         let strainsHTML = '';
         if (strains && strains.length > 0) {
