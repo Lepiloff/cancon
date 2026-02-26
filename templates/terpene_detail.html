@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
+{% load i18n %}
 {% block title %}
-    Descripción y propiedades del terpeno {{ terpene.title }}
+    {% blocktrans with name=terpene.title %}Descripción y propiedades del terpeno {{ name }}{% endblocktrans %}
 {% endblock %}
 
 {% block keywords %}
@@ -17,7 +18,7 @@
             <div class="container">
                 <div class="article-page__header">
                     <div class="article-page__case">
-                        <a href="#" class="category-tag">Terpeno</a>
+                        <a href="#" class="category-tag">{% trans "Terpeno" %}</a>
                     </div>
                     <h1 class="article-page__title">{{ terpene.title }}</h1>
                     <div class="article__footer">
