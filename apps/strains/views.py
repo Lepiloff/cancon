@@ -1,3 +1,5 @@
+from bs4 import BeautifulSoup
+
 from django.db.models import Q, Max
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
@@ -7,6 +9,18 @@ from django.urls import reverse
 from apps.strains.forms import StrainFilterForm
 from apps.strains.models import Article, Strain
 from apps.strains.utils import get_related_strains, get_filtered_strains, is_ajax_request
+
+
+def _extract_headings(html_content):
+    """Extract h3 headings from HTML, respecting current language content."""
+    if not html_content:
+        return []
+    soup = BeautifulSoup(html_content, 'html.parser')
+    return [
+        {'id': h.get('id', ''), 'text': h.get_text()}
+        for h in soup.find_all('h3')
+        if h.get('id')
+    ]
 
 
 def custom_page_not_found_view(request, exception):
@@ -95,7 +109,7 @@ def strain_list(request):
 def article_detail(request, slug):
     article = get_object_or_404(Article, slug=slug)
     image = article.images.filter(is_preview=False).first()
-    headings = article.get_headings()
+    headings = _extract_headings(article.text_content)
     return render(
         request,
         'article_detail.html',
@@ -168,9 +182,8 @@ def terpene_list(request):
 
 def terpene_detail(request, slug):
     terpene = get_object_or_404(Article, slug=slug, category__name='Terpenes')
-    image = terpene.images.filter(
-        is_preview=False).first()
-    headings = terpene.get_headings()
+    image = terpene.images.filter(is_preview=False).first()
+    headings = _extract_headings(terpene.text_content)
     return render(
         request,
         'terpene_detail.html',

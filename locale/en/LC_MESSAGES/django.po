@@ -386,6 +386,12 @@ msgstr ""
 "you personalized strain recommendations. Browse strains, explore terpene "
 "profiles, and find dispensaries near you."
 
+msgid "Terpeno"
+msgstr "Terpene"
+
+msgid "Descripción y propiedades del terpeno %(name)s"
+msgstr "Description and properties of terpene %(name)s"
+
 msgid "Superuser must have is_staff=True."
 msgstr "Superuser must have is_staff=True."
 
