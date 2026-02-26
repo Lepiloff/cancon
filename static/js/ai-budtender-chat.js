@@ -635,7 +635,8 @@ class AIBudtenderChat {
 
         if (metadata) this.handleContextAwareMessage(metadata);
         if (!this.isOpen) this.showNotification();
-        this.scrollToBottom();
+        // Do NOT scrollToBottom here — user is already reading the streamed text.
+        // Scrolling to bottom would jump past strain cards and away from the text.
     }
 
     async callAPI(message) {
