@@ -17,6 +17,7 @@
 {% block content %}
     {% block meta_tags %}
         {% render_json_ld strain.structured_data %}
+        {% if strain.faq_structured_data %}{% render_json_ld strain.faq_structured_data %}{% endif %}
     {% endblock %}
     
     <div class="blog">

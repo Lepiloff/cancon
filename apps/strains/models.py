@@ -106,7 +106,142 @@ class Strain(BaseText, TranslationMixin):
         if additional_properties:
             data['additionalProperty'] = additional_properties
 
+        if self.rating is not None:
+            data['aggregateRating'] = {
+                '@type': 'AggregateRating',
+                'ratingValue': str(self.rating),
+                'bestRating': '5',
+                'worstRating': '1',
+                'reviewCount': 5,
+            }
+
         return data
+
+    @property
+    def faq_structured_data(self):
+        from django.utils.translation import get_language
+        current_lang = get_language() or 'es'
+        is_en = current_lang == 'en'
+
+        questions = []
+
+        feelings = list(self.feelings.values_list('name', flat=True))
+        if feelings:
+            joined = ', '.join(feelings)
+            questions.append({
+                '@type': 'Question',
+                'name': (
+                    f'What effects does {self.name} produce?'
+                    if is_en else
+                    f'¿Qué efectos produce {self.name}?'
+                ),
+                'acceptedAnswer': {
+                    '@type': 'Answer',
+                    'text': (
+                        f'{self.name} produces the following effects: {joined}.'
+                        if is_en else
+                        f'{self.name} produce los siguientes efectos: {joined}.'
+                    ),
+                },
+            })
+
+        helps = list(self.helps_with.values_list('name', flat=True))
+        if helps:
+            joined = ', '.join(helps)
+            questions.append({
+                '@type': 'Question',
+                'name': (
+                    f'What does {self.name} help with?'
+                    if is_en else
+                    f'¿Con qué puede ayudar {self.name}?'
+                ),
+                'acceptedAnswer': {
+                    '@type': 'Answer',
+                    'text': (
+                        f'{self.name} may help with: {joined}.'
+                        if is_en else
+                        f'{self.name} puede ayudar con: {joined}.'
+                    ),
+                },
+            })
+
+        negatives = list(self.negatives.values_list('name', flat=True))
+        if negatives:
+            joined = ', '.join(negatives)
+            questions.append({
+                '@type': 'Question',
+                'name': (
+                    f'What are the negative effects of {self.name}?'
+                    if is_en else
+                    f'¿Cuáles son los efectos negativos de {self.name}?'
+                ),
+                'acceptedAnswer': {
+                    '@type': 'Answer',
+                    'text': (
+                        f'Possible negative effects of {self.name}: {joined}.'
+                        if is_en else
+                        f'Los posibles efectos negativos de {self.name}: {joined}.'
+                    ),
+                },
+            })
+
+        terpene_names = []
+        if self.dominant_terpene:
+            terpene_names.append(self.dominant_terpene.name)
+        terpene_names.extend(self.other_terpenes.values_list('name', flat=True))
+        if terpene_names:
+            joined = ', '.join(terpene_names)
+            questions.append({
+                '@type': 'Question',
+                'name': (
+                    f'What terpenes does {self.name} contain?'
+                    if is_en else
+                    f'¿Qué terpenos contiene {self.name}?'
+                ),
+                'acceptedAnswer': {
+                    '@type': 'Answer',
+                    'text': (
+                        f'{self.name} contains the following terpenes: {joined}.'
+                        if is_en else
+                        f'{self.name} contiene los siguientes terpenos: {joined}.'
+                    ),
+                },
+            })
+
+        cannabinoids = []
+        if self.thc is not None:
+            cannabinoids.append(f'THC: {self.thc}%')
+        if self.cbd is not None:
+            cannabinoids.append(f'CBD: {self.cbd}%')
+        if self.cbg is not None:
+            cannabinoids.append(f'CBG: {self.cbg}%')
+        if cannabinoids:
+            joined = ', '.join(cannabinoids)
+            questions.append({
+                '@type': 'Question',
+                'name': (
+                    f'What is the THC and CBD content of {self.name}?'
+                    if is_en else
+                    f'¿Cuánto THC y CBD tiene {self.name}?'
+                ),
+                'acceptedAnswer': {
+                    '@type': 'Answer',
+                    'text': (
+                        f'{self.name} cannabinoid profile: {joined}.'
+                        if is_en else
+                        f'Perfil de cannabinoides de {self.name}: {joined}.'
+                    ),
+                },
+            })
+
+        if not questions:
+            return None
+
+        return {
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            'mainEntity': questions,
+        }
 
     def __str__(self):
         return self.name
