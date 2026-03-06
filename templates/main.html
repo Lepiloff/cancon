@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% load i18n %}
+{% load translate %}
 {% block title %}
     {% trans "AI Budtender y Base de Datos de Variedades de Cannabis | Cannamente" %}
 {% endblock %}
@@ -26,7 +27,7 @@
         "applicationCategory": "HealthApplication",
         "operatingSystem": "Web",
         "description": "{% trans "AI-powered cannabis strain recommendation engine. Get personalized suggestions based on desired effects, flavors, terpenes, and medical needs." %}",
-        "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}",
+        "url": "{{ request.path|absolute_url }}",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -35,7 +36,7 @@
         "provider": {
             "@type": "Organization",
             "name": "Cannamente",
-            "url": "{{ request.scheme }}://{{ request.get_host }}"
+            "url": "{{ '/'|absolute_url }}"
         }
     }
     </script>

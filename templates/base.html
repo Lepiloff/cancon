@@ -41,18 +41,20 @@
 
     <!-- hreflang tags for SEO (using alt_url template tag) -->
     {% for lang_code, _ in LANGUAGES %}
-        <link rel="alternate" hreflang="{{ lang_code }}" href="{{ request.scheme }}://{{ request.get_host }}{% alt_url lang_code %}">
+        {% alt_url lang_code as alt_path %}
+        <link rel="alternate" hreflang="{{ lang_code }}" href="{{ alt_path|absolute_url }}">
     {% endfor %}
     <!-- x-default points to Spanish (default language) -->
-    <link rel="alternate" hreflang="x-default" href="{{ request.scheme }}://{{ request.get_host }}{% alt_url 'es' %}">
+    {% alt_url 'es' as default_alt_path %}
+    <link rel="alternate" hreflang="x-default" href="{{ default_alt_path|absolute_url }}">
 
     <!-- Canonical URL (without query parameters) -->
-    <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+    <link rel="canonical" href="{{ request.path|absolute_url }}">
 
     <!-- OpenGraph meta tags -->
     <meta property="og:site_name" content="Cannamente">
     <meta property="og:type" content="{% block og_type %}website{% endblock %}">
-    <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+    <meta property="og:url" content="{{ request.path|absolute_url }}">
     <meta property="og:title" content="{% block og_title %}{% endblock %}">
     <meta property="og:description" content="{% block og_description %}{% endblock %}">
     {% block og_image %}<meta property="og:image" content="{% static 'img/cannamente_bg_THC_CBD_1140x320.png' %}">{% endblock %}
