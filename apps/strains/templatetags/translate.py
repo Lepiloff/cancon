@@ -1,6 +1,5 @@
 from django import template
 from django.conf import settings
-from django.utils.translation import get_language
 
 register = template.Library()
 
@@ -17,6 +16,28 @@ def translate(value, translations_dict=None):
     """
     # Return value as-is - modeltranslation handles the language switching
     return value
+
+
+@register.filter
+def absolute_url(path):
+    """
+    Build a stable absolute URL for SEO tags from SITE_PROTOCOL + SITE_DOMAIN.
+    """
+    protocol = getattr(settings, 'SITE_PROTOCOL', 'https')
+    domain = getattr(settings, 'SITE_DOMAIN', 'cannamente.com')
+    base = f'{protocol}://{domain}'.rstrip('/')
+
+    if not path:
+        return f'{base}/'
+
+    value = str(path).strip()
+    if value.startswith('http://') or value.startswith('https://'):
+        return value
+
+    if not value.startswith('/'):
+        value = f'/{value}'
+
+    return f'{base}{value}'
 
 
 @register.simple_tag(takes_context=True)
@@ -49,8 +70,6 @@ def alt_url(context, lang_code):
 
     # Use request.path (without query string) for clean hreflang URLs
     current_path = request.path
-    current_lang = get_language()
-
     # Remove current language prefix if present
     path_without_lang = current_path
     for lang, _ in settings.LANGUAGES:
