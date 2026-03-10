@@ -8,8 +8,8 @@
     padding-top: 80px;
     max-width: var(--container-max);
     margin: 0 auto;
-    padding-left: var(--section-pad-x);
-    padding-right: var(--section-pad-x);
+    padding-left: 24px;
+    padding-right: 24px;
     padding-bottom: 60px;
     font-family: var(--font-body);
     color: var(--text-primary);
