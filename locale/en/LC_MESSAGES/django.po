@@ -578,6 +578,10 @@ msgstr "The terpene catalog will be available soon."
 msgid "Contenido"
 msgstr "Contents"
 
+#: templates/base_v2.html
+msgid "Resultado de la búsqueda"
+msgstr "Search results"
+
 #~ msgid "Efectos"
 #~ msgstr "Effects"
 
