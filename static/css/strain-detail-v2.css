@@ -1,0 +1,613 @@
+/* ==========================================================================
+   Strain Detail Page — v2 Dark Theme
+   Requires: styles_v2.css (design tokens), Google Fonts (Syne + DM Sans)
+   ========================================================================== */
+
+/* --- Page wrapper for fixed header clearance --- */
+.sd-page-v2 {
+    padding-top: 80px;
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding-left: var(--section-pad-x);
+    padding-right: var(--section-pad-x);
+    padding-bottom: 60px;
+    font-family: var(--font-body);
+    color: var(--text-primary);
+}
+
+/* --- Header: Name + Meta inline --- */
+.sd-header {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 16px;
+}
+
+/* --- Name --- */
+.sd-name {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    width: 300px;
+    flex-shrink: 0;
+    line-height: 1.2;
+    text-decoration: none;
+    border: none;
+}
+
+h1.sd-name,
+h1.sd-name:after,
+h1.sd-name:before {
+    text-decoration: none !important;
+    border-bottom: none !important;
+    background-image: none !important;
+}
+
+/* --- Meta: category + rating --- */
+.sd-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sd-category {
+    display: inline-block;
+    padding: 3px 14px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.sd-category--indica {
+    background: var(--badge-indica-bg);
+    color: var(--badge-indica);
+    border: 1px solid rgba(124, 77, 255, 0.3);
+}
+
+.sd-category--sativa {
+    background: var(--badge-sativa-bg);
+    color: var(--badge-sativa);
+    border: 1px solid rgba(255, 145, 0, 0.3);
+}
+
+.sd-category--hybrid {
+    background: var(--badge-hybrid-bg);
+    color: var(--badge-hybrid);
+    border: 1px solid rgba(0, 230, 118, 0.3);
+}
+
+.sd-rating-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 13px;
+    color: var(--text-muted);
+    position: relative;
+}
+
+.sd-rating-value {
+    font-weight: 700;
+    color: var(--accent-green);
+}
+
+.sd-rating-star {
+    color: #f59e0b;
+    font-size: 14px;
+}
+
+.sd-info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid var(--text-muted);
+    cursor: help;
+    position: relative;
+    margin-left: 2px;
+}
+
+.sd-info-i {
+    font-size: 10px;
+    font-weight: 700;
+    font-style: italic;
+    color: var(--text-muted);
+    line-height: 1;
+}
+
+/* --- Tooltip --- */
+.sd-tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
+    font-size: 12px;
+    font-weight: 400;
+    font-style: normal;
+    white-space: normal;
+    width: 220px;
+    line-height: 1.4;
+    z-index: 100;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+}
+
+.sd-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--bg-card);
+}
+
+.sd-info-icon:hover .sd-tooltip,
+.sd-info-icon:focus .sd-tooltip {
+    display: block;
+}
+
+/* --- Top section: image left + description right --- */
+.sd-top {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+
+.sd-top__image {
+    width: 300px;
+    flex-shrink: 0;
+}
+
+.sd-top__image img {
+    border-radius: var(--radius-md);
+}
+
+.sd-top__desc {
+    flex: 1;
+    min-width: 0;
+}
+
+.sd-top__desc .tovar_text {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--text-secondary);
+}
+
+.sd-top__desc .tovar_text h3 {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.sd-top__desc .tovar_text p {
+    margin-bottom: 6px;
+}
+
+.sd-top__desc .tovar_text p:last-child {
+    margin-bottom: 0;
+}
+
+.sd-top__desc .tovar_text a {
+    color: var(--accent-green);
+    transition: color 0.2s var(--ease-out);
+}
+
+.sd-top__desc .tovar_text a:hover {
+    color: #69f0ae;
+}
+
+/* --- Section --- */
+.sd-section {
+    margin-bottom: 28px;
+    padding-top: 16px;
+}
+
+.sd-section__title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    border: none;
+    text-decoration: none;
+}
+
+.sd-section__title::after,
+.sd-section__title::before {
+    display: none !important;
+}
+
+/* --- Cannabinoids --- */
+.sd-cannabinoids {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 420px;
+}
+
+.sd-cann {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sd-cann__label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    width: 32px;
+    flex-shrink: 0;
+}
+
+.sd-cann__bar {
+    flex: 1;
+    height: 8px;
+    background: var(--bg-card);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.sd-cann__fill {
+    height: 100%;
+    border-radius: 4px;
+    min-width: 4px;
+    transition: width 0.6s var(--ease-out);
+}
+
+.sd-cann__fill--thc { background: #f87171; }
+.sd-cann__fill--cbd { background: #34d399; }
+.sd-cann__fill--cbg { background: #fbbf24; }
+
+.sd-cann__val {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    width: 36px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+/* --- Terpenes (compact inline) --- */
+.sd-terpenes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+}
+
+.sd-terpene {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.sd-terpene--dominant {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.sd-terpene__dot {
+    display: inline-block;
+    width: 8px;
+    height: 18px;
+    border-radius: 4px;
+}
+
+/* Terpene dot colors -- bright enough for dark bg */
+.sd-terpene__dot--dominant { background: #4fc3f7; }
+.sd-terpene__dot--1 { background: #f06292; }
+.sd-terpene__dot--2 { background: #fdd835; }
+.sd-terpene__dot--3 { background: #66bb6a; }
+.sd-terpene__dot--4 { background: #ff8a65; }
+.sd-terpene__dot--5 { background: #b388ff; }
+
+/* --- Effects --- */
+.sd-effects {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.sd-effect-group {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    transition: border-color 0.2s var(--ease-out);
+}
+
+.sd-effect-group:hover {
+    border-color: var(--border-light);
+}
+
+.sd-effect-group__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.sd-effect-group__head h3 {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin: 0;
+    border: none;
+    text-decoration: none;
+    line-height: 1;
+    padding-top: 2px;
+}
+
+.sd-effect-group__head h3::after,
+.sd-effect-group__head h3::before {
+    display: none !important;
+}
+
+.sd-effect-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.sd-effect-icon--positive { color: #34d399; }
+.sd-effect-icon--therapeutic { color: #60a5fa; }
+.sd-effect-icon--negative { color: #f87171; }
+.sd-effect-icon--flavor { color: #fbbf24; }
+
+.sd-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.sd-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    transition: opacity 0.15s var(--ease-out);
+}
+
+.sd-tag:hover {
+    opacity: 0.85;
+}
+
+.sd-tag--positive {
+    background: rgba(5, 150, 105, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(5, 150, 105, 0.3);
+}
+
+.sd-tag--therapeutic {
+    background: rgba(37, 99, 235, 0.15);
+    color: #60a5fa;
+    border: 1px solid rgba(37, 99, 235, 0.3);
+}
+
+.sd-tag--negative {
+    background: rgba(220, 38, 38, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+.sd-tag--flavor {
+    background: rgba(217, 119, 6, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(217, 119, 6, 0.3);
+}
+
+/* --- Genetics Tree --- */
+.sd-genetics {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.sd-genetics__parents {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+}
+
+.sd-genetics__node {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    min-width: 120px;
+    text-align: center;
+    text-decoration: none;
+    transition: opacity 0.2s var(--ease-out);
+}
+
+.sd-genetics__node--parent {
+    background: linear-gradient(135deg, #00c853, #00e676);
+    box-shadow: 0 2px 12px rgba(0, 230, 118, 0.2);
+}
+
+.sd-genetics__node--parent:hover {
+    opacity: 0.85;
+    color: #fff;
+    text-decoration: none;
+}
+
+.sd-genetics__node--unknown {
+    background: var(--text-muted);
+    font-style: italic;
+    opacity: 0.5;
+}
+
+.sd-genetics__node--current {
+    background: linear-gradient(135deg, #7c4dff, #9575cd);
+    box-shadow: 0 2px 12px rgba(124, 77, 255, 0.25);
+}
+
+.sd-genetics__lines {
+    width: 100%;
+}
+
+.sd-genetics__svg {
+    width: 100%;
+    height: 50px;
+    display: block;
+}
+
+.sd-genetics__svg line,
+.sd-genetics__svg path {
+    stroke: var(--accent-green);
+}
+
+.sd-genetics__current {
+    display: flex;
+    justify-content: center;
+}
+
+/* --- AI Review Summary --- */
+.sd-review-summary {
+    background: linear-gradient(135deg, rgba(0, 230, 118, 0.08) 0%, rgba(76, 175, 80, 0.06) 100%);
+    border: 1px solid rgba(0, 230, 118, 0.2);
+    border-radius: var(--radius-md);
+    padding: 20px 24px;
+}
+
+.sd-review-summary__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #69f0ae;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+}
+
+.sd-review-summary__icon {
+    color: var(--accent-green);
+    flex-shrink: 0;
+}
+
+.sd-review-summary__badge {
+    margin-left: auto;
+    background: var(--accent-green);
+    color: var(--bg-primary);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    line-height: 1.6;
+}
+
+.sd-review-summary__text {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.65;
+    margin-top: 10px;
+}
+
+.sd-review-summary__text p {
+    margin: 0;
+}
+
+/* --- Similar Strains Section --- */
+.sd-similar-section .section-title-v2 {
+    font-family: var(--font-display);
+    color: var(--text-primary);
+}
+
+/* --- Focus ring for keyboard navigation --- */
+.sd-genetics__node:focus-visible,
+.sd-info-icon:focus-visible,
+.sd-tag:focus-visible {
+    outline: 2px solid var(--accent-green);
+    outline-offset: 2px;
+}
+
+/* --- Responsive: Tablet (768px) --- */
+@media screen and (max-width: 768px) {
+    .sd-effects {
+        grid-template-columns: 1fr;
+    }
+
+    .sd-page-v2 {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+}
+
+/* --- Responsive: Mobile (640px) --- */
+@media screen and (max-width: 640px) {
+    .sd-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .sd-name {
+        font-size: 24px;
+        width: auto;
+    }
+
+    .sd-top {
+        flex-direction: column;
+    }
+
+    .sd-top__image {
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .sd-genetics__parents {
+        gap: 20px;
+    }
+
+    .sd-genetics__node {
+        min-width: 90px;
+        padding: 8px 14px;
+        font-size: 12px;
+    }
+
+    .sd-cannabinoids {
+        max-width: 100%;
+    }
+
+    .sd-review-summary {
+        padding: 16px;
+    }
+}
+
+/* --- Reduced motion preference --- */
+@media (prefers-reduced-motion: reduce) {
+    .sd-cann__fill {
+        transition: none;
+    }
+
+    .sd-effect-group,
+    .sd-tag,
+    .sd-genetics__node,
+    .sd-top__desc .tovar_text a {
+        transition: none;
+    }
+}

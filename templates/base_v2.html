@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+{% load i18n %}
+{% load translate %}
+{% get_current_language as LANGUAGE_CODE %}
+<html dir="ltr" lang="{{ LANGUAGE_CODE }}">
+{% load static %}
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HTGQ1DC07H"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-HTGQ1DC07H');
+    </script>
+    <meta charset="utf-8" />
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
+    <meta name="keywords" content="{% block keywords %}{% endblock %}" />
+    <meta name="description" content="{% block description %}{% endblock %}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- SEO: Multi-language support -->
+    {% get_current_language as CURRENT_LANG %}
+    {% get_available_languages as LANGUAGES %}
+
+    <!-- hreflang tags for SEO -->
+    {% for lang_code, _ in LANGUAGES %}
+        <link rel="alternate" hreflang="{{ lang_code }}" href="{{ request.scheme }}://{{ request.get_host }}{% alt_url lang_code %}">
+    {% endfor %}
+    <link rel="alternate" hreflang="x-default" href="{{ request.scheme }}://{{ request.get_host }}{% alt_url 'es' %}">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+
+    <!-- OpenGraph meta tags -->
+    <meta property="og:site_name" content="Cannamente">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+    <meta property="og:title" content="{% block og_title %}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{% endblock %}">
+    {% block og_image %}<meta property="og:image" content="{% static 'img/cannamente_bg_THC_CBD_1140x320.png' %}">{% endblock %}
+    <meta property="og:locale" content="{% if CURRENT_LANG == 'es' %}es_ES{% else %}en_US{% endif %}">
+    <meta property="og:locale:alternate" content="{% if CURRENT_LANG == 'es' %}en_US{% else %}es_ES{% endif %}">
+
+    <!-- Twitter Card meta tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{% endblock %}">
+    {% block twitter_image %}<meta name="twitter:image" content="{% static 'img/cannamente_bg_THC_CBD_1140x320.png' %}">{% endblock %}
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- New dark theme styles -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles_v2.css' %}" />
+
+    {% if ENABLE_AI_CHAT %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/ai-budtender-chat.css' %}" />
+    {% endif %}
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="body-v2"{% if ENABLE_AI_CHAT %} data-ai-budtender-chat{% endif %}>
+
+{% block header_block %}
+<header class="header-v2" id="header-v2">
+    <div class="header-v2__inner">
+        <a href="/" class="header-v2__logo">
+            <img src="{% static 'img/logo.svg' %}" alt="Cannamente" width="195" height="18" class="header-v2__logo-img">
+        </a>
+
+        <button class="header-v2__burger" id="burger-btn" aria-label="Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <nav class="header-v2__nav" id="main-nav">
+            <ul class="header-v2__nav-list">
+                <li><a href="{% url 'strain_list' %}" class="header-v2__nav-link">{% trans "Variedades" %}</a></li>
+                <li><a href="{% url 'terpene_list' %}" class="header-v2__nav-link">{% trans "Terpenos" %}</a></li>
+                <li><a href="{% url 'article_list' %}" class="header-v2__nav-link">{% trans "Artículos" %}</a></li>
+            </ul>
+        </nav>
+
+        <div class="header-v2__actions">
+            <form action="{% url 'search' %}" method="get" class="header-v2__search">
+                <input type="text" name="q" class="header-v2__search-input" placeholder="{% trans 'Buscar...' %}">
+                <button type="submit" class="header-v2__search-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                </button>
+            </form>
+
+            <div class="header-v2__lang">
+                {% for lang_code, _ in LANGUAGES %}
+                    {% if lang_code == CURRENT_LANG %}
+                        <span class="header-v2__lang-option header-v2__lang-option--active">{{ lang_code|upper }}</span>
+                    {% else %}
+                        <a href="{% alt_url lang_code %}" class="header-v2__lang-option">{{ lang_code|upper }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</header>
+{% endblock header_block %}
+
+{% block content %}{% endblock content %}
+
+{% block footer %}
+<footer class="footer-v2">
+    <div class="footer-v2__inner">
+        <div class="footer-v2__col">
+            <a href="/" class="footer-v2__logo">
+                <img src="{% static 'img/logo.svg' %}" alt="Cannamente" width="160" height="15" class="header-v2__logo-img">
+            </a>
+            <p class="footer-v2__desc">
+                {% block footer_description %}{% endblock %}
+            </p>
+        </div>
+        <div class="footer-v2__col">
+            <h4 class="footer-v2__heading">{% trans "Explorar" %}</h4>
+            <ul class="footer-v2__links">
+                <li><a href="{% url 'strain_list' %}">{% trans "Variedades" %}</a></li>
+                <li><a href="{% url 'terpene_list' %}">{% trans "Terpenos" %}</a></li>
+                <li><a href="{% url 'article_list' %}">{% trans "Artículos" %}</a></li>
+            </ul>
+        </div>
+        <div class="footer-v2__col">
+            <h4 class="footer-v2__heading">{% trans "Contacto" %}</h4>
+            <ul class="footer-v2__links">
+                <li><a href="mailto:cannament@gmail.com">cannament@gmail.com</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-v2__bottom">
+        <p>&copy; Copyright 2023-2026 Cannamente</p>
+    </div>
+</footer>
+{% endblock footer %}
+
+<!-- Fullscreen Chat Overlay -->
+{% if ENABLE_AI_CHAT %}
+<div class="chat-fullscreen" id="chat-fullscreen">
+    <div class="chat-fullscreen__header">
+        <div class="chat-fullscreen__header-left">
+            <img src="{% static 'img/mascot_avatar_60x60.png' %}" alt="AI Budtender" class="chat-fullscreen__avatar">
+            <span class="chat-fullscreen__header-title">AI Budtender</span>
+        </div>
+        <button class="chat-fullscreen__close" id="chat-fullscreen-close" aria-label="Close">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+    </div>
+    <div class="chat-fullscreen__messages" id="chat-fullscreen-messages">
+        <div class="chat-fullscreen__welcome">
+            <img src="{% static 'img/mascot_avatar_60x60.png' %}" alt="" class="chat-fullscreen__welcome-avatar">
+            <h3>{% trans "Hola! Soy tu AI Budtender" %}</h3>
+            <p>{% trans "Cuéntame qué efectos buscas y te recomendaré las mejores variedades de cannabis." %}</p>
+        </div>
+    </div>
+    <div class="chat-fullscreen__input-area">
+        <div class="chat-fullscreen__input-wrapper">
+            <textarea class="chat-fullscreen__input" id="chat-fullscreen-input" placeholder="{% trans 'Escribe tu mensaje...' %}" rows="1"></textarea>
+            <button class="chat-fullscreen__send" id="chat-fullscreen-send" aria-label="Send">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4z"/><path d="m22 2-11 11"/></svg>
+            </button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% block common_scripts %}
+    <script src="{% static 'js/jquery-3.2.0.min.js' %}"></script>
+    <script src="{% static 'js/jquery.raty.js' %}"></script>
+    <script src="{% static 'js/util.js' %}"></script>
+    <script src="{% static 'js/collapse.js' %}"></script>
+    <script src="{% static 'js/modal.js' %}"></script>
+    <script src="{% static 'js/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'js/strains_search.js' %}"></script>
+    <script type="text/javascript">
+        var starOnUrl = "{% static 'img/raty_on.svg' %}";
+        var starOffUrl = "{% static 'img/raty_off.svg' %}";
+        var starHalfUrl = "{% static 'img/star_half.svg' %}";
+    </script>
+    <script src="{% static 'js/script.js' %}"></script>
+    <script src="{% static 'js/lang_toggle.js' %}"></script>
+
+    {% if ENABLE_AI_CHAT %}
+    <script>
+        window.AIBudtenderChatConfig = {
+            apiBaseUrl: '/api/chat',
+            apiKey: '',
+            websocketUrl: null,
+            autoConnect: true,
+            maxHistory: 10,
+            avatarUrl: '{% static "img/mascot_avatar_60x60.png" %}'
+        };
+    </script>
+    <script src="{% url 'javascript-catalog' %}"></script>
+    <script src="{% static 'js/ai-budtender-chat.js' %}"></script>
+    {% endif %}
+
+    <!-- V2 Homepage Scripts -->
+    <script>
+    (function() {
+        // Header scroll effect
+        const header = document.getElementById('header-v2');
+        if (header) {
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    header.classList.add('header-v2--scrolled');
+                } else {
+                    header.classList.remove('header-v2--scrolled');
+                }
+            });
+        }
+
+        // Mobile burger menu
+        const burger = document.getElementById('burger-btn');
+        const nav = document.getElementById('main-nav');
+        if (burger && nav) {
+            burger.addEventListener('click', function() {
+                burger.classList.toggle('header-v2__burger--active');
+                nav.classList.toggle('header-v2__nav--open');
+            });
+        }
+
+        {% if ENABLE_AI_CHAT %}
+        // Fullscreen chat logic
+        const fullscreen = document.getElementById('chat-fullscreen');
+        const fsMessages = document.getElementById('chat-fullscreen-messages');
+        const fsInput = document.getElementById('chat-fullscreen-input');
+        const fsSend = document.getElementById('chat-fullscreen-send');
+        const fsClose = document.getElementById('chat-fullscreen-close');
+
+        function openFullscreenChat(prefillText) {
+            if (!fullscreen) return;
+            fullscreen.classList.add('chat-fullscreen--active');
+            document.body.style.overflow = 'hidden';
+            if (prefillText && fsInput) {
+                fsInput.value = prefillText;
+                fsInput.focus();
+            } else if (fsInput) {
+                fsInput.focus();
+            }
+        }
+
+        function closeFullscreenChat() {
+            if (!fullscreen) return;
+            fullscreen.classList.remove('chat-fullscreen--active');
+            document.body.style.overflow = '';
+        }
+
+        if (fsClose) {
+            fsClose.addEventListener('click', closeFullscreenChat);
+        }
+
+        // Close on Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && fullscreen && fullscreen.classList.contains('chat-fullscreen--active')) {
+                closeFullscreenChat();
+            }
+        });
+
+        // === Fullscreen Chat: API Connection ===
+        function getPageLanguage() {
+            const lang = document.documentElement.lang || 'es';
+            return lang.split('-')[0].toLowerCase();
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function getSessionId() {
+            // Reuse session from the existing chat widget if available
+            return localStorage.getItem('ai-budtender-session-id') || localStorage.getItem('ai_budtender_session_id') || null;
+        }
+
+        function setSessionId(id) {
+            localStorage.setItem('ai-budtender-session-id', id);
+            localStorage.setItem('ai_budtender_session_id', id);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showTypingIndicator() {
+            const welcome = fsMessages.querySelector('.chat-fullscreen__welcome');
+            if (welcome) welcome.style.display = 'none';
+
+            const typing = document.createElement('div');
+            typing.className = 'chat-fullscreen__msg chat-fullscreen__msg--assistant chat-fullscreen__msg--typing';
+            typing.innerHTML = '<div class="chat-fullscreen__typing-indicator">' +
+                '<span class="chat-fullscreen__typing-dot"></span>' +
+                '<span class="chat-fullscreen__typing-dot"></span>' +
+                '<span class="chat-fullscreen__typing-dot"></span>' +
+                '</div>';
+            fsMessages.appendChild(typing);
+            fsMessages.scrollTop = fsMessages.scrollHeight;
+            return typing;
+        }
+
+        function addMessageToFullscreen(role, text) {
+            const welcome = fsMessages.querySelector('.chat-fullscreen__welcome');
+            if (welcome) welcome.style.display = 'none';
+
+            const msg = document.createElement('div');
+            msg.className = 'chat-fullscreen__msg chat-fullscreen__msg--' + role;
+            msg.innerHTML = '<div class="chat-fullscreen__msg-text">' + escapeHtml(text) + '</div>';
+            fsMessages.appendChild(msg);
+            fsMessages.scrollTop = fsMessages.scrollHeight;
+            return msg;
+        }
+
+        function addErrorMessage(text) {
+            const msg = document.createElement('div');
+            msg.className = 'chat-fullscreen__msg chat-fullscreen__msg--error';
+            msg.innerHTML = '<div class="chat-fullscreen__msg-text chat-fullscreen__msg-error-text">' +
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg> ' +
+                escapeHtml(text) + '</div>';
+            fsMessages.appendChild(msg);
+            fsMessages.scrollTop = fsMessages.scrollHeight;
+        }
+
+        // Send message via streaming API
+        function sendFullscreenMessage() {
+            if (!fsInput || !fsInput.value.trim()) return;
+            const message = fsInput.value.trim();
+
+            // Add user message
+            addMessageToFullscreen('user', message);
+            fsInput.value = '';
+            fsInput.style.height = 'auto';
+
+            // Show typing indicator
+            const typingEl = showTypingIndicator();
+
+            // Build request payload (matching old chat widget format)
+            const payload = {
+                message: message,
+                language: getPageLanguage(),
+                source_platform: 'cannamente'
+            };
+            const sid = getSessionId();
+            if (sid) payload.session_id = sid;
+
+            // Build headers
+            const headers = {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': getCookie('csrftoken') || ''
+            };
+
+            // Try streaming endpoint first
+            fetch('/api/chat/stream/', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(payload)
+            }).then(function(response) {
+                if (response.status === 429) {
+                    typingEl.remove();
+                    const retryData = response.headers.get('Retry-After');
+                    const retryMsg = retryData
+                        ? '{% trans "Has alcanzado el límite de mensajes. Por favor, inténtalo más tarde." %}'
+                        : '{% trans "Has alcanzado el límite de mensajes. Por favor, inténtalo más tarde." %}';
+                    addErrorMessage(retryMsg);
+                    return;
+                }
+                if (response.status === 503) {
+                    typingEl.remove();
+                    addErrorMessage('{% trans "El servicio no está disponible en este momento. Inténtalo más tarde." %}');
+                    return;
+                }
+                if (!response.ok) {
+                    typingEl.remove();
+                    addErrorMessage('{% trans "Error del servidor. Por favor, inténtalo de nuevo." %}');
+                    return;
+                }
+
+                // Replace typing indicator with response bubble
+                typingEl.remove();
+                const responseBubble = addMessageToFullscreen('assistant', '');
+                const textEl = responseBubble.querySelector('.chat-fullscreen__msg-text');
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let fullText = '';
+                let buffer = '';
+
+                function processChunk() {
+                    reader.read().then(function(result) {
+                        if (result.done) {
+                            // Process any remaining buffer
+                            if (buffer.trim()) processLines(buffer);
+                            return;
+                        }
+                        buffer += decoder.decode(result.value, {stream: true});
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop(); // Keep incomplete last line in buffer
+
+                        processLines(lines.join('\n'));
+                        processChunk();
+                    }).catch(function(err) {
+                        if (!fullText) {
+                            responseBubble.remove();
+                            addErrorMessage('{% trans "Error de conexión. Inténtalo de nuevo." %}');
+                        }
+                    });
+                }
+
+                function processLines(text) {
+                    const lines = text.split('\n');
+                    for (const line of lines) {
+                        if (!line.startsWith('data: ')) continue;
+                        try {
+                            const data = JSON.parse(line.slice(6));
+                            if (data.type === 'metadata') {
+                                // Update session ID if provided by backend
+                                if (data.session_id) setSessionId(data.session_id);
+                                if (data.data && data.data.session_id) setSessionId(data.data.session_id);
+                            } else if (data.type === 'response_chunk') {
+                                const chunk = data.text || data.content || '';
+                                if (chunk) {
+                                    fullText += chunk;
+                                    textEl.textContent = fullText;
+                                    fsMessages.scrollTop = fsMessages.scrollHeight;
+                                }
+                            } else if (data.type === 'error') {
+                                responseBubble.remove();
+                                addErrorMessage(data.message || '{% trans "Error de conexión. Inténtalo de nuevo." %}');
+                            } else if (data.type === 'done') {
+                                // Stream complete
+                            }
+                        } catch(e) {
+                            // Skip malformed JSON lines
+                        }
+                    }
+                }
+
+                processChunk();
+            }).catch(function(err) {
+                typingEl.remove();
+                // Network error — try blocking fallback
+                fetch('/api/chat/chat/', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(payload)
+                }).then(function(r) { return r.json(); }).then(function(data) {
+                    if (data.response) {
+                        addMessageToFullscreen('assistant', data.response);
+                        if (data.session_id) setSessionId(data.session_id);
+                    } else if (data.error) {
+                        addErrorMessage(data.error);
+                    } else {
+                        addErrorMessage('{% trans "Error de conexión. Inténtalo de nuevo." %}');
+                    }
+                }).catch(function() {
+                    addErrorMessage('{% trans "No se puede conectar con el servidor. Verifica tu conexión a internet." %}');
+                });
+            });
+        }
+
+        if (fsSend) {
+            fsSend.addEventListener('click', sendFullscreenMessage);
+        }
+        if (fsInput) {
+            fsInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendFullscreenMessage();
+                }
+            });
+            // Auto-resize textarea
+            fsInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+        }
+
+        // Expose for hero section
+        window.openFullscreenChat = openFullscreenChat;
+        {% endif %}
+    })();
+    </script>
+{% endblock common_scripts %}
+
+{% block page_scripts %}{% endblock page_scripts %}
+</body>
+</html>

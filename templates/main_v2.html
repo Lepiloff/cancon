@@ -1,0 +1,249 @@
+{% extends "base_v2.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}
+    {% trans "AI Budtender y Base de Datos de Variedades de Cannabis | Cannamente" %}
+{% endblock %}
+
+{% block keywords %}
+    {% trans "AI budtender, variedades de cannabis, marihuana, recomendaciones de cannabis, buscador de variedades, terpenos, THC, CBD" %}
+{% endblock %}
+
+{% block description %}
+    {% trans "Conoce al AI Budtender: recomendaciones personalizadas de variedades de cannabis con inteligencia artificial. Mas de 500 variedades con efectos, terpenos y datos de THC/CBD." %}
+{% endblock %}
+
+{% block og_title %}{% trans "AI Budtender y Base de Datos de Variedades de Cannabis | Cannamente" %}{% endblock %}
+{% block og_description %}{% trans "Recomendaciones personalizadas de variedades de cannabis con nuestro AI Budtender. Explora por efectos, terpenos y niveles de THC/CBD." %}{% endblock %}
+{% block twitter_title %}{% trans "AI Budtender y Base de Datos de Variedades de Cannabis | Cannamente" %}{% endblock %}
+{% block twitter_description %}{% trans "Recomendaciones personalizadas de variedades de cannabis con nuestro AI Budtender. Explora por efectos, terpenos y niveles de THC/CBD." %}{% endblock %}
+
+{% block content %}
+    {% if ENABLE_AI_CHAT %}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "AI Budtender by Cannamente",
+        "applicationCategory": "HealthApplication",
+        "operatingSystem": "Web",
+        "description": "{% trans "AI-powered cannabis strain recommendation engine. Get personalized suggestions based on desired effects, flavors, terpenes, and medical needs." %}",
+        "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "provider": {
+            "@type": "Organization",
+            "name": "Cannamente",
+            "url": "{{ request.scheme }}://{{ request.get_host }}"
+        }
+    }
+    </script>
+    {% endif %}
+
+    <!-- Hero Section -->
+    <section class="hero-v2">
+        <div class="hero-v2__bg-glow"></div>
+        <div class="hero-v2__content">
+            {% if ENABLE_AI_CHAT %}
+            <img src="{% static 'img/mascot_avatar_60x60.png' %}" alt="AI Budtender" class="hero-v2__mascot">
+            {% endif %}
+            <h1 class="hero-v2__title">{% trans "Tu Asesor de Cannabis con IA" %}</h1>
+            <p class="hero-v2__subtitle">{% trans "Describe lo que buscas y obtén recomendaciones personalizadas de variedades" %}</p>
+
+            {% if ENABLE_AI_CHAT %}
+            <div class="hero-chat">
+                <div class="hero-chat__input-wrapper">
+                    <input type="text" class="hero-chat__input" id="hero-chat-input"
+                           placeholder="{% trans 'Necesito algo para relajación y creatividad...' %}">
+                    <button class="hero-chat__send" id="hero-chat-send" aria-label="{% trans 'Enviar' %}">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4z"/><path d="m22 2-11 11"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="hero-chips">
+                <button class="hero-chips__item" data-query="{% trans 'Necesito algo para relajarme después del trabajo' %}">{% trans "Relajación" %}</button>
+                <button class="hero-chips__item" data-query="{% trans 'Busco una variedad que estimule la creatividad' %}">{% trans "Creatividad" %}</button>
+                <button class="hero-chips__item" data-query="{% trans 'Necesito aliviar el dolor de forma natural' %}">{% trans "Alivio del dolor" %}</button>
+                <button class="hero-chips__item" data-query="{% trans 'Quiero algo que me ayude a dormir mejor' %}">{% trans "Mejor sueño" %}</button>
+                <button class="hero-chips__item" data-query="{% trans 'Busco energía y motivación para el día' %}">{% trans "Energía" %}</button>
+                <button class="hero-chips__item" data-query="{% trans 'Necesito concentración para trabajar o estudiar' %}">{% trans "Concentración" %}</button>
+            </div>
+            {% else %}
+            <a href="{% url 'strain_list' %}" class="hero-v2__cta">{% trans "Explorar variedades" %}</a>
+            {% endif %}
+        </div>
+        <div class="hero-v2__scroll-indicator">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+    </section>
+
+    <!-- Stats Strip -->
+    <section class="stats-strip">
+        <div class="stats-strip__inner">
+            <div class="stats-strip__item">
+                <span class="stats-strip__number">500+</span>
+                <span class="stats-strip__label">{% trans "Variedades" %}</span>
+            </div>
+            <div class="stats-strip__divider"></div>
+            <div class="stats-strip__item">
+                <svg class="stats-strip__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a5 5 0 0 1 5 5c0 2.76-2.5 5-5 8-2.5-3-5-5.24-5-8a5 5 0 0 1 5-5z"/><circle cx="12" cy="7" r="1"/></svg>
+                <span class="stats-strip__label">{% trans "IA Personalizada" %}</span>
+            </div>
+            <div class="stats-strip__divider"></div>
+            <div class="stats-strip__item">
+                <svg class="stats-strip__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                <span class="stats-strip__label">{% trans "Basado en Terpenos" %}</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Explore Strains Section -->
+    <section class="explore-v2">
+        <div class="explore-v2__inner">
+            <h2 class="section-title-v2">{% trans "Explora Variedades de Cannabis" %}</h2>
+
+            <!-- Category Cards -->
+            <div class="category-cards">
+                <a href="{% url 'article_detail' slug='top-10-variedades-de-indica-un-viaje-al-corazon-de' %}" class="category-cards__item">
+                    <img src="{% static 'pic/top_10_indica.jpg' %}" alt="Top 10 Indica" loading="lazy" decoding="async">
+                    <div class="category-cards__overlay">
+                        <span class="category-cards__label">Top 10 Indica</span>
+                    </div>
+                </a>
+                <a href="{% url 'article_detail' slug='top-10-variedades-de-sativa' %}" class="category-cards__item">
+                    <img src="{% static 'pic/top_10_sativa.jpg' %}" alt="Top 10 Sativa" loading="lazy" decoding="async">
+                    <div class="category-cards__overlay">
+                        <span class="category-cards__label">Top 10 Sativa</span>
+                    </div>
+                </a>
+                <a href="{% url 'article_detail' slug='top-10-variedades-de-hibridos' %}" class="category-cards__item">
+                    <img src="{% static 'pic/top_10_hybrid.jpg' %}" alt="Top 10 Hybrid" loading="lazy" decoding="async">
+                    <div class="category-cards__overlay">
+                        <span class="category-cards__label">Top 10 Hybrid</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Strain Cards Grid -->
+            <div class="strain-grid-v2">
+                {% for strain in strains %}
+                <div class="strain-card-v2">
+                    <a href="{% url 'strain_detail' slug=strain.slug %}" class="strain-card-v2__link">
+                        <div class="strain-card-v2__img">
+                            {% if strain.img %}
+                            <img src="{{ strain.img.url }}" alt="{{ strain.name }}" loading="lazy" decoding="async">
+                            {% else %}
+                            <img src="{% static 'img/no_img.png' %}" alt="{{ strain.name }}" loading="lazy" decoding="async">
+                            {% endif %}
+                        </div>
+                        <div class="strain-card-v2__info">
+                            <h3 class="strain-card-v2__name">{{ strain.name }}</h3>
+                            <span class="strain-card-v2__category strain-card-v2__category--{{ strain.category|lower }}">{{ strain.category }}</span>
+                            <div class="strain-card-v2__meta">
+                                <span class="strain-card-v2__thc">THC {{ strain.thc|floatformat:0 }}%</span>
+                                {% if strain.cbd is not none %}
+                                    <span class="strain-card-v2__cbd">CBD {{ strain.cbd|floatformat:0 }}%</span>
+                                {% elif strain.cbg is not none %}
+                                    <span class="strain-card-v2__cbg">CBG {{ strain.cbg|floatformat:0 }}%</span>
+                                {% endif %}
+                            </div>
+                            <div class="strain-card-v2__rating">
+                                <span class="strain-card-v2__rating-value">{{ strain.rating }}</span>
+                                <div class="raty" data-score="{{ strain.rating }}" data-readonly="true"></div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="explore-v2__more">
+                <a href="{% url 'strain_list' %}" class="btn-v2 btn-v2--outline">{% trans "Ver más variedades" %}</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Articles / Learn Section -->
+    <section class="learn-v2">
+        <div class="learn-v2__inner">
+            <h2 class="section-title-v2">{% trans "Aprende sobre Cannabis" %}</h2>
+            <div class="learn-v2__grid">
+                {% for article in articles|slice:":3" %}
+                <a href="{% url 'article_detail' slug=article.slug %}" class="learn-card-v2">
+                    <div class="learn-card-v2__img">
+                        {% for image in article.images.all %}
+                            {% if image.is_preview %}
+                                <img src="{{ image.img.url }}" alt="{{ image.img_alt_text }}" loading="lazy" decoding="async">
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <h3 class="learn-card-v2__title">{{ article.title }}</h3>
+                </a>
+                {% endfor %}
+            </div>
+            <div class="learn-v2__more">
+                <a href="{% url 'article_list' %}" class="btn-v2 btn-v2--outline">{% trans "Ver todos los artículos" %}</a>
+            </div>
+        </div>
+    </section>
+
+{% endblock content %}
+
+{% block footer_description %}
+{% trans "Cannamente es una base de datos de variedades de cannabis con un AI Budtender que te da recomendaciones personalizadas. Explora variedades y perfiles de terpenos." %}
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+(function() {
+    // Hero chat input -> opens fullscreen chat
+    const heroInput = document.getElementById('hero-chat-input');
+    const heroSend = document.getElementById('hero-chat-send');
+
+    function sendHeroMessage() {
+        if (!heroInput || !heroInput.value.trim()) return;
+        const query = heroInput.value.trim();
+        heroInput.value = '';
+        if (window.openFullscreenChat) {
+            window.openFullscreenChat(query);
+            // Small delay then auto-send
+            setTimeout(function() {
+                const fsSend = document.getElementById('chat-fullscreen-send');
+                if (fsSend) fsSend.click();
+            }, 300);
+        }
+    }
+
+    if (heroSend) {
+        heroSend.addEventListener('click', sendHeroMessage);
+    }
+    if (heroInput) {
+        heroInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendHeroMessage();
+            }
+        });
+    }
+
+    // Suggestion chips
+    document.querySelectorAll('.hero-chips__item').forEach(function(chip) {
+        chip.addEventListener('click', function() {
+            const query = this.getAttribute('data-query');
+            if (window.openFullscreenChat) {
+                window.openFullscreenChat(query);
+                setTimeout(function() {
+                    const fsSend = document.getElementById('chat-fullscreen-send');
+                    if (fsSend) fsSend.click();
+                }, 300);
+            }
+        });
+    });
+})();
+</script>
+{% endblock page_scripts %}

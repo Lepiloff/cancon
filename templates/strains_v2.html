@@ -1,0 +1,234 @@
+{% extends "base_v2.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}
+{% trans "Catálogo de Variedades de Marihuana | Tu Guía Completa" %}
+{% endblock %}
+
+{% block keywords %}
+{% trans "Catálogo de marihuana, variedades de marihuana, cepas de cannabis, guía de marihuana, cannabis medicinal, cannabis recreativa, índica, sativa, híbrida" %}
+{% endblock %}
+
+{% block description %}
+{% trans "Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos de cepas de cannabis para uso medicinal y recreativo. Encuentra la variedad perfecta de índica, sativa o híbrida para tus necesidades. Actualizado y detallado para tu conveniencia." %}
+{% endblock %}
+
+{% block og_title %}{% trans "Catálogo de Variedades de Marihuana | Tu Guía Completa" %}{% endblock %}
+{% block og_description %}{% trans "Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos de cepas de cannabis para uso medicinal y recreativo." %}{% endblock %}
+{% block twitter_title %}{% trans "Catálogo de Variedades de Marihuana | Tu Guía Completa" %}{% endblock %}
+{% block twitter_description %}{% trans "Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos de cepas de cannabis para uso medicinal y recreativo." %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/strains-filter-v2.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="strains-page-v2">
+    <!-- Page Header -->
+    <section class="strains-header-v2">
+        <div class="strains-header-v2__inner">
+            <div class="strains-header-v2__text">
+                <h1 class="strains-header-v2__title">{% trans "Nuestro Catálogo de Cepas de Marihuana: Diversidad y Calidad" %}</h1>
+                <p class="strains-header-v2__desc">{% trans "Descubre la variedad y unicidad de cada cepa de marihuana en nuestro catálogo. Aquí, puedes explorar en detalle las características, beneficios terapéuticos, sabores y niveles de THC de cada cepa. Encuentra la cepa que se ajusta perfectamente a tus necesidades y preferencias." %}</p>
+            </div>
+            {% if ENABLE_AI_CHAT %}
+            <div class="strains-chat-cta" id="strains-chat-cta">
+                <div class="strains-chat-cta__icon">
+                    <img src="{% static 'img/mascot_avatar_60x60.png' %}" alt="AI Budtender">
+                </div>
+                <div class="strains-chat-cta__body">
+                    <span class="strains-chat-cta__label">AI Budtender</span>
+                    <span class="strains-chat-cta__text">{% trans "No sabes qué elegir? Pregúntale a la IA" %}</span>
+                </div>
+                <svg class="strains-chat-cta__arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Filters -->
+    <section class="strains-filters-v2">
+        <div class="strains-filters-v2__inner">
+            <div class="sf-filter">
+                <div class="sf-chips"></div>
+
+                <form method="get" id="filterForm">
+                    <div class="sf-bar">
+                        <!-- Tipo -->
+                        <div class="sf-group">
+                            <button type="button" class="sf-btn">
+                                {% trans "Tipo" %}
+                                <svg class="sf-btn__chevron" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg>
+                            </button>
+                            <div class="sf-dropdown">
+                                {% for choice in form.category.field.choices %}
+                                <label class="sf-check">
+                                    <input type="checkbox" name="{{ form.category.html_name }}" value="{{ choice.0 }}">
+                                    <span class="sf-check__box">
+                                        <svg viewBox="0 0 10 8" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 4l3 3 5-6"/></svg>
+                                    </span>
+                                    <span class="sf-check__label">{{ choice.1 }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Sensaciones -->
+                        <div class="sf-group">
+                            <button type="button" class="sf-btn">
+                                {% trans "Sensaciones" %}
+                                <svg class="sf-btn__chevron" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg>
+                            </button>
+                            <div class="sf-dropdown sf-dropdown--wide">
+                                {% for choice in form.feelings.field.choices %}
+                                <label class="sf-check">
+                                    <input type="checkbox" name="{{ form.feelings.html_name }}" value="{{ choice.0 }}">
+                                    <span class="sf-check__box">
+                                        <svg viewBox="0 0 10 8" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 4l3 3 5-6"/></svg>
+                                    </span>
+                                    <span class="sf-check__label">{{ choice.1 }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Ayuda con -->
+                        <div class="sf-group">
+                            <button type="button" class="sf-btn">
+                                {% trans "Ayuda con" %}
+                                <svg class="sf-btn__chevron" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg>
+                            </button>
+                            <div class="sf-dropdown sf-dropdown--wide">
+                                {% for choice in form.helps_with.field.choices %}
+                                <label class="sf-check">
+                                    <input type="checkbox" name="{{ form.helps_with.html_name }}" value="{{ choice.0 }}">
+                                    <span class="sf-check__box">
+                                        <svg viewBox="0 0 10 8" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 4l3 3 5-6"/></svg>
+                                    </span>
+                                    <span class="sf-check__label">{{ choice.1 }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Sabores -->
+                        <div class="sf-group">
+                            <button type="button" class="sf-btn">
+                                {% trans "Sabores" %}
+                                <svg class="sf-btn__chevron" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg>
+                            </button>
+                            <div class="sf-dropdown sf-dropdown--wide">
+                                {% for choice in form.flavors.field.choices %}
+                                <label class="sf-check">
+                                    <input type="checkbox" name="{{ form.flavors.html_name }}" value="{{ choice.0 }}">
+                                    <span class="sf-check__box">
+                                        <svg viewBox="0 0 10 8" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 4l3 3 5-6"/></svg>
+                                    </span>
+                                    <span class="sf-check__label">{{ choice.1 }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- THC Level -->
+                        <div class="sf-group">
+                            <button type="button" class="sf-btn">
+                                {% trans "Nivel de THC" %}
+                                <svg class="sf-btn__chevron" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg>
+                            </button>
+                            <div class="sf-thc">
+                                {% for choice in form.thc.field.choices %}
+                                <input type="checkbox" name="{{ form.thc.html_name }}" value="{{ choice.0 }}" style="display:none">
+                                {% endfor %}
+                                <div class="sf-segments">
+                                    <button type="button" class="sf-seg" data-thc="sin thc">{% trans "Sin THC" %}</button>
+                                    <button type="button" class="sf-seg" data-thc="bajo thc">{% trans "Bajo" %}</button>
+                                    <button type="button" class="sf-seg" data-thc="medio thc">{% trans "Medio" %}</button>
+                                    <button type="button" class="sf-seg" data-thc="alto thc">{% trans "Alto" %}</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reset -->
+                        <button type="button" class="sf-reset">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/></svg>
+                            {% trans "Ver todos" %}
+                        </button>
+                    </div>
+                </form>
+
+                <div class="sf-backdrop"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Strain Results -->
+    <section class="strains-results-v2">
+        <div class="strains-results-v2__inner">
+            {% if no_matches %}
+            <p class="strains-results-v2__empty">{% trans "No hay cepas que coincidan. Nos encanta tu imaginación, pero ninguna variedad coincide con la descripción. Prueba a simplificar tus opciones o empieza de cero borrando los filtros." %}</p>
+            {% else %}
+            <div class="strain-grid-v2" id="strainsContainer">
+                {% for strain in strains %}
+                <div class="strain-card-v2 ctg__item">
+                    <a href="{% url 'strain_detail' slug=strain.slug %}" class="strain-card-v2__link">
+                        <div class="strain-card-v2__img">
+                            {% if strain.top %}
+                            <span class="strain-card-v2__top-badge">Top</span>
+                            {% endif %}
+                            {% if strain.img %}
+                            <img src="{{ strain.img.url }}" alt="{{ strain.name }}" loading="lazy" decoding="async">
+                            {% else %}
+                            <img src="{% static 'img/no_img.png' %}" alt="{{ strain.name }}" loading="lazy" decoding="async">
+                            {% endif %}
+                        </div>
+                        <div class="strain-card-v2__info">
+                            <h3 class="strain-card-v2__name">{{ strain.name }}</h3>
+                            <span class="strain-card-v2__category strain-card-v2__category--{{ strain.category|lower }}">{{ strain.category }}</span>
+                            <div class="strain-card-v2__meta">
+                                <span class="strain-card-v2__thc">THC {{ strain.thc|floatformat:0 }}%</span>
+                                {% if strain.cbd is not none %}
+                                    <span class="strain-card-v2__cbd">CBD {{ strain.cbd|floatformat:0 }}%</span>
+                                {% elif strain.cbg is not none %}
+                                    <span class="strain-card-v2__cbg">CBG {{ strain.cbg|floatformat:0 }}%</span>
+                                {% endif %}
+                            </div>
+                            <div class="strain-card-v2__rating">
+                                <span class="strain-card-v2__rating-value">{{ strain.rating }}</span>
+                                <div class="raty" data-score="{{ strain.rating }}" data-readonly="true"></div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="strains-results-v2__more">
+                <a href="#" class="btn-v2 btn-v2--outline btn btn--outline">{% trans "Ver todos" %}</a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock content %}
+
+{% block footer_description %}
+{% trans "Descubre diversas cepas de marihuana en nuestro catálogo. Ofrecemos descripciones detalladas, beneficios terapéuticos y niveles de THC. Encuentra la cepa ideal para ti con nosotros." %}
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{% static 'js/strains_filter_new.js' %}"></script>
+<script src="{% static 'js/strains_download.js' %}"></script>
+{% if ENABLE_AI_CHAT %}
+<script>
+(function() {
+    var cta = document.getElementById('strains-chat-cta');
+    if (cta && window.openFullscreenChat) {
+        cta.addEventListener('click', function() {
+            window.openFullscreenChat('');
+        });
+    }
+})();
+</script>
+{% endif %}
+{% endblock page_scripts %}

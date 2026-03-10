@@ -1,0 +1,72 @@
+{% extends "base_v2.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}
+    {% blocktrans with name=terpene.title %}Descripción y propiedades del terpeno {{ name }}{% endblocktrans %}
+{% endblock %}
+
+{% block keywords %}
+    {{ terpene.keywords }}
+{% endblock %}
+
+{% block description %}
+    {{ terpene.description }}
+{% endblock %}
+
+{% block og_title %}{{ terpene.title }} | Cannamente{% endblock %}
+{% block og_description %}{{ terpene.description }}{% endblock %}
+{% block twitter_title %}{{ terpene.title }} | Cannamente{% endblock %}
+{% block twitter_description %}{{ terpene.description }}{% endblock %}
+
+{% block content %}
+<div class="terpene-detail-v2">
+    <div class="terpene-detail-v2__container">
+        <div class="terpene-detail-v2__body">
+            <!-- Article content -->
+            <article class="terpene-detail-v2__article">
+                <div class="terpene-detail-v2__meta">
+                    <span class="terpene-detail-v2__tag">{% trans "Terpeno" %}</span>
+                    <time class="terpene-detail-v2__date">{{ terpene.created_at|date:"d/m/Y" }}</time>
+                </div>
+
+                <h1 class="terpene-detail-v2__title">{{ terpene.title }}</h1>
+
+                {% if image %}
+                <div class="terpene-detail-v2__image">
+                    <img src="{{ image.img.url }}" alt="{{ image.img_alt_text }}" loading="lazy" decoding="async">
+                </div>
+                {% endif %}
+
+                <div class="terpene-detail-v2__content">
+                    {{ terpene.text_content|safe }}
+                </div>
+            </article>
+
+            <!-- Sidebar -->
+            {% if headings %}
+            <aside class="terpene-detail-v2__sidebar">
+                <nav class="terpene-detail-v2__toc">
+                    <h4 class="terpene-detail-v2__toc-title">{% trans "Contenido" %}</h4>
+                    <ul class="terpene-detail-v2__toc-list">
+                        {% for heading in headings %}
+                        <li>
+                            <a href="#{{ heading.id }}" class="terpene-detail-v2__toc-link">{{ heading.text }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </nav>
+            </aside>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block footer_description %}
+{{ terpene.title }} - {{ terpene.description|truncatewords:20 }}
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{% static 'js/anchor_articles.js' %}"></script>
+{% endblock page_scripts %}

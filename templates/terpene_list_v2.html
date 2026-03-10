@@ -1,0 +1,67 @@
+{% extends "base_v2.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}
+    {% trans "Catálogo de Terpenos en Cannamente" %}
+{% endblock %}
+
+{% block keywords %}
+    {% trans "Terpenos, Catálogo de Terpenos, Cannamente" %}
+{% endblock %}
+
+{% block description %}
+    {% trans "Explora nuestro catálogo de terpenos en Cannamente. Conoce los diferentes terpenos, sus efectos y características." %}
+{% endblock %}
+
+{% block og_title %}{% trans "Catálogo de Terpenos en Cannamente" %}{% endblock %}
+{% block og_description %}{% trans "Explora nuestro catálogo de terpenos en Cannamente. Conoce los diferentes terpenos, sus efectos y características." %}{% endblock %}
+{% block twitter_title %}{% trans "Catálogo de Terpenos en Cannamente" %}{% endblock %}
+{% block twitter_description %}{% trans "Explora nuestro catálogo de terpenos en Cannamente. Conoce los diferentes terpenos, sus efectos y características." %}{% endblock %}
+
+{% block content %}
+<div class="terpene-page-v2">
+    <!-- Page Header -->
+    <section class="terpene-page-v2__header">
+        <div class="terpene-page-v2__header-inner">
+            <h1 class="section-title-v2">{% trans "Catálogo de Terpenos" %}</h1>
+            <p class="terpene-page-v2__subtitle">{% trans "Descubre los terpenos del cannabis, sus aromas, efectos y propiedades terapéuticas." %}</p>
+        </div>
+    </section>
+
+    <!-- Terpene Cards -->
+    <section class="terpene-page-v2__grid-section">
+        <div class="terpene-page-v2__grid-inner">
+            {% if terpenes_with_images %}
+            <div class="terpene-grid-v2">
+                {% for item in terpenes_with_images %}
+                <a href="{% url 'terpene_detail' slug=item.slug %}" class="terpene-card-v2">
+                    <div class="terpene-card-v2__img">
+                        {% if item.preview_image %}
+                        <img src="{{ item.preview_image.img.url }}" alt="{{ item.preview_image.img_alt_text }}" loading="lazy" decoding="async">
+                        {% else %}
+                        <div class="terpene-card-v2__img-placeholder">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M8 12a4 4 0 0 0 8 0c0-2-1-3-2-4l-2-2-2 2c-1 1-2 2-2 4z"/></svg>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="terpene-card-v2__info">
+                        <h3 class="terpene-card-v2__title">{{ item.title }}</h3>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="terpene-page-v2__empty">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M8 12a4 4 0 0 0 8 0c0-2-1-3-2-4l-2-2-2 2c-1 1-2 2-2 4z"/></svg>
+                <p>{% trans "El catálogo de terpenos estará disponible próximamente." %}</p>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock content %}
+
+{% block footer_description %}
+{% trans "Explora nuestro catálogo de terpenos en Cannamente. Conoce los diferentes terpenos, sus efectos y características." %}
+{% endblock %}

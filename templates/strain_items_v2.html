@@ -1,0 +1,34 @@
+{% load static %}
+{% load i18n %}
+{% for strain in strains %}
+<div class="strain-card-v2 ctg__item">
+    <a href="{% url 'strain_detail' slug=strain.slug %}" class="strain-card-v2__link">
+        <div class="strain-card-v2__img">
+            {% if strain.top %}
+            <span class="strain-card-v2__top-badge">Top</span>
+            {% endif %}
+            {% if strain.img %}
+            <img src="{{ strain.img.url }}" alt="{{ strain.name }}" loading="lazy" decoding="async">
+            {% else %}
+            <img src="{% static 'img/no_img.png' %}" alt="{{ strain.name }}" loading="lazy" decoding="async">
+            {% endif %}
+        </div>
+        <div class="strain-card-v2__info">
+            <h3 class="strain-card-v2__name">{{ strain.name }}</h3>
+            <span class="strain-card-v2__category strain-card-v2__category--{{ strain.category|lower }}">{{ strain.category }}</span>
+            <div class="strain-card-v2__meta">
+                <span class="strain-card-v2__thc">THC {{ strain.thc|floatformat:0 }}%</span>
+                {% if strain.cbd is not none %}
+                    <span class="strain-card-v2__cbd">CBD {{ strain.cbd|floatformat:0 }}%</span>
+                {% elif strain.cbg is not none %}
+                    <span class="strain-card-v2__cbg">CBG {{ strain.cbg|floatformat:0 }}%</span>
+                {% endif %}
+            </div>
+            <div class="strain-card-v2__rating">
+                <span class="strain-card-v2__rating-value">{{ strain.rating }}</span>
+                <div class="raty" data-score="{{ strain.rating }}" data-readonly="true"></div>
+            </div>
+        </div>
+    </a>
+</div>
+{% endfor %}
