@@ -2839,6 +2839,11 @@ input, textarea {
   justify-content: flex-end;
 }
 
+.chat-fullscreen__msg--assistant {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 .chat-fullscreen__msg-text {
   padding: 12px 18px;
   border-radius: var(--radius-lg);
@@ -2920,6 +2925,175 @@ input, textarea {
 
 .chat-fullscreen__msg-error-text svg {
   flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Strain Recommendation Cards (inside chat messages)
+   -------------------------------------------------------------------------- */
+.chat-strain-cards {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 12px 0 4px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  width: 100%;
+  max-width: 100%;
+}
+
+.chat-strain-cards::-webkit-scrollbar {
+  height: 4px;
+}
+
+.chat-strain-cards::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-strain-cards::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+}
+
+.chat-strain-card {
+  flex: 0 0 220px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  text-decoration: none;
+  color: var(--text-primary);
+  scroll-snap-align: start;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-strain-card:hover {
+  border-color: var(--accent-green);
+  background: var(--bg-card-hover);
+  transform: translateY(-2px);
+}
+
+.chat-strain-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.chat-strain-card__name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-strain-card__badge {
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+
+.chat-strain-card__badge--indica {
+  background: var(--badge-indica-bg);
+  color: var(--badge-indica);
+}
+
+.chat-strain-card__badge--sativa {
+  background: var(--badge-sativa-bg);
+  color: var(--badge-sativa);
+}
+
+.chat-strain-card__badge--hybrid {
+  background: var(--badge-hybrid-bg);
+  color: var(--badge-hybrid);
+}
+
+.chat-strain-card__cannabinoids {
+  display: flex;
+  gap: 10px;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+}
+
+.chat-strain-card__cannabinoid {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chat-strain-card__cannabinoid-label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.chat-strain-card__cannabinoid-value {
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+.chat-strain-card__effects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.chat-strain-card__effect-tag {
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: rgba(5, 150, 105, 0.12);
+  color: #34d399;
+  line-height: 1.4;
+}
+
+.chat-strain-card__flavors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.chat-strain-card__flavor-tag {
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: rgba(217, 119, 6, 0.12);
+  color: #fbbf24;
+  line-height: 1.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-strain-card {
+    transition: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-strain-card {
+    flex: 0 0 190px;
+    padding: 12px;
+  }
+
+  .chat-strain-card__name {
+    font-size: 0.85rem;
+  }
 }
 
 /* Mobile nav (burger open state) */

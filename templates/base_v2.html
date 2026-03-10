@@ -415,6 +415,84 @@
             return msg;
         }
 
+        function strainUrl(absoluteUrl) {
+            // Convert absolute URL to relative path
+            if (!absoluteUrl) return '#';
+            try {
+                var url = new URL(absoluteUrl);
+                return url.pathname;
+            } catch(e) {
+                return absoluteUrl;
+            }
+        }
+
+        function createStrainCardHTML(strain) {
+            var cat = (strain.category || '').toLowerCase();
+            var badgeClass = 'chat-strain-card__badge--' + (cat === 'indica' || cat === 'sativa' || cat === 'hybrid' ? cat : 'hybrid');
+
+            // Cannabinoids
+            var cannabinoids = '';
+            if (strain.thc && parseFloat(strain.thc) > 0) {
+                cannabinoids += '<span class="chat-strain-card__cannabinoid">' +
+                    '<span class="chat-strain-card__cannabinoid-label">THC</span>' +
+                    '<span class="chat-strain-card__cannabinoid-value">' + escapeHtml(parseFloat(strain.thc).toFixed(1)) + '%</span>' +
+                    '</span>';
+            }
+            if (strain.cbd && parseFloat(strain.cbd) > 0) {
+                cannabinoids += '<span class="chat-strain-card__cannabinoid">' +
+                    '<span class="chat-strain-card__cannabinoid-label">CBD</span>' +
+                    '<span class="chat-strain-card__cannabinoid-value">' + escapeHtml(parseFloat(strain.cbd).toFixed(1)) + '%</span>' +
+                    '</span>';
+            }
+            if (strain.cbg && parseFloat(strain.cbg) > 0) {
+                cannabinoids += '<span class="chat-strain-card__cannabinoid">' +
+                    '<span class="chat-strain-card__cannabinoid-label">CBG</span>' +
+                    '<span class="chat-strain-card__cannabinoid-value">' + escapeHtml(parseFloat(strain.cbg).toFixed(1)) + '%</span>' +
+                    '</span>';
+            }
+
+            // Effects (top 3 from feelings)
+            var effects = '';
+            if (strain.feelings && strain.feelings.length) {
+                var top = strain.feelings.slice(0, 3);
+                for (var i = 0; i < top.length; i++) {
+                    effects += '<span class="chat-strain-card__effect-tag">' + escapeHtml(top[i].name) + '</span>';
+                }
+            }
+
+            // Flavors (top 2)
+            var flavors = '';
+            if (strain.flavors && strain.flavors.length) {
+                var topF = strain.flavors.slice(0, 2);
+                for (var j = 0; j < topF.length; j++) {
+                    flavors += '<span class="chat-strain-card__flavor-tag">' + escapeHtml(topF[j].name) + '</span>';
+                }
+            }
+
+            return '<a href="' + escapeHtml(strainUrl(strain.url)) + '" class="chat-strain-card" target="_blank" rel="noopener">' +
+                '<div class="chat-strain-card__header">' +
+                    '<span class="chat-strain-card__name">' + escapeHtml(strain.name || '') + '</span>' +
+                    '<span class="chat-strain-card__badge ' + badgeClass + '">' + escapeHtml(strain.category || '') + '</span>' +
+                '</div>' +
+                (cannabinoids ? '<div class="chat-strain-card__cannabinoids">' + cannabinoids + '</div>' : '') +
+                (effects ? '<div class="chat-strain-card__effects">' + effects + '</div>' : '') +
+                (flavors ? '<div class="chat-strain-card__flavors">' + flavors + '</div>' : '') +
+                '</a>';
+        }
+
+        function renderStrainCards(msgElement, strains) {
+            if (!strains || !strains.length || !msgElement) return;
+            var container = document.createElement('div');
+            container.className = 'chat-strain-cards';
+            var html = '';
+            for (var i = 0; i < strains.length; i++) {
+                html += createStrainCardHTML(strains[i]);
+            }
+            container.innerHTML = html;
+            msgElement.appendChild(container);
+            fsMessages.scrollTop = fsMessages.scrollHeight;
+        }
+
         function addErrorMessage(text) {
             const msg = document.createElement('div');
             msg.className = 'chat-fullscreen__msg chat-fullscreen__msg--error';
@@ -485,8 +563,11 @@
                     }).then(function(r) { return r.json(); }).then(function(fbData) {
                         fallbackTyping.remove();
                         if (fbData.response) {
-                            addMessageToFullscreen('assistant', fbData.response);
+                            var fbMsg = addMessageToFullscreen('assistant', fbData.response);
                             if (fbData.session_id) setSessionId(fbData.session_id);
+                            if (fbData.recommended_strains && fbData.recommended_strains.length) {
+                                renderStrainCards(fbMsg, fbData.recommended_strains);
+                            }
                         } else if (fbData.error) {
                             addErrorMessage(fbData.error);
                         } else {
@@ -508,12 +589,17 @@
                 const decoder = new TextDecoder();
                 let fullText = '';
                 let buffer = '';
+                let pendingStrains = null;
 
                 function processChunk() {
                     reader.read().then(function(result) {
                         if (result.done) {
                             // Process any remaining buffer
                             if (buffer.trim()) processLines(buffer);
+                            // Stream finished — render strain cards if we have them
+                            if (pendingStrains && pendingStrains.length) {
+                                renderStrainCards(responseBubble, pendingStrains);
+                            }
                             return;
                         }
                         buffer += decoder.decode(result.value, {stream: true});
@@ -540,6 +626,13 @@
                                 // Update session ID if provided by backend
                                 if (data.session_id) setSessionId(data.session_id);
                                 if (data.data && data.data.session_id) setSessionId(data.data.session_id);
+                                // Capture recommended strains from metadata
+                                if (data.data && data.data.recommended_strains) {
+                                    pendingStrains = data.data.recommended_strains;
+                                }
+                                if (data.recommended_strains) {
+                                    pendingStrains = data.recommended_strains;
+                                }
                             } else if (data.type === 'response_chunk') {
                                 const chunk = data.text || data.content || '';
                                 if (chunk) {
@@ -551,7 +644,7 @@
                                 responseBubble.remove();
                                 addErrorMessage(data.message || '{% trans "Error de conexión. Inténtalo de nuevo." %}');
                             } else if (data.type === 'done') {
-                                // Stream complete
+                                // Stream complete — cards rendered in processChunk done handler
                             }
                         } catch(e) {
                             // Skip malformed JSON lines
@@ -569,8 +662,11 @@
                     body: JSON.stringify(payload)
                 }).then(function(r) { return r.json(); }).then(function(data) {
                     if (data.response) {
-                        addMessageToFullscreen('assistant', data.response);
+                        var fbMsg2 = addMessageToFullscreen('assistant', data.response);
                         if (data.session_id) setSessionId(data.session_id);
+                        if (data.recommended_strains && data.recommended_strains.length) {
+                            renderStrainCards(fbMsg2, data.recommended_strains);
+                        }
                     } else if (data.error) {
                         addErrorMessage(data.error);
                     } else {
