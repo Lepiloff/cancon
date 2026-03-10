@@ -86,12 +86,23 @@
             </ul>
             <!-- Mobile-only: search and language toggle inside nav overlay -->
             <div class="header-v2__mobile-extras">
-                <form action="{% url 'search' %}" method="get" class="header-v2__mobile-search">
-                    <input type="text" name="q" class="header-v2__search-input" placeholder="{% trans 'Buscar...' %}">
-                    <button type="submit" class="header-v2__search-btn">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                    </button>
-                </form>
+                <div class="header-v2__search-wrapper header-v2__search-wrapper--mobile">
+                    <form action="{% url 'search' %}" method="get" class="header-v2__mobile-search" id="searchFormMobile">
+                        <input type="text" name="q" class="header-v2__search-input" placeholder="{% trans 'Buscar...' %}" autocomplete="off">
+                        <button type="submit" class="header-v2__search-btn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        </button>
+                    </form>
+                    <div class="search-dropdown" id="searchDropdownMobile">
+                        <div class="search-dropdown__header">
+                            <span class="search-dropdown__title">{% trans "Resultado de la búsqueda" %}</span>
+                            <button class="search-dropdown__close" type="button" aria-label="Close">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            </button>
+                        </div>
+                        <div class="search-dropdown__results"></div>
+                    </div>
+                </div>
                 <div class="header-v2__mobile-lang">
                     {% for lang_code, _ in LANGUAGES %}
                         {% if lang_code == CURRENT_LANG %}
@@ -105,12 +116,23 @@
         </nav>
 
         <div class="header-v2__actions">
-            <form action="{% url 'search' %}" method="get" id="searchForm" class="header-v2__search">
-                <input type="text" name="q" class="header-v2__search-input" placeholder="{% trans 'Buscar...' %}">
-                <button type="submit" class="header-v2__search-btn" data-toggle="modal" data-target="#exampleModal">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                </button>
-            </form>
+            <div class="header-v2__search-wrapper">
+                <form action="{% url 'search' %}" method="get" id="searchForm" class="header-v2__search">
+                    <input type="text" name="q" class="header-v2__search-input" placeholder="{% trans 'Buscar...' %}" autocomplete="off">
+                    <button type="submit" class="header-v2__search-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    </button>
+                </form>
+                <div class="search-dropdown" id="searchDropdown">
+                    <div class="search-dropdown__header">
+                        <span class="search-dropdown__title">{% trans "Resultado de la búsqueda" %}</span>
+                        <button class="search-dropdown__close" type="button" aria-label="Close">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                        </button>
+                    </div>
+                    <div class="search-dropdown__results"></div>
+                </div>
+            </div>
 
             <div class="header-v2__lang">
                 {% for lang_code, _ in LANGUAGES %}
@@ -190,21 +212,6 @@
 </div>
 {% endif %}
 
-<!-- Search Results Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content search-modal-v2">
-            <div class="modal-header search-modal-v2__header">
-                <h5 class="modal-title search-modal-v2__title" id="exampleModalLabel">{% trans "Resultado de la búsqueda" %}</h5>
-                <button type="button" class="close search-modal-v2__close" data-dismiss="modal" aria-label="Close">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                </button>
-            </div>
-            <div class="modal-body search-modal-v2__body"></div>
-        </div>
-    </div>
-</div>
-
 {% block common_scripts %}
     <script src="{% static 'js/jquery-3.2.0.min.js' %}"></script>
     <script src="{% static 'js/jquery.raty.js' %}"></script>
@@ -212,7 +219,52 @@
     <script src="{% static 'js/collapse.js' %}"></script>
     <script src="{% static 'js/modal.js' %}"></script>
     <script src="{% static 'js/owl.carousel.min.js' %}"></script>
-    <script src="{% static 'js/strains_search.js' %}"></script>
+    <!-- Override strains_search.js with dropdown search -->
+    <script>
+    $(document).ready(function() {
+        function initSearchDropdown(formSel, dropdownSel) {
+            var $form = $(formSel);
+            var $dropdown = $(dropdownSel);
+            if (!$form.length || !$dropdown.length) return;
+
+            var $results = $dropdown.find('.search-dropdown__results');
+            var $close = $dropdown.find('.search-dropdown__close');
+
+            $form.on('submit', function(e) {
+                e.preventDefault();
+                var q = $form.find('input[name="q"]').val().trim();
+                if (!q) return;
+                $.ajax({
+                    url: $form.attr('action'),
+                    data: $form.serialize(),
+                    success: function(data) {
+                        $results.html(data);
+                        $dropdown.addClass('search-dropdown--open');
+                    }
+                });
+            });
+
+            $close.on('click', function() {
+                $dropdown.removeClass('search-dropdown--open');
+            });
+
+            // Close on click outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest(formSel + ',' + dropdownSel).length) {
+                    $dropdown.removeClass('search-dropdown--open');
+                }
+            });
+
+            // Close on Escape
+            $(document).on('keydown', function(e) {
+                if (e.key === 'Escape') $dropdown.removeClass('search-dropdown--open');
+            });
+        }
+
+        initSearchDropdown('#searchForm', '#searchDropdown');
+        initSearchDropdown('#searchFormMobile', '#searchDropdownMobile');
+    });
+    </script>
     <script type="text/javascript">
         var starOnUrl = "{% static 'img/raty_on.svg' %}";
         var starOffUrl = "{% static 'img/raty_off.svg' %}";
