@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.urls import reverse
 
 from apps.strains.forms import StrainFilterForm
-from apps.strains.models import Article, Strain
+from apps.strains.models import Article, ArticleCategory, Strain
 from apps.strains.utils import get_related_strains, get_filtered_strains, is_ajax_request
 
 
@@ -36,7 +36,7 @@ def main_page(request):
         'strains': strains,
         'articles': articles,
     }
-    return render(request, 'main.html', context)
+    return render(request, 'main_v2.html', context)
 
 
 def strain_detail(request, slug):
@@ -59,7 +59,7 @@ def strain_detail(request, slug):
         'max_cbg': cann_max['max_cbg'] or 1,
     }
 
-    return render(request, 'strain_modern.html', context)
+    return render(request, 'strain_modern_v2.html', context)
 
 
 def strain_list(request):
@@ -79,7 +79,7 @@ def strain_list(request):
     expected_params = ['category', 'thc', 'feelings', 'helps_with', 'flavors', 'page']
     if any(param not in expected_params for param in mutable_params):
         return render(
-            request, 'strains.html', {'form': form, 'no_matches': True}
+            request, 'strains_v2.html', {'form': form, 'no_matches': True}
         )
 
     if form.is_valid():
@@ -95,11 +95,11 @@ def strain_list(request):
         if not strains:
             return HttpResponse(status=204)
         html_strains = render_to_string(
-            'strain_items.html', {'strains': strains}
+            'strain_items_v2.html', {'strains': strains}
         )
         return HttpResponse(html_strains)
 
-    return render(request, 'strains.html', {
+    return render(request, 'strains_v2.html', {
         'strains': strains,
         'form': form,
         'no_matches': no_matches,
@@ -112,35 +112,42 @@ def article_detail(request, slug):
     headings = _extract_headings(article.text_content)
     return render(
         request,
-        'article_detail.html',
+        'article_detail_v2.html',
         {'article': article, 'image': image, 'headings': headings}
     )
 
 
 def article_list(request):
     category = request.GET.get('category')
-    articles = Article.objects.exclude(category__name__in=['TOP 10', 'Terpenes']).order_by(
-        '-created_at').prefetch_related('images')
+    articles = Article.objects.exclude(
+        category__name__in=['TOP 10', 'Terpenes']
+    ).order_by('-created_at').prefetch_related('images', 'category')
 
     if category:
         articles = articles.filter(category__name=category)
 
-    # Получаем первое изображение (не превью) только для первой статьи
     main_image = None
     if articles:
         main_image = articles[0].images.filter(is_preview=False).first()
 
+    categories = ArticleCategory.objects.exclude(
+        name__in=['TOP 10', 'Terpenes']
+    )
+
+    context = {
+        'articles': articles,
+        'main_image': main_image,
+        'categories': categories,
+        'current_category': category,
+    }
+
     if is_ajax_request(request):
         html_articles = render_to_string(
-            'articles.html',
-            {'articles': articles, 'main_image': main_image}
+            'articles_v2.html', context
         )
         return HttpResponse(html_articles)
 
-    return render(request,
-                  'articles.html',
-                  {'articles': articles, 'main_image': main_image}
-                  )
+    return render(request, 'articles_v2.html', context)
 
 
 def search(request):
@@ -177,7 +184,7 @@ def terpene_list(request):
             'slug': terpene.slug,
         })
 
-    return render(request, 'terpene_list.html', {'terpenes_with_images': terpenes_with_images})
+    return render(request, 'terpene_list_v2.html', {'terpenes_with_images': terpenes_with_images})
 
 
 def terpene_detail(request, slug):
@@ -186,7 +193,7 @@ def terpene_detail(request, slug):
     headings = _extract_headings(terpene.text_content)
     return render(
         request,
-        'terpene_detail.html',
+        'terpene_detail_v2.html',
         {
             'terpene': terpene,
             'image': image,
