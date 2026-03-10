@@ -15,12 +15,15 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.views import View
 from django.conf import settings
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 from .models import ChatConfiguration, APIKey, ChatSession, ChatMessage
 from .rate_limiter import check_rate_limit, RateLimitExceeded
 import json
 import requests
 import time
 import logging
+
+logger = logging.getLogger(__name__)
 
 
 def get_client_ip(request):
@@ -128,11 +131,11 @@ class ChatProxyView(View):
             if session_id:
                 try:
                     session = ChatSession.objects.get(session_id=session_id, is_active=True)
-                except ChatSession.DoesNotExist:
+                except (ChatSession.DoesNotExist, ValidationError):
                     session = None
             else:
                 session = None
-            
+
             if not session:
                 session = ChatSession.objects.create(
                     user=request.user if request.user.is_authenticated else None,
@@ -304,7 +307,7 @@ class ChatStreamView(View):
             if session_id:
                 try:
                     django_session = ChatSession.objects.get(session_id=session_id, is_active=True)
-                except ChatSession.DoesNotExist:
+                except (ChatSession.DoesNotExist, ValidationError):
                     django_session = None
             else:
                 django_session = None

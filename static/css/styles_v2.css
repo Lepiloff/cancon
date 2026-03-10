@@ -2951,6 +2951,136 @@ input, textarea {
   color: var(--text-primary);
 }
 
+/* Mobile extras: hidden on desktop, visible in open nav overlay */
+.header-v2__mobile-extras {
+  display: none;
+}
+
+.header-v2__nav--open .header-v2__mobile-extras {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  margin-top: 40px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.header-v2__mobile-search {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-pill);
+  padding: 0 12px 0 20px;
+  height: 48px;
+  transition: border-color 0.2s;
+}
+
+.header-v2__mobile-search:focus-within {
+  border-color: var(--accent-green);
+}
+
+.header-v2__mobile-search input[type="text"] {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.header-v2__mobile-search input[type="text"]::placeholder {
+  color: var(--text-muted);
+}
+
+.header-v2__mobile-search button {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 8px;
+  display: flex !important;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.header-v2__mobile-lang {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Search results modal v2 */
+.search-modal-v2 .modal-dialog {
+  max-width: 600px;
+}
+
+.search-modal-v2 .modal-content {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+}
+
+.search-modal-v2 .modal-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px 20px;
+}
+
+.search-modal-v2 .modal-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.search-modal-v2 .close {
+  color: var(--text-secondary);
+  opacity: 0.8;
+  text-shadow: none;
+  font-size: 1.4rem;
+}
+
+.search-modal-v2 .modal-body {
+  padding: 16px 20px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.search-modal-v2 .modal-body a {
+  display: block;
+  padding: 10px 14px;
+  color: var(--text-primary);
+  text-decoration: none;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+
+.search-modal-v2 .modal-body a:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--accent-green);
+}
+
+.search-modal-v2 .modal-body p {
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  padding: 10px 14px;
+}
+
+/* Modal backdrop fix for v2 */
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
 /* Mobile responsive overrides for new aliases */
 @media (max-width: 768px) {
   .header-v2__burger {

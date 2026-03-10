@@ -84,12 +84,30 @@
                 <li><a href="{% url 'terpene_list' %}" class="header-v2__nav-link">{% trans "Terpenos" %}</a></li>
                 <li><a href="{% url 'article_list' %}" class="header-v2__nav-link">{% trans "Artículos" %}</a></li>
             </ul>
+            <!-- Mobile-only: search and language toggle inside nav overlay -->
+            <div class="header-v2__mobile-extras">
+                <form action="{% url 'search' %}" method="get" class="header-v2__mobile-search">
+                    <input type="text" name="q" class="header-v2__search-input" placeholder="{% trans 'Buscar...' %}">
+                    <button type="submit" class="header-v2__search-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    </button>
+                </form>
+                <div class="header-v2__mobile-lang">
+                    {% for lang_code, _ in LANGUAGES %}
+                        {% if lang_code == CURRENT_LANG %}
+                            <span class="header-v2__lang-option header-v2__lang-option--active">{{ lang_code|upper }}</span>
+                        {% else %}
+                            <a href="{% alt_url lang_code %}" class="header-v2__lang-option">{{ lang_code|upper }}</a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
         </nav>
 
         <div class="header-v2__actions">
-            <form action="{% url 'search' %}" method="get" class="header-v2__search">
+            <form action="{% url 'search' %}" method="get" id="searchForm" class="header-v2__search">
                 <input type="text" name="q" class="header-v2__search-input" placeholder="{% trans 'Buscar...' %}">
-                <button type="submit" class="header-v2__search-btn">
+                <button type="submit" class="header-v2__search-btn" data-toggle="modal" data-target="#exampleModal">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                 </button>
             </form>
@@ -171,6 +189,21 @@
     </div>
 </div>
 {% endif %}
+
+<!-- Search Results Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content search-modal-v2">
+            <div class="modal-header search-modal-v2__header">
+                <h5 class="modal-title search-modal-v2__title" id="exampleModalLabel">{% trans "Resultado de la búsqueda" %}</h5>
+                <button type="button" class="close search-modal-v2__close" data-dismiss="modal" aria-label="Close">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body search-modal-v2__body"></div>
+        </div>
+    </div>
+</div>
 
 {% block common_scripts %}
     <script src="{% static 'js/jquery-3.2.0.min.js' %}"></script>
@@ -390,8 +423,27 @@
                     return;
                 }
                 if (!response.ok) {
+                    // Server error — try blocking fallback
                     typingEl.remove();
-                    addErrorMessage('{% trans "Error del servidor. Por favor, inténtalo de nuevo." %}');
+                    var fallbackTyping = showTypingIndicator();
+                    fetch('/api/chat/chat/', {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify(payload)
+                    }).then(function(r) { return r.json(); }).then(function(fbData) {
+                        fallbackTyping.remove();
+                        if (fbData.response) {
+                            addMessageToFullscreen('assistant', fbData.response);
+                            if (fbData.session_id) setSessionId(fbData.session_id);
+                        } else if (fbData.error) {
+                            addErrorMessage(fbData.error);
+                        } else {
+                            addErrorMessage('{% trans "Error del servidor. Por favor, inténtalo de nuevo." %}');
+                        }
+                    }).catch(function() {
+                        fallbackTyping.remove();
+                        addErrorMessage('{% trans "Error del servidor. Por favor, inténtalo de nuevo." %}');
+                    });
                     return;
                 }
 
