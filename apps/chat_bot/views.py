@@ -282,10 +282,11 @@ class ChatStreamView(View):
             try:
                 check_rate_limit(client_ip)
             except RateLimitExceeded as e:
+                retry_after = e.retry_after_seconds  # capture before Python 3 deletes 'e'
                 def _rate_limited():
-                    yield f'data: {json.dumps({"type": "error", "message": "Rate limit exceeded", "retry_after": e.retry_after_seconds})}\n\n'
+                    yield f'data: {json.dumps({"type": "error", "message": "Rate limit exceeded", "retry_after": retry_after})}\n\n'
                 resp = StreamingHttpResponse(_rate_limited(), content_type='text/event-stream', status=429)
-                resp['Retry-After'] = str(e.retry_after_seconds)
+                resp['Retry-After'] = str(retry_after)
                 return resp
 
             try:
