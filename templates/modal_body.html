@@ -1,8 +1,8 @@
+{% load i18n %}
 {% if links %}
     {% for link in links %}
-        <a href="{{ link.url }}"> {{ link.name }} </a><br>
+        <a href="{{ link.url }}" class="search-dropdown__result-link">{{ link.name }}</a>
     {% endfor %}
 {% else %}
- <p>No hay cepas que coincidan. Nos encanta tu imaginación, pero ninguna variedad coincide con la descripción.</p>
-
+    <p class="search-dropdown__no-results">{% trans "No se encontraron variedades que coincidan con tu búsqueda." %}</p>
 {% endif %}

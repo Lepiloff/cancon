@@ -199,51 +199,5 @@
 {% endblock %}
 
 {% block page_scripts %}
-<script>
-(function() {
-    // Hero chat input -> opens fullscreen chat
-    const heroInput = document.getElementById('hero-chat-input');
-    const heroSend = document.getElementById('hero-chat-send');
-
-    function sendHeroMessage() {
-        if (!heroInput || !heroInput.value.trim()) return;
-        const query = heroInput.value.trim();
-        heroInput.value = '';
-        if (window.openFullscreenChat) {
-            window.openFullscreenChat(query);
-            // Small delay then auto-send
-            setTimeout(function() {
-                const fsSend = document.getElementById('chat-fullscreen-send');
-                if (fsSend) fsSend.click();
-            }, 300);
-        }
-    }
-
-    if (heroSend) {
-        heroSend.addEventListener('click', sendHeroMessage);
-    }
-    if (heroInput) {
-        heroInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                sendHeroMessage();
-            }
-        });
-    }
-
-    // Suggestion chips
-    document.querySelectorAll('.hero-chips__item').forEach(function(chip) {
-        chip.addEventListener('click', function() {
-            const query = this.getAttribute('data-query');
-            if (window.openFullscreenChat) {
-                window.openFullscreenChat(query);
-                setTimeout(function() {
-                    const fsSend = document.getElementById('chat-fullscreen-send');
-                    if (fsSend) fsSend.click();
-                }, 300);
-            }
-        });
-    });
-})();
-</script>
+<script src="{% static 'js/hero-chat.js' %}"></script>
 {% endblock page_scripts %}

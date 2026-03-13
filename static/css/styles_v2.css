@@ -1291,10 +1291,13 @@ input, textarea {
   transform: scale(1.05);
 }
 
-.chat-fullscreen__send:disabled {
+.chat-fullscreen__send:disabled,
+.chat-fullscreen__send--disabled {
   background: var(--text-muted);
   cursor: not-allowed;
   transform: none;
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 /* Typing indicator (fullscreen) */
