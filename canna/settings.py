@@ -230,6 +230,7 @@ TRANSLATION_DIRECTION = os.getenv('TRANSLATION_DIRECTION', 'en-to-es')  # en-to-
 
 # SEO Configuration
 SITE_DOMAIN = os.getenv('SITE_DOMAIN', 'cannamente.com')  # For sitemap absolute URLs
+SITE_PROTOCOL = os.getenv('SITE_PROTOCOL', 'https')  # Canonical protocol for SEO URLs
 
 # AI Budtender Chat Configuration
 ENABLE_AI_CHAT = os.getenv('ENABLE_AI_CHAT', 'false').lower() == 'true'
@@ -242,6 +243,10 @@ CHAT_RATE_LIMIT_WINDOW_SECONDS = int(os.getenv('CHAT_RATE_LIMIT_WINDOW_SECONDS',
 # Chat message length limit
 CHAT_MAX_MESSAGE_LENGTH = int(os.getenv('CHAT_MAX_MESSAGE_LENGTH', 2000))
 
+# Reverse proxy settings (needed for correct scheme/host behind nginx)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
 # Security settings (enforced in production when DEBUG=False)
 # NOTE: SECURE_SSL_REDIRECT is NOT set here because nginx handles HTTP->HTTPS redirect.
 # Setting it in Django causes 301 loops behind a reverse proxy and breaks tests.
@@ -251,7 +256,6 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'

@@ -5,6 +5,7 @@ Contains views that don't belong to specific apps.
 """
 
 from django.http import HttpResponse
+from django.conf import settings
 
 
 def robots_txt(request):
@@ -18,10 +19,13 @@ def robots_txt(request):
 
     This helps search engines find and index the site correctly.
     """
+    protocol = getattr(settings, 'SITE_PROTOCOL', 'https')
+    domain = getattr(settings, 'SITE_DOMAIN', 'cannamente.com')
+
     lines = [
         "User-agent: *",
         "Allow: /",
         "",
-        f"Sitemap: {request.scheme}://{request.get_host()}/sitemap.xml",
+        f"Sitemap: {protocol}://{domain}/sitemap.xml",
     ]
     return HttpResponse("\n".join(lines), content_type="text/plain")
