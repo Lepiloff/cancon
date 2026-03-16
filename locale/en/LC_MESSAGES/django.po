@@ -84,6 +84,12 @@ msgstr "Terpenes"
 msgid "Artículos"
 msgstr "Articles"
 
+msgid "Inicio"
+msgstr "Home"
+
+msgid "Cerrar menú"
+msgstr "Close menu"
+
 msgid "Tiendas/Dispensarios"
 msgstr "Stores/Dispensaries"
 

@@ -180,13 +180,16 @@ input, textarea {
 
 /* Logo */
 .header-v2__logo {
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .header-v2__logo img,
 .header-v2__logo svg {
   height: 32px;
   width: auto;
+  max-width: 100%;
   filter: brightness(0) invert(1);
 }
 
@@ -3135,6 +3138,50 @@ input, textarea {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Close button inside mobile nav overlay */
+.header-v2__nav-close {
+  display: none;
+}
+
+.header-v2__nav--open .header-v2__nav-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 16px;
+  right: var(--section-pad-x, 20px);
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  color: var(--text-primary);
+  cursor: pointer;
+  z-index: 1001;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.header-v2__nav--open .header-v2__nav-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Prevent body scroll when mobile nav is open */
+body.mobile-nav-open {
+  overflow: hidden;
+}
+
+/* Home link: only visible in mobile nav overlay */
+.header-v2__nav-home {
+  display: none;
+}
+
+.header-v2__nav--open .header-v2__nav-home {
+  display: list-item;
 }
 
 .header-v2__nav--open .header-v2__nav-list {
@@ -3345,14 +3392,14 @@ input, textarea {
 @media (max-width: 768px) {
   .header-v2__burger {
     display: flex;
+    flex-shrink: 0;
   }
 
   .header-v2__nav:not(.header-v2__nav--open) {
     display: none;
   }
 
-  .header-v2__search,
-  .header-v2__actions .header-v2__search-wrapper {
+  .header-v2__actions {
     display: none;
   }
 
@@ -3365,6 +3412,10 @@ input, textarea {
   .hero-chat__input-wrapper {
     height: 54px;
     padding: 0 6px 0 18px;
+  }
+
+  .hero-chat__input {
+    font-size: 14px;
   }
 
   .hero-chat__send {

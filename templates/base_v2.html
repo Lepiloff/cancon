@@ -77,7 +77,11 @@
         </button>
 
         <nav class="header-v2__nav" id="main-nav">
+            <button class="header-v2__nav-close" id="nav-close-btn" aria-label="{% trans 'Cerrar menú' %}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
             <ul class="header-v2__nav-list">
+                <li class="header-v2__nav-home"><a href="/" class="header-v2__nav-link">{% trans "Inicio" %}</a></li>
                 <li><a href="{% url 'strain_list' %}" class="header-v2__nav-link">{% trans "Variedades" %}</a></li>
                 <li><a href="{% url 'terpene_list' %}" class="header-v2__nav-link">{% trans "Terpenos" %}</a></li>
                 <li><a href="{% url 'article_list' %}" class="header-v2__nav-link">{% trans "Artículos" %}</a></li>
