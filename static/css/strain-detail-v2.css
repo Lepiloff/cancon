@@ -1,6 +1,19 @@
-/* ==============================================
-   Strain Detail Page
-   ============================================== */
+/* ==========================================================================
+   Strain Detail Page — v2 Dark Theme
+   Requires: styles_v2.css (design tokens), Google Fonts (Syne + DM Sans)
+   ========================================================================== */
+
+/* --- Page wrapper for fixed header clearance --- */
+.sd-page-v2 {
+    padding-top: 120px;
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding-left: 0;
+    padding-right: 0;
+    padding-bottom: 60px;
+    font-family: var(--font-body);
+    color: var(--text-primary);
+}
 
 /* --- Header: Name + Meta inline --- */
 .sd-header {
@@ -12,9 +25,10 @@
 
 /* --- Name --- */
 .sd-name {
+    font-family: var(--font-display);
     font-size: 28px;
     font-weight: 700;
-    color: #1a1a1a;
+    color: var(--text-primary);
     margin: 0;
     width: 300px;
     flex-shrink: 0;
@@ -23,7 +37,6 @@
     border: none;
 }
 
-/* Override any global h1 underline */
 h1.sd-name,
 h1.sd-name:after,
 h1.sd-name:before {
@@ -42,30 +55,43 @@ h1.sd-name:before {
 .sd-category {
     display: inline-block;
     padding: 3px 14px;
-    border-radius: 20px;
+    border-radius: var(--radius-pill);
     font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #fff;
 }
 
-.sd-category--indica { background: #6b46c1; }
-.sd-category--sativa { background: #059669; }
-.sd-category--hybrid { background: #dc2626; }
+.sd-category--indica {
+    background: var(--badge-indica-bg);
+    color: var(--badge-indica);
+    border: 1px solid rgba(124, 77, 255, 0.3);
+}
+
+.sd-category--sativa {
+    background: var(--badge-sativa-bg);
+    color: var(--badge-sativa);
+    border: 1px solid rgba(255, 145, 0, 0.3);
+}
+
+.sd-category--hybrid {
+    background: var(--badge-hybrid-bg);
+    color: var(--badge-hybrid);
+    border: 1px solid rgba(0, 230, 118, 0.3);
+}
 
 .sd-rating-badge {
     display: inline-flex;
     align-items: center;
     gap: 3px;
     font-size: 13px;
-    color: #6b7280;
+    color: var(--text-muted);
     position: relative;
 }
 
 .sd-rating-value {
     font-weight: 700;
-    color: #374151;
+    color: var(--accent-green);
 }
 
 .sd-rating-star {
@@ -80,7 +106,7 @@ h1.sd-name:before {
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    border: 1px solid #9ca3af;
+    border: 1px solid var(--text-muted);
     cursor: help;
     position: relative;
     margin-left: 2px;
@@ -90,20 +116,22 @@ h1.sd-name:before {
     font-size: 10px;
     font-weight: 700;
     font-style: italic;
-    color: #9ca3af;
+    color: var(--text-muted);
     line-height: 1;
 }
 
+/* --- Tooltip --- */
 .sd-tooltip {
     display: none;
     position: absolute;
     bottom: calc(100% + 8px);
     left: 50%;
     transform: translateX(-50%);
-    background: #1f2937;
-    color: #fff;
+    background: var(--bg-card);
+    color: var(--text-primary);
     padding: 8px 12px;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
     font-size: 12px;
     font-weight: 400;
     font-style: normal;
@@ -111,7 +139,7 @@ h1.sd-name:before {
     width: 220px;
     line-height: 1.4;
     z-index: 100;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
     pointer-events: none;
 }
 
@@ -122,7 +150,7 @@ h1.sd-name:before {
     left: 50%;
     transform: translateX(-50%);
     border: 5px solid transparent;
-    border-top-color: #1f2937;
+    border-top-color: var(--bg-card);
 }
 
 .sd-info-icon:hover .sd-tooltip,
@@ -142,6 +170,10 @@ h1.sd-name:before {
     flex-shrink: 0;
 }
 
+.sd-top__image img {
+    border-radius: var(--radius-md);
+}
+
 .sd-top__desc {
     flex: 1;
     min-width: 0;
@@ -150,17 +182,17 @@ h1.sd-name:before {
 .sd-top__desc .tovar_text {
     font-size: 15px;
     line-height: 1.65;
-    color: #374151;
+    color: var(--text-secondary);
 }
 
 .sd-top__desc .tovar_text h3 {
+    font-family: var(--font-display);
     font-size: 18px;
     font-weight: 700;
-    color: #1a1a1a;
+    color: var(--text-primary);
     margin-bottom: 6px;
 }
 
-/* Tighter paragraph spacing */
 .sd-top__desc .tovar_text p {
     margin-bottom: 6px;
 }
@@ -170,29 +202,30 @@ h1.sd-name:before {
 }
 
 .sd-top__desc .tovar_text a {
-    color: #3C7E80;
+    color: var(--accent-green);
+    transition: color 0.2s var(--ease-out);
 }
 
 .sd-top__desc .tovar_text a:hover {
-    color: #0d95e8;
+    color: #69f0ae;
 }
 
-/* --- Section (no border/underline) --- */
+/* --- Section --- */
 .sd-section {
     margin-bottom: 28px;
     padding-top: 16px;
 }
 
 .sd-section__title {
+    font-family: var(--font-display);
     font-size: 18px;
     font-weight: 700;
-    color: #1a1a1a;
+    color: var(--text-primary);
     margin-bottom: 12px;
     border: none;
     text-decoration: none;
 }
 
-/* Kill any inherited underlines on h2 inside sections */
 .sd-section__title::after,
 .sd-section__title::before {
     display: none !important;
@@ -215,7 +248,7 @@ h1.sd-name:before {
 .sd-cann__label {
     font-size: 13px;
     font-weight: 700;
-    color: #374151;
+    color: var(--text-secondary);
     width: 32px;
     flex-shrink: 0;
 }
@@ -223,7 +256,7 @@ h1.sd-name:before {
 .sd-cann__bar {
     flex: 1;
     height: 8px;
-    background: #e5e7eb;
+    background: var(--bg-card);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -232,16 +265,17 @@ h1.sd-name:before {
     height: 100%;
     border-radius: 4px;
     min-width: 4px;
+    transition: width 0.6s var(--ease-out);
 }
 
-.sd-cann__fill--thc { background: #ef4444; }
-.sd-cann__fill--cbd { background: #10b981; }
-.sd-cann__fill--cbg { background: #f59e0b; }
+.sd-cann__fill--thc { background: #f87171; }
+.sd-cann__fill--cbd { background: #34d399; }
+.sd-cann__fill--cbg { background: #fbbf24; }
 
 .sd-cann__val {
     font-size: 13px;
     font-weight: 700;
-    color: #374151;
+    color: var(--text-secondary);
     width: 36px;
     text-align: right;
     flex-shrink: 0;
@@ -260,11 +294,12 @@ h1.sd-name:before {
     align-items: center;
     gap: 6px;
     font-size: 14px;
-    color: #374151;
+    color: var(--text-secondary);
 }
 
 .sd-terpene--dominant {
     font-weight: 700;
+    color: var(--text-primary);
 }
 
 .sd-terpene__dot {
@@ -274,12 +309,13 @@ h1.sd-name:before {
     border-radius: 4px;
 }
 
-.sd-terpene__dot--dominant { background: #1e3a5f; }
-.sd-terpene__dot--1 { background: #c2185b; }
-.sd-terpene__dot--2 { background: #c9b700; }
-.sd-terpene__dot--3 { background: #2e7d32; }
-.sd-terpene__dot--4 { background: #e65100; }
-.sd-terpene__dot--5 { background: #4527a0; }
+/* Terpene dot colors -- bright enough for dark bg */
+.sd-terpene__dot--dominant { background: #4fc3f7; }
+.sd-terpene__dot--1 { background: #f06292; }
+.sd-terpene__dot--2 { background: #fdd835; }
+.sd-terpene__dot--3 { background: #66bb6a; }
+.sd-terpene__dot--4 { background: #ff8a65; }
+.sd-terpene__dot--5 { background: #b388ff; }
 
 /* --- Effects --- */
 .sd-effects {
@@ -289,10 +325,15 @@ h1.sd-name:before {
 }
 
 .sd-effect-group {
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
     padding: 12px;
+    transition: border-color 0.2s var(--ease-out);
+}
+
+.sd-effect-group:hover {
+    border-color: var(--border-light);
 }
 
 .sd-effect-group__head {
@@ -303,9 +344,10 @@ h1.sd-name:before {
 }
 
 .sd-effect-group__head h3 {
+    font-family: var(--font-display);
     font-size: 14px;
     font-weight: 700;
-    color: #374151;
+    color: var(--text-secondary);
     margin: 0;
     border: none;
     text-decoration: none;
@@ -324,10 +366,10 @@ h1.sd-name:before {
     flex-shrink: 0;
 }
 
-.sd-effect-icon--positive { color: #059669; }
-.sd-effect-icon--therapeutic { color: #2563eb; }
-.sd-effect-icon--negative { color: #dc2626; }
-.sd-effect-icon--flavor { color: #d97706; }
+.sd-effect-icon--positive { color: #34d399; }
+.sd-effect-icon--therapeutic { color: #60a5fa; }
+.sd-effect-icon--negative { color: #f87171; }
+.sd-effect-icon--flavor { color: #fbbf24; }
 
 .sd-tags {
     display: flex;
@@ -341,30 +383,35 @@ h1.sd-name:before {
     border-radius: 6px;
     font-size: 12px;
     font-weight: 500;
+    transition: opacity 0.15s var(--ease-out);
+}
+
+.sd-tag:hover {
+    opacity: 0.85;
 }
 
 .sd-tag--positive {
-    background: #ecfdf5;
-    color: #065f46;
-    border: 1px solid #a7f3d0;
+    background: rgba(5, 150, 105, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(5, 150, 105, 0.3);
 }
 
 .sd-tag--therapeutic {
-    background: #eff6ff;
-    color: #1e40af;
-    border: 1px solid #bfdbfe;
+    background: rgba(37, 99, 235, 0.15);
+    color: #60a5fa;
+    border: 1px solid rgba(37, 99, 235, 0.3);
 }
 
 .sd-tag--negative {
-    background: #fef2f2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
+    background: rgba(220, 38, 38, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(220, 38, 38, 0.3);
 }
 
 .sd-tag--flavor {
-    background: #fffbeb;
-    color: #92400e;
-    border: 1px solid #fde68a;
+    background: rgba(217, 119, 6, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(217, 119, 6, 0.3);
 }
 
 /* --- Genetics Tree --- */
@@ -387,17 +434,19 @@ h1.sd-name:before {
     align-items: center;
     justify-content: center;
     padding: 10px 20px;
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     font-size: 14px;
     font-weight: 700;
     color: #fff;
     min-width: 120px;
     text-align: center;
     text-decoration: none;
+    transition: opacity 0.2s var(--ease-out);
 }
 
 .sd-genetics__node--parent {
-    background: linear-gradient(135deg, #059669, #10b981);
+    background: linear-gradient(135deg, #00c853, #00e676);
+    box-shadow: 0 2px 12px rgba(0, 230, 118, 0.2);
 }
 
 .sd-genetics__node--parent:hover {
@@ -407,13 +456,14 @@ h1.sd-name:before {
 }
 
 .sd-genetics__node--unknown {
-    background: #9ca3af;
+    background: var(--text-muted);
     font-style: italic;
-    opacity: 0.7;
+    opacity: 0.5;
 }
 
 .sd-genetics__node--current {
-    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+    background: linear-gradient(135deg, #7c4dff, #9575cd);
+    box-shadow: 0 2px 12px rgba(124, 77, 255, 0.25);
 }
 
 .sd-genetics__lines {
@@ -426,19 +476,91 @@ h1.sd-name:before {
     display: block;
 }
 
+.sd-genetics__svg line,
+.sd-genetics__svg path {
+    stroke: var(--accent-green);
+}
+
 .sd-genetics__current {
     display: flex;
     justify-content: center;
 }
 
-/* --- Responsive: Tablet --- */
+/* --- AI Review Summary --- */
+.sd-review-summary {
+    background: linear-gradient(135deg, rgba(0, 230, 118, 0.08) 0%, rgba(76, 175, 80, 0.06) 100%);
+    border: 1px solid rgba(0, 230, 118, 0.2);
+    border-radius: var(--radius-md);
+    padding: 20px 24px;
+}
+
+.sd-review-summary__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #69f0ae;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+}
+
+.sd-review-summary__icon {
+    color: var(--accent-green);
+    flex-shrink: 0;
+}
+
+.sd-review-summary__badge {
+    margin-left: auto;
+    background: var(--accent-green);
+    color: var(--bg-primary);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    line-height: 1.6;
+}
+
+.sd-review-summary__text {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.65;
+    margin-top: 10px;
+}
+
+.sd-review-summary__text p {
+    margin: 0;
+}
+
+/* --- Similar Strains Section --- */
+.sd-similar-section .section-title-v2 {
+    font-family: var(--font-display);
+    color: var(--text-primary);
+}
+
+/* --- Focus ring for keyboard navigation --- */
+.sd-genetics__node:focus-visible,
+.sd-info-icon:focus-visible,
+.sd-tag:focus-visible {
+    outline: 2px solid var(--accent-green);
+    outline-offset: 2px;
+}
+
+/* --- Responsive: Below container-max — add edge padding --- */
+@media screen and (max-width: 1280px) {
+    .sd-page-v2 {
+        padding-left: var(--section-pad-x);
+        padding-right: var(--section-pad-x);
+    }
+}
+
+/* --- Responsive: Tablet (768px) --- */
 @media screen and (max-width: 768px) {
     .sd-effects {
         grid-template-columns: 1fr;
     }
 }
 
-/* --- Responsive: Mobile --- */
+/* --- Responsive: Mobile (640px) --- */
 @media screen and (max-width: 640px) {
     .sd-header {
         flex-direction: column;
@@ -451,7 +573,6 @@ h1.sd-name:before {
         width: auto;
     }
 
-    /* On mobile: name → meta → image → description (natural flow) */
     .sd-top {
         flex-direction: column;
     }
@@ -474,47 +595,22 @@ h1.sd-name:before {
     .sd-cannabinoids {
         max-width: 100%;
     }
-}
-/* ── AI Review Summary block ─────────────────────────────────────── */
-.sd-review-summary {
-    background: linear-gradient(135deg, #f0f7ea 0%, #e8f5e2 100%);
-    border: 1px solid #c8e6b8;
-    border-radius: 12px;
-    padding: 20px 24px;
+
+    .sd-review-summary {
+        padding: 16px;
+    }
 }
 
-.sd-review-summary__title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #2d5a1b;
-    font-size: 1.05rem;
-}
+/* --- Reduced motion preference --- */
+@media (prefers-reduced-motion: reduce) {
+    .sd-cann__fill {
+        transition: none;
+    }
 
-.sd-review-summary__icon {
-    color: #4a7c23;
-    flex-shrink: 0;
-}
-
-.sd-review-summary__badge {
-    margin-left: auto;
-    background: #4a7c23;
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    padding: 2px 7px;
-    border-radius: 4px;
-    line-height: 1.6;
-}
-
-.sd-review-summary__text {
-    color: #374151;
-    font-size: 0.95rem;
-    line-height: 1.65;
-    margin-top: 10px;
-}
-
-.sd-review-summary__text p {
-    margin: 0;
+    .sd-effect-group,
+    .sd-tag,
+    .sd-genetics__node,
+    .sd-top__desc .tovar_text a {
+        transition: none;
+    }
 }

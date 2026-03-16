@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base_v2.html" %}
 {% load static %}
 {% load i18n %}
 
@@ -51,11 +51,9 @@
 </div>
 {% endblock content %}
 
-{% block footer_col_2 %}
-    <div class="footer_col footer_col--2">
-        {% blocktrans %}Encuentra las mejores tiendas y dispensarios en {{ country }} con nuestro mapa interactivo.{% endblocktrans %}
-    </div>
-{% endblock footer_col_2 %}
+{% block footer_description %}
+{% blocktrans %}Encuentra las mejores tiendas y dispensarios en {{ country }} con nuestro mapa interactivo.{% endblocktrans %}
+{% endblock footer_description %}
 
 {% block page_scripts %}
 <script>

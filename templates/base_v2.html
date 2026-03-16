@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+{% load i18n %}
+{% load translate %}
+{% get_current_language as LANGUAGE_CODE %}
+<html dir="ltr" lang="{{ LANGUAGE_CODE }}">
+{% load static %}
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HTGQ1DC07H"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-HTGQ1DC07H');
+    </script>
+    <meta charset="utf-8" />
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
+    <meta name="keywords" content="{% block keywords %}{% endblock %}" />
+    <meta name="description" content="{% block description %}{% endblock %}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- SEO: Multi-language support -->
+    {% get_current_language as CURRENT_LANG %}
+    {% get_available_languages as LANGUAGES %}
+
+    <!-- hreflang tags for SEO -->
+    {% for lang_code, _ in LANGUAGES %}
+        {% alt_url lang_code as alt_path %}
+        <link rel="alternate" hreflang="{{ lang_code }}" href="{{ alt_path|absolute_url }}">
+    {% endfor %}
+    {% alt_url 'es' as default_alt_path %}
+    <link rel="alternate" hreflang="x-default" href="{{ default_alt_path|absolute_url }}">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{{ request.path|absolute_url }}">
+
+    <!-- OpenGraph meta tags -->
+    <meta property="og:site_name" content="Cannamente">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:url" content="{{ request.path|absolute_url }}">
+    <meta property="og:title" content="{% block og_title %}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{% endblock %}">
+    {% block og_image %}<meta property="og:image" content="{% static 'img/cannamente_bg_THC_CBD_1140x320.png' %}">{% endblock %}
+    <meta property="og:locale" content="{% if CURRENT_LANG == 'es' %}es_ES{% else %}en_US{% endif %}">
+    <meta property="og:locale:alternate" content="{% if CURRENT_LANG == 'es' %}en_US{% else %}es_ES{% endif %}">
+
+    <!-- Twitter Card meta tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{% endblock %}">
+    {% block twitter_image %}<meta name="twitter:image" content="{% static 'img/cannamente_bg_THC_CBD_1140x320.png' %}">{% endblock %}
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- New dark theme styles -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles_v2.css' %}" />
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="body-v2">
+
+{% block header_block %}
+<header class="header-v2" id="header-v2">
+    <div class="header-v2__inner">
+        <a href="/" class="header-v2__logo">
+            <img src="{% static 'img/logo.svg' %}" alt="Cannamente" width="195" height="18" class="header-v2__logo-img">
+        </a>
+
+        <button class="header-v2__burger" id="burger-btn" aria-label="Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <nav class="header-v2__nav" id="main-nav">
+            <ul class="header-v2__nav-list">
+                <li><a href="{% url 'strain_list' %}" class="header-v2__nav-link">{% trans "Variedades" %}</a></li>
+                <li><a href="{% url 'terpene_list' %}" class="header-v2__nav-link">{% trans "Terpenos" %}</a></li>
+                <li><a href="{% url 'article_list' %}" class="header-v2__nav-link">{% trans "Artículos" %}</a></li>
+            </ul>
+            <!-- Mobile-only: search and language toggle inside nav overlay -->
+            <div class="header-v2__mobile-extras">
+                <div class="header-v2__search-wrapper header-v2__search-wrapper--mobile">
+                    <form action="{% url 'search' %}" method="get" class="header-v2__mobile-search" id="searchFormMobile">
+                        <input type="text" name="q" class="header-v2__search-input" placeholder="{% trans 'Buscar...' %}" autocomplete="off">
+                        <button type="submit" class="header-v2__search-btn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        </button>
+                    </form>
+                    <div class="search-dropdown" id="searchDropdownMobile">
+                        <div class="search-dropdown__header">
+                            <span class="search-dropdown__title">{% trans "Resultado de la búsqueda" %}</span>
+                            <button class="search-dropdown__close" type="button" aria-label="Close">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            </button>
+                        </div>
+                        <div class="search-dropdown__results"></div>
+                    </div>
+                </div>
+                <div class="header-v2__mobile-lang">
+                    {% for lang_code, _ in LANGUAGES %}
+                        {% if lang_code == CURRENT_LANG %}
+                            <span class="header-v2__lang-option header-v2__lang-option--active">{{ lang_code|upper }}</span>
+                        {% else %}
+                            <a href="{% alt_url lang_code %}" class="header-v2__lang-option">{{ lang_code|upper }}</a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </nav>
+
+        <div class="header-v2__actions">
+            <div class="header-v2__search-wrapper">
+                <form action="{% url 'search' %}" method="get" id="searchForm" class="header-v2__search">
+                    <input type="text" name="q" class="header-v2__search-input" placeholder="{% trans 'Buscar...' %}" autocomplete="off">
+                    <button type="submit" class="header-v2__search-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    </button>
+                </form>
+                <div class="search-dropdown" id="searchDropdown">
+                    <div class="search-dropdown__header">
+                        <span class="search-dropdown__title">{% trans "Resultado de la búsqueda" %}</span>
+                        <button class="search-dropdown__close" type="button" aria-label="Close">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                        </button>
+                    </div>
+                    <div class="search-dropdown__results"></div>
+                </div>
+            </div>
+
+            <div class="header-v2__lang">
+                {% for lang_code, _ in LANGUAGES %}
+                    {% if lang_code == CURRENT_LANG %}
+                        <span class="header-v2__lang-option header-v2__lang-option--active">{{ lang_code|upper }}</span>
+                    {% else %}
+                        <a href="{% alt_url lang_code %}" class="header-v2__lang-option">{{ lang_code|upper }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</header>
+{% endblock header_block %}
+
+{% block content %}{% endblock content %}
+
+{% block footer %}
+<footer class="footer-v2">
+    <div class="footer-v2__inner">
+        <div class="footer-v2__col">
+            <a href="/" class="footer-v2__logo">
+                <img src="{% static 'img/logo.svg' %}" alt="Cannamente" width="160" height="15" class="header-v2__logo-img">
+            </a>
+            <p class="footer-v2__desc">
+                {% block footer_description %}{% endblock %}
+            </p>
+        </div>
+        <div class="footer-v2__col">
+            <h4 class="footer-v2__heading">{% trans "Explorar" %}</h4>
+            <ul class="footer-v2__links">
+                <li><a href="{% url 'strain_list' %}">{% trans "Variedades" %}</a></li>
+                <li><a href="{% url 'terpene_list' %}">{% trans "Terpenos" %}</a></li>
+                <li><a href="{% url 'article_list' %}">{% trans "Artículos" %}</a></li>
+            </ul>
+        </div>
+        <div class="footer-v2__col">
+            <h4 class="footer-v2__heading">{% trans "Contacto" %}</h4>
+            <ul class="footer-v2__links">
+                <li><a href="mailto:cannament@gmail.com">cannament@gmail.com</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-v2__bottom">
+        <p>&copy; Copyright 2023-2026 Cannamente</p>
+    </div>
+</footer>
+{% endblock footer %}
+
+<!-- Fullscreen Chat Overlay -->
+{% if ENABLE_AI_CHAT %}
+<div class="chat-fullscreen" id="chat-fullscreen">
+    <div class="chat-fullscreen__header">
+        <div class="chat-fullscreen__header-left">
+            <img src="{% static 'img/mascot_avatar_60x60.png' %}" alt="AI Budtender" class="chat-fullscreen__avatar">
+            <span class="chat-fullscreen__header-title">AI Budtender</span>
+        </div>
+        <button class="chat-fullscreen__close" id="chat-fullscreen-close" aria-label="Close">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+    </div>
+    <div class="chat-fullscreen__messages" id="chat-fullscreen-messages">
+        <div class="chat-fullscreen__welcome">
+            <img src="{% static 'img/mascot_avatar_60x60.png' %}" alt="" class="chat-fullscreen__welcome-avatar">
+            <h3>{% trans "Hola! Soy tu AI Budtender" %}</h3>
+            <p>{% trans "Cuéntame qué efectos buscas y te recomendaré las mejores variedades de cannabis." %}</p>
+        </div>
+    </div>
+    <div class="chat-fullscreen__input-area">
+        <div class="chat-fullscreen__input-wrapper">
+            <textarea class="chat-fullscreen__input" id="chat-fullscreen-input" placeholder="{% trans 'Escribe tu mensaje...' %}" rows="1"></textarea>
+            <button class="chat-fullscreen__send" id="chat-fullscreen-send" aria-label="Send">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4z"/><path d="m22 2-11 11"/></svg>
+            </button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% block common_scripts %}
+    <script src="{% static 'js/jquery-3.2.0.min.js' %}"></script>
+    <script src="{% static 'js/jquery.raty.js' %}"></script>
+    <script src="{% static 'js/util.js' %}"></script>
+    <script src="{% static 'js/collapse.js' %}"></script>
+    <script src="{% static 'js/modal.js' %}"></script>
+    <script src="{% static 'js/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'js/search-dropdown.js' %}"></script>
+    <script type="text/javascript">
+        var starOnUrl = "{% static 'img/raty_on.svg' %}";
+        var starOffUrl = "{% static 'img/raty_off.svg' %}";
+        var starHalfUrl = "{% static 'img/star_half.svg' %}";
+    </script>
+    <script src="{% static 'js/script.js' %}"></script>
+    <script src="{% static 'js/lang_toggle.js' %}"></script>
+    <script src="{% static 'js/header-v2.js' %}"></script>
+
+    {% if ENABLE_AI_CHAT %}
+    <script>
+        window.ChatFullscreenConfig = {
+            errRateLimit: '{% trans "Has alcanzado el límite de mensajes. Por favor, inténtalo más tarde." %}',
+            errUnavailable: '{% trans "El servicio no está disponible en este momento. Inténtalo más tarde." %}',
+            errServer: '{% trans "Error del servidor. Por favor, inténtalo de nuevo." %}',
+            errConnection: '{% trans "Error de conexión. Inténtalo de nuevo." %}',
+            errNoInternet: '{% trans "No se puede conectar con el servidor. Verifica tu conexión a internet." %}'
+        };
+    </script>
+    <script src="{% static 'js/chat-fullscreen.js' %}"></script>
+    {% endif %}
+{% endblock common_scripts %}
+
+{% block page_scripts %}{% endblock page_scripts %}
+</body>
+</html>

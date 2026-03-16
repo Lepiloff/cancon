@@ -1127,6 +1127,81 @@ def get_copywriter():
     return LeaflyCopywriter()
 
 
+class LeaflyReviewSummaryService:
+    def __init__(
+        self,
+        reporter=None,
+        client: Optional[LeaflyClient] = None,
+        parser: Optional[LeaflyParser] = None,
+        copywriter=None,
+        translator=None,
+    ):
+        self.reporter = reporter
+        self.client = client or LeaflyClient()
+        self.parser = parser or LeaflyParser()
+        self.copywriter = copywriter or get_copywriter()
+        self.translator = translator or get_translator()
+
+    def fetch_summary(
+        self, alias: str, strain_name: str
+    ) -> Optional[Dict[str, str]]:
+        """Fetch review texts and produce EN/ES summaries for a strain alias."""
+        try:
+            html = self.client.fetch_reviews(alias)
+        except LeaflyFetchError as exc:
+            self._report('warning', 'reviews', f'{alias}: could not fetch reviews — {exc}')
+            return None
+
+        reviews = self.parser.parse_reviews(html, limit=5)
+        if len(reviews) < self.parser.MIN_REVIEW_COUNT:
+            self._report(
+                'info',
+                'reviews',
+                (
+                    f'{strain_name}: {len(reviews)} reviews '
+                    f'(need {self.parser.MIN_REVIEW_COUNT}), skipping summary'
+                ),
+            )
+            return None
+
+        try:
+            summary_en = self.copywriter.summarize_reviews(reviews, strain_name)
+        except CopywritingError as exc:
+            self._report(
+                'warning',
+                'reviews',
+                f'{strain_name}: summary generation failed — {exc}',
+            )
+            return None
+
+        try:
+            translated = self.translator.translate(
+                'Strain', {'review_summary': summary_en}, 'en', 'es'
+            )
+            summary_es = translated.get('review_summary', '')
+        except Exception as exc:
+            self._report(
+                'warning',
+                'reviews',
+                f'{strain_name}: summary translation failed — {exc}',
+            )
+            summary_es = ''
+
+        self._report(
+            'success',
+            'reviews',
+            f'{strain_name}: AI review summary generated ({len(reviews)} reviews)',
+        )
+        return {'en': summary_en, 'es': summary_es}
+
+    def _report(self, level: str, stage: str, message: str) -> None:
+        if not self.reporter:
+            return
+        reporter_method = getattr(self.reporter, level, None)
+        if reporter_method:
+            reporter_method(stage, message)
+
+
 class StrainPersister:
     def __init__(self, taxonomy_translator: TaxonomyTranslator, reporter=None):
         self.taxonomy_translator = taxonomy_translator
@@ -1375,6 +1450,13 @@ class LeaflyImporter:
         self.copywriter = copywriter or get_copywriter()
         self.translator = translator or get_translator()
         self.taxonomy_translator = taxonomy_translator or TaxonomyTranslator()
+        self.review_summary_service = LeaflyReviewSummaryService(
+            reporter=reporter,
+            client=self.client,
+            parser=self.parser,
+            copywriter=self.copywriter,
+            translator=self.translator,
+        )
         self.persister = StrainPersister(self.taxonomy_translator, reporter=reporter)
 
     def import_alias(self, alias: str, dry_run: bool = False) -> str:
@@ -1456,39 +1538,7 @@ class LeaflyImporter:
     def _fetch_review_summary(
         self, alias: str, strain_name: str
     ) -> Optional[Dict[str, str]]:
-        """Fetch reviews page, extract texts, generate AI summary. Returns None on any failure."""
-        try:
-            html = self.client.fetch_reviews(alias)
-        except LeaflyFetchError as exc:
-            self.reporter.warning('reviews', f'{alias}: could not fetch reviews — {exc}')
-            return None
-
-        reviews = self.parser.parse_reviews(html, limit=5)
-        if len(reviews) < self.parser.MIN_REVIEW_COUNT:
-            self.reporter.info(
-                'reviews',
-                f'{strain_name}: {len(reviews)} reviews (need {self.parser.MIN_REVIEW_COUNT}), skipping summary',
-            )
-            return None
-
-        try:
-            summary_en = self.copywriter.summarize_reviews(reviews, strain_name)
-        except CopywritingError as exc:
-            self.reporter.warning('reviews', f'{strain_name}: summary generation failed — {exc}')
-            return None
-
-        # Translate summary to Spanish
-        try:
-            translated = self.translator.translate(
-                'Strain', {'review_summary': summary_en}, 'en', 'es'
-            )
-            summary_es = translated.get('review_summary', '')
-        except Exception as exc:
-            self.reporter.warning('reviews', f'{strain_name}: summary translation failed — {exc}')
-            summary_es = ''
-
-        self.reporter.success('reviews', f'{strain_name}: AI review summary generated ({len(reviews)} reviews)')
-        return {'en': summary_en, 'es': summary_es}
+        return self.review_summary_service.fetch_summary(alias, strain_name)
 
     def _translate_fields(self, copywriting: Dict[str, object]) -> Dict[str, str]:
         fields = {

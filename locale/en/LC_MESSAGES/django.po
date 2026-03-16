@@ -401,6 +401,187 @@ msgstr "Superuser must have is_superuser=True."
 msgid "email address"
 msgstr "email address"
 
+#: templates/main_v2.html
+msgid "Tu Asesor de Cannabis con IA"
+msgstr "Your AI Cannabis Advisor"
+
+#: templates/main_v2.html
+msgid "Describe lo que buscas y obtén recomendaciones personalizadas de variedades"
+msgstr "Describe what you need and get personalized strain recommendations"
+
+#: templates/main_v2.html
+msgid "Necesito algo para relajación y creatividad..."
+msgstr "I need something for relaxation and creativity..."
+
+#: templates/main_v2.html
+msgid "Enviar"
+msgstr "Send"
+
+#: templates/main_v2.html
+msgid "Necesito algo para relajarme después del trabajo"
+msgstr "I need something to relax after work"
+
+#: templates/main_v2.html
+msgid "Busco una variedad que estimule la creatividad"
+msgstr "I'm looking for a strain that boosts creativity"
+
+#: templates/main_v2.html
+msgid "Necesito aliviar el dolor de forma natural"
+msgstr "I need natural pain relief"
+
+#: templates/main_v2.html
+msgid "Quiero algo que me ayude a dormir mejor"
+msgstr "I want something that helps me sleep better"
+
+#: templates/main_v2.html
+msgid "Busco energía y motivación para el día"
+msgstr "I'm looking for energy and motivation for the day"
+
+#: templates/main_v2.html
+msgid "Necesito concentración para trabajar o estudiar"
+msgstr "I need focus for work or study"
+
+#: templates/main_v2.html
+msgid "Relajación"
+msgstr "Relaxation"
+
+#: templates/main_v2.html
+msgid "Creatividad"
+msgstr "Creativity"
+
+#: templates/main_v2.html
+msgid "Alivio del dolor"
+msgstr "Pain relief"
+
+#: templates/main_v2.html
+msgid "Mejor sueño"
+msgstr "Better sleep"
+
+#: templates/main_v2.html
+msgid "Energía"
+msgstr "Energy"
+
+#: templates/main_v2.html
+msgid "Concentración"
+msgstr "Focus"
+
+#: templates/main_v2.html
+msgid "Explorar variedades"
+msgstr "Explore strains"
+
+#: templates/main_v2.html
+msgid "IA Personalizada"
+msgstr "AI-Powered"
+
+#: templates/main_v2.html
+msgid "Basado en Terpenos"
+msgstr "Terpene-Based"
+
+#: templates/main_v2.html
+msgid "Explora Variedades de Cannabis"
+msgstr "Explore Cannabis Strains"
+
+#: templates/main_v2.html
+msgid "Ver más variedades"
+msgstr "View more strains"
+
+#: templates/main_v2.html
+msgid "Aprende sobre Cannabis"
+msgstr "Learn About Cannabis"
+
+#: templates/main_v2.html
+msgid "Ver todos los artículos"
+msgstr "View all articles"
+
+#: templates/base_v2.html
+msgid "Buscar..."
+msgstr "Search..."
+
+#: templates/base_v2.html
+msgid "Explorar"
+msgstr "Explore"
+
+#: templates/base_v2.html
+msgid "Contacto"
+msgstr "Contact"
+
+#: templates/base_v2.html
+msgid "Hola! Soy tu AI Budtender"
+msgstr "Hi! I'm your AI Budtender"
+
+#: templates/base_v2.html
+msgid "Cuéntame qué efectos buscas y te recomendaré las mejores variedades de cannabis."
+msgstr "Tell me what effects you're looking for and I'll recommend the best cannabis strains."
+
+#: templates/base_v2.html
+msgid "Escribe tu mensaje..."
+msgstr "Type your message..."
+
+#: templates/base_v2.html
+msgid "Has alcanzado el límite de mensajes. Por favor, inténtalo más tarde."
+msgstr "You have reached the message limit. Please try again later."
+
+#: templates/base_v2.html
+msgid "Error de conexión. Inténtalo de nuevo."
+msgstr "Connection error. Please try again."
+
+#: templates/main_v2.html templates/base_v2.html
+msgid ""
+"Cannamente es una base de datos de variedades de cannabis con un AI "
+"Budtender que te da recomendaciones personalizadas. Explora variedades y "
+"perfiles de terpenos."
+msgstr ""
+"Cannamente is a cannabis strain database with an AI Budtender that provides "
+"personalized recommendations. Explore strains and terpene profiles."
+
+#: templates/base_v2.html
+msgid "El servicio no está disponible en este momento. Inténtalo más tarde."
+msgstr "The service is currently unavailable. Please try again later."
+
+#: templates/base_v2.html
+msgid "Error del servidor. Por favor, inténtalo de nuevo."
+msgstr "Server error. Please try again."
+
+#: templates/base_v2.html
+msgid "No se puede conectar con el servidor. Verifica tu conexión a internet."
+msgstr "Cannot connect to the server. Check your internet connection."
+
+#: templates/strains_v2.html
+msgid "No sabes qué elegir? Pregúntale a la IA"
+msgstr "Not sure what to pick? Ask the AI"
+
+#: templates/terpene_list_v2.html
+msgid "Catálogo de Terpenos en Cannamente"
+msgstr "Terpene Catalog at Cannamente"
+
+#: templates/terpene_list_v2.html
+msgid "Terpenos, Catálogo de Terpenos, Cannamente"
+msgstr "Terpenes, Terpene Catalog, Cannamente"
+
+#: templates/terpene_list_v2.html
+msgid "Explora nuestro catálogo de terpenos en Cannamente. Conoce los diferentes terpenos, sus efectos y características."
+msgstr "Explore our terpene catalog at Cannamente. Learn about different terpenes, their effects and characteristics."
+
+#: templates/terpene_list_v2.html
+msgid "Catálogo de Terpenos"
+msgstr "Terpene Catalog"
+
+#: templates/terpene_list_v2.html
+msgid "Descubre los terpenos del cannabis, sus aromas, efectos y propiedades terapéuticas."
+msgstr "Discover cannabis terpenes, their aromas, effects and therapeutic properties."
+
+#: templates/terpene_list_v2.html
+msgid "El catálogo de terpenos estará disponible próximamente."
+msgstr "The terpene catalog will be available soon."
+
+#: templates/terpene_detail_v2.html
+msgid "Contenido"
+msgstr "Contents"
+
+#: templates/base_v2.html
+msgid "Resultado de la búsqueda"
+msgstr "Search results"
+
 #~ msgid "Efectos"
 #~ msgstr "Effects"
 

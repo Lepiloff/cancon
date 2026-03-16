@@ -27,6 +27,7 @@ jQuery(document).ready(function(){
       $(this).raty({
             numberMax: 100,
             score:score,
+            half        : true,
             starHalf    : starHalfUrl,
             starOff     : starOffUrl,
             starOn      : starOnUrl,

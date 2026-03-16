@@ -18,14 +18,14 @@ class ViewsTestCase(TestCase):
 
         response = self.client.get(reverse('main_page'))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'main.html')
+        self.assertTemplateUsed(response, 'main_v2.html')
 
     def test_strain_detail_view_exists(self):
         strain = StrainFactory.create()
 
         response = self.client.get(reverse('strain_detail', args=[strain.slug]))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'strain_modern.html')
+        self.assertTemplateUsed(response, 'strain_modern_v2.html')
 
     def test_strain_detail_view_not_exists(self):
         response = self.client.get(reverse('strain_detail', args=['non-existent-slug']))
@@ -36,7 +36,7 @@ class ViewsTestCase(TestCase):
 
         response = self.client.get(reverse('strain_list'))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'strains.html')
+        self.assertTemplateUsed(response, 'strains_v2.html')
 
     def test_strain_list_view_with_filters(self):
         strain1 = StrainFactory.create(name="Strain A", category="Indica")
@@ -54,7 +54,7 @@ class ViewsTestCase(TestCase):
 
         response = self.client.get(reverse('article_detail', args=[article.slug]))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'article_detail.html')
+        self.assertTemplateUsed(response, 'article_detail_v2.html')
 
     def test_article_detail_view_not_exists(self):
         response = self.client.get(reverse('article_detail', args=['non-existent-slug']))
@@ -65,7 +65,7 @@ class ViewsTestCase(TestCase):
 
         response = self.client.get(reverse('article_list'))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'articles.html')
+        self.assertTemplateUsed(response, 'articles_v2.html')
 
     def test_article_list_view_with_category(self):
         category1 = ArticleCategoryFactory(name="Category A")
