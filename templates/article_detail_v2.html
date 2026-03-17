@@ -67,6 +67,7 @@
                     <div class="top10-item">
                         <span class="top10-item__number">{{ forloop.counter }}</span>
                         <div class="top10-item__description">
+                            <strong>{{ section.strain.name }}</strong>
                             {{ section.description|safe }}
                         </div>
                         <a href="{% url 'strain_detail' slug=section.strain.slug %}" class="article-strain-card">
