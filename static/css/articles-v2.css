@@ -1021,7 +1021,6 @@
     line-height: 1.1;
     color: #fff;
     margin: 16px 0 24px;
-    max-width: 720px;
     letter-spacing: -0.02em;
 }
 
@@ -1029,7 +1028,6 @@
     border-radius: var(--radius-lg, 16px);
     overflow: hidden;
     margin-top: 24px;
-    max-width: 720px;
 }
 
 .top10__hero-image img {
@@ -1039,7 +1037,6 @@
 }
 
 .top10__intro {
-    max-width: 720px;
     margin-bottom: 48px;
     font-size: 1.05rem;
     line-height: 1.75;
@@ -1124,7 +1121,6 @@
 
 /* Outro */
 .top10__outro {
-    max-width: 720px;
     margin-top: 48px;
     padding-top: 32px;
     font-size: 1.05rem;
