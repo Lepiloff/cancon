@@ -33,16 +33,16 @@
                 <p class="strains-header-v2__desc">{% trans "Descubre la variedad y unicidad de cada cepa de marihuana en nuestro catálogo. Aquí, puedes explorar en detalle las características, beneficios terapéuticos, sabores y niveles de THC de cada cepa. Encuentra la cepa que se ajusta perfectamente a tus necesidades y preferencias." %}</p>
             </div>
             {% if ENABLE_AI_CHAT %}
-            <div class="strains-chat-cta" id="strains-chat-cta">
-                <div class="strains-chat-cta__icon">
-                    <img src="{% static 'img/mascot_avatar_60x60.png' %}" alt="AI Budtender">
-                </div>
-                <div class="strains-chat-cta__body">
+            <button type="button" class="strains-chat-cta" id="strains-chat-cta">
+                <span class="strains-chat-cta__icon">
+                    <img src="{% static 'img/mascot_avatar_60x60.png' %}" alt="">
+                </span>
+                <span class="strains-chat-cta__body">
                     <span class="strains-chat-cta__label">AI Budtender</span>
                     <span class="strains-chat-cta__text">{% trans "No sabes qué elegir? Pregúntale a la IA" %}</span>
-                </div>
+                </span>
                 <svg class="strains-chat-cta__arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-            </div>
+            </button>
             {% endif %}
         </div>
     </section>

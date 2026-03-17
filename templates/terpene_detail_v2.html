@@ -21,6 +21,12 @@
 
 {% block content %}
 <div class="terpene-detail-v2">
+    <nav class="breadcrumb-v2" aria-label="{% trans 'Breadcrumb' %}">
+        <a href="{% url 'terpene_list' %}">{% trans "Terpenos" %}</a>
+        <span class="breadcrumb-v2__separator">/</span>
+        <span class="breadcrumb-v2__current">{{ terpene.title }}</span>
+    </nav>
+
     <div class="terpene-detail-v2__container">
         <div class="terpene-detail-v2__body">
             <!-- Article content -->

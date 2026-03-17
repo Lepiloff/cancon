@@ -63,6 +63,8 @@
 </head>
 <body class="body-v2">
 
+<a class="skip-to-content" href="#main-content">{% trans "Ir al contenido principal" %}</a>
+
 {% block header_block %}
 <header class="header-v2" id="header-v2">
     <div class="header-v2__inner">
@@ -70,7 +72,7 @@
             <img src="{% static 'img/logo.svg' %}" alt="Cannamente" width="195" height="18" class="header-v2__logo-img">
         </a>
 
-        <button class="header-v2__burger" id="burger-btn" aria-label="Menu">
+        <button class="header-v2__burger" id="burger-btn" aria-label="{% trans 'Menú' %}" aria-expanded="false" aria-controls="main-nav">
             <span></span>
             <span></span>
             <span></span>
@@ -81,24 +83,25 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
             </button>
             <ul class="header-v2__nav-list">
-                <li class="header-v2__nav-home"><a href="/" class="header-v2__nav-link">{% trans "Inicio" %}</a></li>
-                <li><a href="{% url 'strain_list' %}" class="header-v2__nav-link">{% trans "Variedades" %}</a></li>
-                <li><a href="{% url 'terpene_list' %}" class="header-v2__nav-link">{% trans "Terpenos" %}</a></li>
-                <li><a href="{% url 'article_list' %}" class="header-v2__nav-link">{% trans "Artículos" %}</a></li>
+                <li class="header-v2__nav-home"><a href="/" class="header-v2__nav-link" data-nav="home">{% trans "Inicio" %}</a></li>
+                <li><a href="{% url 'strain_list' %}" class="header-v2__nav-link" data-nav="strain">{% trans "Variedades" %}</a></li>
+                <li><a href="{% url 'terpene_list' %}" class="header-v2__nav-link" data-nav="terpene">{% trans "Terpenos" %}</a></li>
+                <li><a href="{% url 'article_list' %}" class="header-v2__nav-link" data-nav="article">{% trans "Artículos" %}</a></li>
             </ul>
             <!-- Mobile-only: search and language toggle inside nav overlay -->
             <div class="header-v2__mobile-extras">
                 <div class="header-v2__search-wrapper header-v2__search-wrapper--mobile">
-                    <form action="{% url 'search' %}" method="get" class="header-v2__mobile-search" id="searchFormMobile">
-                        <input type="text" name="q" class="header-v2__search-input" placeholder="{% trans 'Buscar...' %}" autocomplete="off">
-                        <button type="submit" class="header-v2__search-btn">
+                    <form action="{% url 'search' %}" method="get" class="header-v2__mobile-search" id="searchFormMobile" role="search">
+                        <label for="search-input-mobile" class="sr-only">{% trans "Buscar" %}</label>
+                        <input type="text" name="q" id="search-input-mobile" class="header-v2__search-input" placeholder="{% trans 'Buscar...' %}" autocomplete="off">
+                        <button type="submit" class="header-v2__search-btn" aria-label="{% trans 'Buscar' %}">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                         </button>
                     </form>
-                    <div class="search-dropdown" id="searchDropdownMobile">
+                    <div class="search-dropdown" id="searchDropdownMobile" role="region" aria-live="polite" aria-label="{% trans 'Resultados de búsqueda' %}">
                         <div class="search-dropdown__header">
                             <span class="search-dropdown__title">{% trans "Resultado de la búsqueda" %}</span>
-                            <button class="search-dropdown__close" type="button" aria-label="Close">
+                            <button class="search-dropdown__close" type="button" aria-label="{% trans 'Cerrar resultados' %}">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                             </button>
                         </div>
@@ -119,16 +122,17 @@
 
         <div class="header-v2__actions">
             <div class="header-v2__search-wrapper">
-                <form action="{% url 'search' %}" method="get" id="searchForm" class="header-v2__search">
-                    <input type="text" name="q" class="header-v2__search-input" placeholder="{% trans 'Buscar...' %}" autocomplete="off">
-                    <button type="submit" class="header-v2__search-btn">
+                <form action="{% url 'search' %}" method="get" id="searchForm" class="header-v2__search" role="search">
+                    <label for="search-input-desktop" class="sr-only">{% trans "Buscar" %}</label>
+                    <input type="text" name="q" id="search-input-desktop" class="header-v2__search-input" placeholder="{% trans 'Buscar...' %}" autocomplete="off">
+                    <button type="submit" class="header-v2__search-btn" aria-label="{% trans 'Buscar' %}">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                     </button>
                 </form>
-                <div class="search-dropdown" id="searchDropdown">
+                <div class="search-dropdown" id="searchDropdown" role="region" aria-live="polite" aria-label="{% trans 'Resultados de búsqueda' %}">
                     <div class="search-dropdown__header">
                         <span class="search-dropdown__title">{% trans "Resultado de la búsqueda" %}</span>
-                        <button class="search-dropdown__close" type="button" aria-label="Close">
+                        <button class="search-dropdown__close" type="button" aria-label="{% trans 'Cerrar resultados' %}">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                         </button>
                     </div>
@@ -150,7 +154,9 @@
 </header>
 {% endblock header_block %}
 
+<main id="main-content">
 {% block content %}{% endblock content %}
+</main>
 
 {% block footer %}
 <footer class="footer-v2">
@@ -163,16 +169,16 @@
                 {% block footer_description %}{% endblock %}
             </p>
         </div>
-        <div class="footer-v2__col">
-            <h4 class="footer-v2__heading">{% trans "Explorar" %}</h4>
+        <nav class="footer-v2__col" aria-label="{% trans 'Explorar' %}">
+            <p class="footer-v2__heading">{% trans "Explorar" %}</p>
             <ul class="footer-v2__links">
                 <li><a href="{% url 'strain_list' %}">{% trans "Variedades" %}</a></li>
                 <li><a href="{% url 'terpene_list' %}">{% trans "Terpenos" %}</a></li>
                 <li><a href="{% url 'article_list' %}">{% trans "Artículos" %}</a></li>
             </ul>
-        </div>
+        </nav>
         <div class="footer-v2__col">
-            <h4 class="footer-v2__heading">{% trans "Contacto" %}</h4>
+            <p class="footer-v2__heading">{% trans "Contacto" %}</p>
             <ul class="footer-v2__links">
                 <li><a href="mailto:cannament@gmail.com">cannament@gmail.com</a></li>
             </ul>
@@ -186,17 +192,17 @@
 
 <!-- Fullscreen Chat Overlay -->
 {% if ENABLE_AI_CHAT %}
-<div class="chat-fullscreen" id="chat-fullscreen">
+<div class="chat-fullscreen" id="chat-fullscreen" role="dialog" aria-label="AI Budtender Chat" aria-hidden="true">
     <div class="chat-fullscreen__header">
         <div class="chat-fullscreen__header-left">
             <img src="{% static 'img/mascot_avatar_60x60.png' %}" alt="AI Budtender" class="chat-fullscreen__avatar">
             <span class="chat-fullscreen__header-title">AI Budtender</span>
         </div>
-        <button class="chat-fullscreen__close" id="chat-fullscreen-close" aria-label="Close">
+        <button class="chat-fullscreen__close" id="chat-fullscreen-close" aria-label="{% trans 'Cerrar' %}">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </button>
     </div>
-    <div class="chat-fullscreen__messages" id="chat-fullscreen-messages">
+    <div class="chat-fullscreen__messages" id="chat-fullscreen-messages" aria-live="polite" aria-relevant="additions">
         <div class="chat-fullscreen__welcome">
             <img src="{% static 'img/mascot_avatar_60x60.png' %}" alt="" class="chat-fullscreen__welcome-avatar">
             <h3>{% trans "Hola! Soy tu AI Budtender" %}</h3>
@@ -205,8 +211,9 @@
     </div>
     <div class="chat-fullscreen__input-area">
         <div class="chat-fullscreen__input-wrapper">
+            <label for="chat-fullscreen-input" class="sr-only">{% trans "Escribe tu mensaje" %}</label>
             <textarea class="chat-fullscreen__input" id="chat-fullscreen-input" placeholder="{% trans 'Escribe tu mensaje...' %}" rows="1"></textarea>
-            <button class="chat-fullscreen__send" id="chat-fullscreen-send" aria-label="Send">
+            <button class="chat-fullscreen__send" id="chat-fullscreen-send" aria-label="{% trans 'Enviar' %}">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4z"/><path d="m22 2-11 11"/></svg>
             </button>
         </div>

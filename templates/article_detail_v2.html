@@ -28,7 +28,7 @@
 <div class="article-detail-v2">
     <!-- Breadcrumb (Dark zone) -->
     <div class="article-detail-v2__breadcrumb-bar">
-        <nav class="article-detail-v2__breadcrumb">
+        <nav class="article-detail-v2__breadcrumb" aria-label="{% trans 'Breadcrumb' %}">
             <a href="{% url 'article_list' %}">{% trans "Artículos" %}</a>
             <span class="article-detail-v2__breadcrumb-separator">/</span>
             <span class="article-detail-v2__breadcrumb-current">{{ article.title|truncatewords:6 }}</span>

@@ -34,6 +34,12 @@
 {% endblock %}
 
 <div class="sd-page-v2">
+    <nav class="breadcrumb-v2" aria-label="{% trans 'Breadcrumb' %}">
+        <a href="{% url 'strain_list' %}">{% trans "Variedades" %}</a>
+        <span class="breadcrumb-v2__separator">/</span>
+        <span class="breadcrumb-v2__current">{{ strain.name }}</span>
+    </nav>
+
     <div class="sd-container-v2">
 
         <!-- Name + Meta -->
