@@ -125,8 +125,23 @@ def _extract_featured_strains(html_content):
     return slugs
 
 
+def _find_strain_slug_in_element(el, strains_by_slug):
+    """Find the first matching strain slug from links in an element."""
+    for a in el.find_all('a', href=True):
+        match = re.search(r'/strain/([\w-]+)/?', a['href'])
+        if match and match.group(1) in strains_by_slug:
+            return match.group(1)
+    return None
+
+
 def _parse_top10_content(html_content, strains_by_slug):
-    """Parse Top 10 article HTML into intro paragraphs, strain sections, and outro paragraphs."""
+    """Parse Top 10 article HTML into intro, strain sections, and outro.
+
+    Handles varied TinyMCE structures: some articles have one <p> per strain
+    with an inline link, others have <img> + <h3> + <p> groups per strain.
+    Deduplicates by slug — only the first occurrence creates a section.
+    Standalone images and headings for strains are skipped (card replaces them).
+    """
     if not html_content:
         return [], [], []
 
@@ -134,35 +149,40 @@ def _parse_top10_content(html_content, strains_by_slug):
     intro = []
     strain_sections = []
     outro = []
+    seen_slugs = set()
     found_first_strain = False
-    last_strain_idx = -1
 
-    elements = soup.find_all(['p', 'h2', 'h3', 'h4', 'ul', 'ol', 'blockquote', 'div'])
+    for el in soup.children:
+        # Skip whitespace text nodes
+        if not hasattr(el, 'name') or el.name is None:
+            continue
 
-    for el in elements:
-        link = el.find('a', href=True)
-        strain_slug = None
-        if link:
-            match = re.search(r'/strain/([\w-]+)/?', link.get('href', ''))
-            if match:
-                strain_slug = match.group(1)
+        slug = _find_strain_slug_in_element(el, strains_by_slug)
 
-        if strain_slug and strain_slug in strains_by_slug:
+        if slug:
             found_first_strain = True
-            # Extract just the description text (without the strain name link text)
-            description = str(el)
-            strain_sections.append({
-                'strain': strains_by_slug[strain_slug],
-                'description': description,
-            })
-            last_strain_idx = len(strain_sections) - 1
+            if slug not in seen_slugs:
+                seen_slugs.add(slug)
+                # Use the element as description only if it's a <p> with real text
+                is_text = el.name == 'p' and len(el.get_text(strip=True)) > 30
+                strain_sections.append({
+                    'strain': strains_by_slug[slug],
+                    'description': str(el) if is_text else '',
+                })
+            # Duplicate slug occurrence — skip (images, duplicate headings, etc.)
         elif not found_first_strain:
-            intro.append(str(el))
+            # Before any strain — intro content
+            if el.name in ('p', 'h2', 'h3', 'h4', 'ul', 'ol', 'blockquote'):
+                intro.append(str(el))
+        elif strain_sections and not strain_sections[-1]['description'] and el.name == 'p':
+            # Plain <p> right after a strain entry without description yet — it IS the description
+            strain_sections[-1]['description'] = str(el)
         else:
-            # Check if this paragraph still belongs to a strain section
-            # (no strain link = it's outro content)
-            if last_strain_idx >= 0:
-                outro.append(str(el))
+            # After strains — outro text (skip images)
+            if el.name in ('p', 'h2', 'h3', 'h4', 'ul', 'ol', 'blockquote'):
+                text = el.get_text(strip=True)
+                if text:
+                    outro.append(str(el))
 
     return intro, strain_sections, outro
 
