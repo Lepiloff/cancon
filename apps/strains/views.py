@@ -163,13 +163,27 @@ def _parse_top10_content(html_content, strains_by_slug):
             found_first_strain = True
             if slug not in seen_slugs:
                 seen_slugs.add(slug)
-                # Use the element as description only if it's a <p> with real text
-                is_text = el.name == 'p' and len(el.get_text(strip=True)) > 30
+                # Extract description: inline <p> with text, or nested <p> inside a container
+                description = ''
+                if el.name == 'p' and len(el.get_text(strip=True)) > 30:
+                    description = str(el)
+                elif el.name == 'div':
+                    # Container div (e.g. TinyMCE strain-container) — find <p> inside
+                    for p in el.find_all('p', recursive=True):
+                        if len(p.get_text(strip=True)) > 30 and not p.find('a', href=True):
+                            description = str(p)
+                            break
                 strain_sections.append({
                     'strain': strains_by_slug[slug],
-                    'description': str(el) if is_text else '',
+                    'description': description,
                 })
-            # Duplicate slug occurrence — skip (images, duplicate headings, etc.)
+            else:
+                # Duplicate slug — but if it's a <p> with real text, use as description
+                if el.name == 'p' and len(el.get_text(strip=True)) > 30:
+                    for section in strain_sections:
+                        if section['strain'].slug == slug and not section['description']:
+                            section['description'] = str(el)
+                            break
         elif not found_first_strain:
             # Before any strain — intro content
             if el.name in ('p', 'h2', 'h3', 'h4', 'ul', 'ol', 'blockquote'):
