@@ -17,8 +17,12 @@
 
     // --- Open / Close -----------------------------------------------------------
 
+    var previouslyFocused = null;
+
     function openFullscreenChat(prefillText) {
+        previouslyFocused = document.activeElement;
         fullscreen.classList.add('chat-fullscreen--active');
+        fullscreen.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
         if (prefillText && fsInput) {
             fsInput.value = prefillText;
@@ -30,7 +34,11 @@
 
     function closeFullscreenChat() {
         fullscreen.classList.remove('chat-fullscreen--active');
+        fullscreen.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
+        if (previouslyFocused && previouslyFocused.focus) {
+            previouslyFocused.focus();
+        }
     }
 
     if (fsClose) {

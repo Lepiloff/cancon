@@ -1,3 +1,5 @@
+import re
+
 from bs4 import BeautifulSoup
 
 from django.db.models import Q, Max
@@ -106,15 +108,96 @@ def strain_list(request):
     })
 
 
+def _extract_featured_strains(html_content):
+    """Extract strain slugs from links in article HTML, preserving order of appearance."""
+    if not html_content:
+        return []
+    soup = BeautifulSoup(html_content, 'html.parser')
+    seen = set()
+    slugs = []
+    for a in soup.find_all('a', href=True):
+        match = re.search(r'/strain/([\w-]+)/?', a['href'])
+        if match:
+            slug = match.group(1)
+            if slug not in seen:
+                seen.add(slug)
+                slugs.append(slug)
+    return slugs
+
+
+def _parse_top10_content(html_content, strains_by_slug):
+    """Parse Top 10 article HTML into intro paragraphs, strain sections, and outro paragraphs."""
+    if not html_content:
+        return [], [], []
+
+    soup = BeautifulSoup(html_content, 'html.parser')
+    intro = []
+    strain_sections = []
+    outro = []
+    found_first_strain = False
+    last_strain_idx = -1
+
+    elements = soup.find_all(['p', 'h2', 'h3', 'h4', 'ul', 'ol', 'blockquote', 'div'])
+
+    for el in elements:
+        link = el.find('a', href=True)
+        strain_slug = None
+        if link:
+            match = re.search(r'/strain/([\w-]+)/?', link.get('href', ''))
+            if match:
+                strain_slug = match.group(1)
+
+        if strain_slug and strain_slug in strains_by_slug:
+            found_first_strain = True
+            # Extract just the description text (without the strain name link text)
+            description = str(el)
+            strain_sections.append({
+                'strain': strains_by_slug[strain_slug],
+                'description': description,
+            })
+            last_strain_idx = len(strain_sections) - 1
+        elif not found_first_strain:
+            intro.append(str(el))
+        else:
+            # Check if this paragraph still belongs to a strain section
+            # (no strain link = it's outro content)
+            if last_strain_idx >= 0:
+                outro.append(str(el))
+
+    return intro, strain_sections, outro
+
+
 def article_detail(request, slug):
     article = get_object_or_404(Article, slug=slug)
     image = article.images.filter(is_preview=False).first()
     headings = _extract_headings(article.text_content)
-    return render(
-        request,
-        'article_detail_v2.html',
-        {'article': article, 'image': image, 'headings': headings}
-    )
+
+    is_top10 = article.category.filter(name='TOP 10').exists()
+
+    strain_slugs = _extract_featured_strains(article.text_content)
+    strains_by_slug = {
+        s.slug: s
+        for s in Strain.objects.filter(slug__in=strain_slugs).prefetch_related('feelings', 'flavors')
+    }
+    featured_strains = [strains_by_slug[s] for s in strain_slugs if s in strains_by_slug]
+
+    context = {
+        'article': article,
+        'image': image,
+        'headings': headings,
+        'featured_strains': featured_strains,
+        'is_top10': is_top10,
+    }
+
+    if is_top10:
+        intro, strain_sections, outro = _parse_top10_content(
+            article.text_content, strains_by_slug
+        )
+        context['intro_html'] = '\n'.join(intro)
+        context['strain_sections'] = strain_sections
+        context['outro_html'] = '\n'.join(outro)
+
+    return render(request, 'article_detail_v2.html', context)
 
 
 def article_list(request):

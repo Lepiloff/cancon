@@ -57,6 +57,7 @@
             {% if ENABLE_AI_CHAT %}
             <div class="hero-chat">
                 <div class="hero-chat__input-wrapper">
+                    <label for="hero-chat-input" class="sr-only">{% trans "Pregunta al AI Budtender" %}</label>
                     <input type="text" class="hero-chat__input" id="hero-chat-input"
                            placeholder="{% trans 'Necesito algo para relajación y creatividad...' %}">
                     <button class="hero-chat__send" id="hero-chat-send" aria-label="{% trans 'Enviar' %}">
@@ -178,7 +179,7 @@
                     <div class="learn-card-v2__img">
                         {% for image in article.images.all %}
                             {% if image.is_preview %}
-                                <img src="{{ image.img.url }}" alt="{{ image.img_alt_text }}" loading="lazy" decoding="async">
+                                <img src="{{ image.img.url }}" alt="{{ image.img_alt_text|default:article.title }}" loading="lazy" decoding="async">
                             {% endif %}
                         {% endfor %}
                     </div>
