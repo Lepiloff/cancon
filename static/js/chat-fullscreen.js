@@ -2,7 +2,8 @@
  * Fullscreen Chat for AI Budtender.
  *
  * Requires window.ChatFullscreenConfig with translated error strings:
- *   { errRateLimit, errUnavailable, errServer, errConnection, errNoInternet }
+ *   { errRateLimit, errUnavailable, errServer, errConnection, errNoInternet,
+ *     resumeChat }
  */
 (function() {
     var cfg = window.ChatFullscreenConfig || {};
@@ -12,15 +13,30 @@
     var fsInput    = document.getElementById('chat-fullscreen-input');
     var fsSend     = document.getElementById('chat-fullscreen-send');
     var fsClose    = document.getElementById('chat-fullscreen-close');
+    var resumeFab  = document.getElementById('chat-resume-fab');
 
     if (!fullscreen) return; // chat not enabled on this page
+
+    // --- Session persistence constants -------------------------------------------
+
+    var STORAGE_KEY_HISTORY  = 'ai-budtender-chat-history';
+    var STORAGE_KEY_TIMESTAMP = 'ai-budtender-chat-ts';
+    var SESSION_TTL_MS = 60 * 60 * 1000; // 1 hour
 
     // --- Open / Close -----------------------------------------------------------
 
     var previouslyFocused = null;
+    var historyRestored = false;
 
     function openFullscreenChat(prefillText) {
         previouslyFocused = document.activeElement;
+
+        // Restore chat history on first open if not already done
+        if (!historyRestored) {
+            restoreChatHistory();
+            historyRestored = true;
+        }
+
         fullscreen.classList.add('chat-fullscreen--active');
         fullscreen.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
@@ -30,6 +46,13 @@
         } else if (fsInput) {
             fsInput.focus();
         }
+
+        // Scroll to bottom after restore
+        if (fsMessages) {
+            fsMessages.scrollTop = fsMessages.scrollHeight;
+        }
+
+        updateResumeFab();
     }
 
     function closeFullscreenChat() {
@@ -39,6 +62,7 @@
         if (previouslyFocused && previouslyFocused.focus) {
             previouslyFocused.focus();
         }
+        updateResumeFab();
     }
 
     if (fsClose) {
@@ -92,6 +116,110 @@
         return div.innerHTML;
     }
 
+    // --- Chat history persistence ------------------------------------------------
+
+    function isSessionExpired() {
+        var ts = localStorage.getItem(STORAGE_KEY_TIMESTAMP);
+        if (!ts) return true;
+        return (Date.now() - parseInt(ts, 10)) > SESSION_TTL_MS;
+    }
+
+    function touchSessionTimestamp() {
+        localStorage.setItem(STORAGE_KEY_TIMESTAMP, String(Date.now()));
+    }
+
+    function getChatHistory() {
+        if (isSessionExpired()) {
+            clearChatSession();
+            return [];
+        }
+        try {
+            var raw = localStorage.getItem(STORAGE_KEY_HISTORY);
+            return raw ? JSON.parse(raw) : [];
+        } catch(e) {
+            return [];
+        }
+    }
+
+    function saveChatHistory(history) {
+        try {
+            // Keep max 50 messages to avoid localStorage bloat
+            var trimmed = history.slice(-50);
+            localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(trimmed));
+            touchSessionTimestamp();
+        } catch(e) {
+            // localStorage full — silently fail
+        }
+    }
+
+    function appendToHistory(entry) {
+        var history = getChatHistory();
+        history.push(entry);
+        saveChatHistory(history);
+    }
+
+    function clearChatSession() {
+        localStorage.removeItem(STORAGE_KEY_HISTORY);
+        localStorage.removeItem(STORAGE_KEY_TIMESTAMP);
+        localStorage.removeItem('ai-budtender-session-id');
+        localStorage.removeItem('ai_budtender_session_id');
+    }
+
+    function hasActiveSession() {
+        if (isSessionExpired()) {
+            clearChatSession();
+            return false;
+        }
+        var history = getChatHistory();
+        return history.length > 0;
+    }
+
+    function restoreChatHistory() {
+        var history = getChatHistory();
+        if (!history.length) return;
+
+        // Hide welcome message
+        var welcome = fsMessages.querySelector('.chat-fullscreen__welcome');
+        if (welcome) welcome.style.display = 'none';
+
+        for (var i = 0; i < history.length; i++) {
+            var entry = history[i];
+            if (entry.role === 'user') {
+                addMessageToFullscreen('user', entry.text, true);
+            } else if (entry.role === 'assistant') {
+                var msg = addMessageToFullscreen('assistant', '', true);
+                var textEl = msg.querySelector('.chat-fullscreen__msg-text');
+                if (textEl) {
+                    textEl.innerHTML = parseSimpleMarkdown(entry.text);
+                }
+                if (entry.strains && entry.strains.length) {
+                    renderStrainCards(msg, entry.strains);
+                }
+            }
+        }
+    }
+
+    // --- Resume FAB --------------------------------------------------------------
+
+    function updateResumeFab() {
+        if (!resumeFab) return;
+        var chatOpen = fullscreen.classList.contains('chat-fullscreen--active');
+        if (!chatOpen && hasActiveSession()) {
+            resumeFab.classList.add('chat-resume-fab--visible');
+        } else {
+            resumeFab.classList.remove('chat-resume-fab--visible');
+        }
+    }
+
+    if (resumeFab) {
+        resumeFab.addEventListener('click', function() {
+            openFullscreenChat('');
+        });
+    }
+
+    // Check on page load
+    updateResumeFab();
+
     // --- UI builders -------------------------------------------------------------
 
     function showTypingIndicator() {
@@ -110,7 +238,7 @@
         return typing;
     }
 
-    function addMessageToFullscreen(role, text) {
+    function addMessageToFullscreen(role, text, skipPersist) {
         var welcome = fsMessages.querySelector('.chat-fullscreen__welcome');
         if (welcome) welcome.style.display = 'none';
 
@@ -119,6 +247,12 @@
         msg.innerHTML = '<div class="chat-fullscreen__msg-text">' + escapeHtml(text) + '</div>';
         fsMessages.appendChild(msg);
         fsMessages.scrollTop = fsMessages.scrollHeight;
+
+        // Persist user messages immediately
+        if (!skipPersist && role === 'user') {
+            appendToHistory({ role: 'user', text: text });
+        }
+
         return msg;
     }
 
@@ -264,6 +398,15 @@
         }
     }
 
+    function persistAssistantMessage(text, strains) {
+        appendToHistory({
+            role: 'assistant',
+            text: text,
+            strains: strains || []
+        });
+        updateResumeFab();
+    }
+
     function sendFullscreenMessage() {
         if (fsIsSending) return;
         if (!fsInput || !fsInput.value.trim()) return;
@@ -313,9 +456,11 @@
                 if (data.response) {
                     var fbMsg = addMessageToFullscreen('assistant', data.response);
                     if (data.session_id) setSessionId(data.session_id);
-                    if (data.recommended_strains && data.recommended_strains.length) {
-                        renderStrainCards(fbMsg, data.recommended_strains);
+                    var fbStrains = data.recommended_strains || [];
+                    if (fbStrains.length) {
+                        renderStrainCards(fbMsg, fbStrains);
                     }
+                    persistAssistantMessage(data.response, fbStrains);
                 } else if (data.error) {
                     addErrorMessage(data.error);
                 } else {
@@ -360,6 +505,7 @@
             var textSpan = null;
             var fullText = '';
             var metadataResponse = '';
+            var streamStrains = null;
             var finalized = false;
 
             function finalize() {
@@ -378,6 +524,7 @@
                     addErrorMessage(cfg.errServer || 'Server error');
                 } else {
                     finalizeStreamingBubble(streamBubble);
+                    persistAssistantMessage(fullText, streamStrains);
                 }
                 unlockSend();
             }
@@ -397,6 +544,7 @@
                             var strains = null;
                             if (data.data && data.data.recommended_strains) strains = data.data.recommended_strains;
                             if (data.recommended_strains) strains = data.recommended_strains;
+                            streamStrains = strains;
 
                             // Capture response text from metadata (non-search branches send it here)
                             if (data.data && data.data.response) metadataResponse = data.data.response;
@@ -483,5 +631,10 @@
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 120) + 'px';
         });
+    }
+
+    // --- Expired session cleanup on load -----------------------------------------
+    if (isSessionExpired()) {
+        clearChatSession();
     }
 })();

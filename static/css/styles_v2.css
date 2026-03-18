@@ -1361,6 +1361,83 @@ select:focus-visible,
 }
 
 
+/* Chat Resume FAB (floating action button) */
+.chat-resume-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10000;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 2px solid var(--accent-green);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.8);
+  transition: opacity 0.3s var(--ease-out),
+              visibility 0s 0.3s,
+              transform 0.3s var(--ease-out),
+              box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(0, 230, 118, 0.15);
+}
+
+.chat-resume-fab--visible {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+  transition: opacity 0.3s var(--ease-out),
+              visibility 0s 0s,
+              transform 0.3s var(--ease-out),
+              box-shadow 0.2s;
+}
+
+.chat-resume-fab:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 28px rgba(0, 230, 118, 0.3);
+}
+
+.chat-resume-fab:active {
+  transform: scale(0.95);
+}
+
+.chat-resume-fab__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.chat-resume-fab__pulse {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  border: 2px solid var(--bg-primary);
+}
+
+.chat-resume-fab__pulse::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  opacity: 0.4;
+  animation: chatFabPulse 2s ease-in-out infinite;
+}
+
+@keyframes chatFabPulse {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.6); opacity: 0; }
+}
+
 /* --------------------------------------------------------------------------
    14. Responsive — Tablet (max-width: 1024px)
    -------------------------------------------------------------------------- */
@@ -1399,6 +1476,18 @@ select:focus-visible,
   :root {
     --section-pad-x: 16px;
     --section-pad-y: 48px;
+  }
+
+  .chat-resume-fab {
+    bottom: 16px;
+    right: 16px;
+    width: 52px;
+    height: 52px;
+  }
+
+  .chat-resume-fab__avatar {
+    width: 32px;
+    height: 32px;
   }
 
   /* Header: show hamburger, hide desktop nav */

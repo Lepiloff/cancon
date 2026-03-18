@@ -588,6 +588,10 @@ msgstr "Contents"
 msgid "Resultado de la búsqueda"
 msgstr "Search results"
 
+#: templates/base_v2.html
+msgid "Continuar chat"
+msgstr "Resume chat"
+
 #~ msgid "Efectos"
 #~ msgstr "Effects"
 
