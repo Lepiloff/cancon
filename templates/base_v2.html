@@ -190,6 +190,14 @@
 </footer>
 {% endblock footer %}
 
+<!-- Chat Resume FAB (floating action button) -->
+{% if ENABLE_AI_CHAT %}
+<button class="chat-resume-fab" id="chat-resume-fab" aria-label="{% trans 'Continuar chat' %}">
+    <img src="{% static 'img/mascot_avatar_60x60.png' %}" alt="" class="chat-resume-fab__avatar">
+    <span class="chat-resume-fab__pulse"></span>
+</button>
+{% endif %}
+
 <!-- Fullscreen Chat Overlay -->
 {% if ENABLE_AI_CHAT %}
 <div class="chat-fullscreen" id="chat-fullscreen" role="dialog" aria-label="AI Budtender Chat" aria-hidden="true">
@@ -245,7 +253,8 @@
             errUnavailable: '{% trans "El servicio no está disponible en este momento. Inténtalo más tarde." %}',
             errServer: '{% trans "Error del servidor. Por favor, inténtalo de nuevo." %}',
             errConnection: '{% trans "Error de conexión. Inténtalo de nuevo." %}',
-            errNoInternet: '{% trans "No se puede conectar con el servidor. Verifica tu conexión a internet." %}'
+            errNoInternet: '{% trans "No se puede conectar con el servidor. Verifica tu conexión a internet." %}',
+            resumeChat: '{% trans "Continuar chat" %}'
         };
     </script>
     <script src="{% static 'js/chat-fullscreen.js' %}"></script>
