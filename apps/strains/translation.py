@@ -22,8 +22,8 @@ class ArticleTranslationOptions(TranslationOptions):
 
 
 class TerpeneTranslationOptions(TranslationOptions):
-    # NOTE: 'name' is NOT translated - terpene names remain in English (Limonene, Myrcene, etc.)
-    fields = ('description',)
+    # Terpene names are translated: "Caryophyllene (spicy)" / "Cariofileno (picante)"
+    fields = ('name', 'description',)
     required_languages = ('en',)
 
 
