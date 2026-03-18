@@ -118,5 +118,66 @@ negatives_translator = {
 }
 
 
-terpenes_translation = {}
+# English -> Spanish mapping for terpene names (with descriptors)
+terpenes_translation = {
+    'Caryophyllene (spicy)': 'Cariofileno (picante)',
+    'Limonene (citrus)': 'Limoneno (cítrico)',
+    'Myrcene (herbal)': 'Mirceno (herbal)',
+    'Terpinolene (floral)': 'Terpinoleno (floral)',
+    'Pinene (woody)': 'Pineno (amaderado)',
+    'Humulene (hoppy)': 'Humuleno (lúpulo)',
+    'Ocimene (sweet)': 'Ocimeno (dulce)',
+    'Linalool (floral)': 'Linalool (floral)',
+    'Bisabolol (floral)': 'Bisabolol (floral)',
+    'Nerolidol (woody)': 'Nerolidol (amaderado)',
+    'Valencene (citrus)': 'Valenceno (cítrico)',
+    'Geraniol (floral)': 'Geraniol (floral)',
+    'Eucalyptol (menthol)': 'Eucaliptol (mentolado)',
+    'Phellandrene (herbal)': 'Felandreno (herbal)',
+    'Borneol (herbal)': 'Borneol (herbal)',
+    'Camphene (herbal)': 'Canfeno (herbal)',
+    'Sabinene (spicy)': 'Sabineno (picante)',
+    'Pulegone (menthol)': 'Pulegona (mentolado)',
+    'Guaiol (woody)': 'Guaiol (amaderado)',
+}
+
+# Reverse mapping: Spanish -> English (for data migration)
+terpenes_translation_reverse = {v: k for k, v in terpenes_translation.items()}
+
+# Partial mappings for flexible matching
+terpene_name_es_to_en = {
+    'Cariofileno': 'Caryophyllene',
+    'Limoneno': 'Limonene',
+    'Mirceno': 'Myrcene',
+    'Terpinoleno': 'Terpinolene',
+    'Pineno': 'Pinene',
+    'Humuleno': 'Humulene',
+    'Ocimeno': 'Ocimene',
+    'Linalool': 'Linalool',
+    'Bisabolol': 'Bisabolol',
+    'Nerolidol': 'Nerolidol',
+    'Valenceno': 'Valencene',
+    'Geraniol': 'Geraniol',
+    'Eucaliptol': 'Eucalyptol',
+    'Felandreno': 'Phellandrene',
+    'Borneol': 'Borneol',
+    'Canfeno': 'Camphene',
+    'Sabineno': 'Sabinene',
+    'Pulegona': 'Pulegone',
+    'Guaiol': 'Guaiol',
+}
+
+terpene_descriptor_es_to_en = {
+    'picante': 'spicy',
+    'cítrico': 'citrus',
+    'herbal': 'herbal',
+    'floral': 'floral',
+    'woody': 'woody',
+    'amaderado': 'woody',
+    'dulce': 'sweet',
+    'mentolado': 'menthol',
+    'afrutado': 'fruity',
+    'lúpulo': 'hoppy',
+    'terroso': 'earthy',
+}
 

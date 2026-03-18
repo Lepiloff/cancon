@@ -1,3 +1,5 @@
+import re
+
 from django.core.management.base import BaseCommand
 from apps.strains.models import Feeling, Negative, HelpsWith, Flavor, Terpene
 from apps.strains.localizations import (
@@ -5,16 +7,19 @@ from apps.strains.localizations import (
     negatives_translator,
     helps_with_translation,
     flavors_translation,
+    terpene_name_es_to_en,
+    terpene_descriptor_es_to_en,
+    terpenes_translation,
 )
 
 
 class Command(BaseCommand):
-    help = '''Populate English translations for taxonomy models and fix Spanish translations.
+    help = '''Populate translations for taxonomy models (Feelings, Flavors, Negatives, HelpsWith, Terpenes).
 
     This command:
     1. Sets English as primary (name_en) for Feelings, Flavors, Negatives, HelpsWith
     2. Uses localizations.py mappings for Spanish translations (name_es)
-    3. Fixes Terpene names to English (removes Spanish)
+    3. Populates Terpene name_en and name_es from Spanish→English mappings
 
     Run with --dry-run first to see what will be changed.
     '''
@@ -248,41 +253,59 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(f"  ✓ Updated: {updated}, Skipped: {skipped}"))
 
-    def process_terpenes(self, dry_run, force):
-        """Fix Terpene names to English"""
-        self.stdout.write('\n' + self.style.HTTP_INFO('Processing Terpenes (fixing to English)...'))
+    def _translate_terpene_to_english(self, spanish_name):
+        """Convert Spanish terpene name like 'Cariofileno (picante)' → 'Caryophyllene (spicy)'."""
+        # First check exact match in full translation dict
+        reverse = {v: k for k, v in terpenes_translation.items()}
+        if spanish_name in reverse:
+            return reverse[spanish_name]
 
-        # Spanish -> English mapping for terpenes
-        terpene_fixes = {
-            'Humuleno': 'Humulene',
-            'Ocimeno': 'Ocimene',
-            'Terpinoleno': 'Terpinolene',
-            'Pineno': 'Pinene',
-            'Mirceno': 'Myrcene',
-            'Limoneno': 'Limonene',
-            'Cariofileno': 'Caryophyllene',
-            'Linalool': 'Linalool',  # Already correct
-        }
+        # Parse: "TerpeneName (descriptor)" or just "TerpeneName"
+        match = re.match(r'^(\S+)\s*\((.+)\)$', spanish_name.strip())
+        if match:
+            name_part = match.group(1)
+            descriptor_part = match.group(2).strip()
+            en_name = terpene_name_es_to_en.get(name_part, name_part)
+            en_descriptor = terpene_descriptor_es_to_en.get(descriptor_part.lower(), descriptor_part)
+            return f'{en_name} ({en_descriptor})'
+        else:
+            return terpene_name_es_to_en.get(spanish_name.strip(), spanish_name.strip())
+
+    def process_terpenes(self, dry_run, force):
+        """Populate Terpene name_en and name_es translations."""
+        self.stdout.write('\n' + self.style.HTTP_INFO('Processing Terpenes...'))
 
         updated = 0
         skipped = 0
 
         for terpene in Terpene.objects.all():
-            current_name = terpene.name
+            current_name = terpene.name or ''
+            current_name_en = terpene.name_en or ''
+            current_name_es = terpene.name_es or ''
 
-            # Check if name needs fixing
-            english_name = None
-            for spanish, english in terpene_fixes.items():
-                if spanish.lower() in current_name.lower():
-                    # Replace Spanish with English, keep any extra info like "(floral)"
-                    english_name = current_name.replace(spanish, english).replace(spanish.lower(), english)
-                    break
+            # Determine Spanish and English names
+            spanish_name = current_name_es or current_name
+            english_name = self._translate_terpene_to_english(current_name)
 
-            if english_name and english_name != current_name:
-                self.stdout.write(f"  Terpene #{terpene.id}: '{current_name}' -> '{english_name}'")
+            should_update = False
+            changes = []
+
+            if not current_name_en or force:
+                if english_name != current_name_en:
+                    should_update = True
+                    changes.append(f"EN: '{current_name_en}' -> '{english_name}'")
+
+            if not current_name_es or force:
+                if spanish_name != current_name_es:
+                    should_update = True
+                    changes.append(f"ES: '{current_name_es}' -> '{spanish_name}'")
+
+            if should_update:
+                self.stdout.write(f"  Terpene #{terpene.id}: {' | '.join(changes)}")
 
                 if not dry_run:
-                    terpene.name = english_name
+                    terpene.name_en = english_name
+                    terpene.name_es = spanish_name
                     terpene.save()
 
                 updated += 1
