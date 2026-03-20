@@ -763,6 +763,26 @@ msgstr "You are about to sign in using your %(provider_name)s account."
 msgid "Continuar"
 msgstr "Continue"
 
+#: templates/socialaccount/signup.html
+msgid "Completar registro"
+msgstr "Complete registration"
+
+#: templates/socialaccount/signup.html
+msgid "Vas a usar tu cuenta de %(provider_name)s para acceder. Como paso final, completa el siguiente formulario:"
+msgstr "You are about to use your %(provider_name)s account to sign in. As a final step, please complete the following form:"
+
+#: templates/socialaccount/signup.html
+msgid "Registrarse"
+msgstr "Sign up"
+
+#: templates/socialaccount/authentication_error.html
+msgid "Error de autenticación"
+msgstr "Authentication error"
+
+#: templates/socialaccount/authentication_error.html
+msgid "Ocurrió un error al intentar iniciar sesión con tu cuenta externa. Por favor, inténtalo de nuevo."
+msgstr "An error occurred while attempting to sign in with your external account. Please try again."
+
 #: templates/socialaccount/login_cancelled.html
 msgid "Inicio de sesión cancelado"
 msgstr "Sign in cancelled"
