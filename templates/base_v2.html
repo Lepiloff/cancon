@@ -58,6 +58,7 @@
 
     <!-- New dark theme styles -->
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles_v2.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/auth.css' %}" />
 
     {% block extra_css %}{% endblock %}
 </head>
@@ -117,6 +118,18 @@
                         {% endif %}
                     {% endfor %}
                 </div>
+                <div class="header-v2__mobile-auth">
+                    {% if user.is_authenticated %}
+                    <span class="header-v2__user">
+                        <span class="header-v2__user-icon">{{ user.email|first|upper }}</span>
+                        {{ user.email }}
+                    </span>
+                    <a href="{% url 'account_logout' %}" class="auth-btn auth-btn--secondary">{% trans "Cerrar sesión" %}</a>
+                    {% else %}
+                    <a href="{% url 'account_login' %}" class="auth-btn auth-btn--primary">{% trans "Iniciar sesión" %}</a>
+                    <a href="{% url 'account_signup' %}" class="auth-btn auth-btn--secondary">{% trans "Crear cuenta" %}</a>
+                    {% endif %}
+                </div>
             </div>
         </nav>
 
@@ -148,6 +161,19 @@
                         <a href="{% alt_url lang_code %}" class="header-v2__lang-option">{{ lang_code|upper }}</a>
                     {% endif %}
                 {% endfor %}
+            </div>
+
+            <div class="header-v2__auth">
+                {% if user.is_authenticated %}
+                <span class="header-v2__user">
+                    <span class="header-v2__user-icon">{{ user.email|first|upper }}</span>
+                    <a href="{% url 'account_logout' %}" class="header-v2__user-logout" aria-label="{% trans 'Cerrar sesión' %}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    </a>
+                </span>
+                {% else %}
+                <a href="{% url 'account_login' %}" class="header-v2__auth-link header-v2__auth-link--login">{% trans "Iniciar sesión" %}</a>
+                {% endif %}
             </div>
         </div>
     </div>
