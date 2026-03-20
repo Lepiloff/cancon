@@ -1,0 +1,34 @@
+{% extends "base_v2.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Iniciar sesión con Google" %} — Cannamente{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/auth.css' %}" />
+{% endblock %}
+
+{% block content %}
+<section class="auth-page">
+  <div class="auth-card">
+    <a href="{% url 'account_login' %}" class="auth-card__close" aria-label="{% trans 'Cerrar' %}">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </a>
+    <div class="auth-card__header">
+      <h1 class="auth-card__title">{% trans "Iniciar sesión con Google" %}</h1>
+      <p class="auth-card__subtitle">
+        {% blocktrans with provider_name=provider.name %}Vas a iniciar sesión con tu cuenta de {{ provider_name }}.{% endblocktrans %}
+      </p>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="auth-btn auth-btn--primary">{% trans "Continuar" %}</button>
+    </form>
+
+    <div class="auth-card__footer">
+      <a href="{% url 'account_login' %}">{% trans "Volver a iniciar sesión" %}</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

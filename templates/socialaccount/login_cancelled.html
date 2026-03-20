@@ -1,0 +1,26 @@
+{% extends "base_v2.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Inicio de sesión cancelado" %} — Cannamente{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/auth.css' %}" />
+{% endblock %}
+
+{% block content %}
+<section class="auth-page">
+  <div class="auth-card">
+    <div class="auth-card__header">
+      <h1 class="auth-card__title">{% trans "Inicio de sesión cancelado" %}</h1>
+    </div>
+
+    <div class="auth-message">
+      <p class="auth-message__text">
+        {% trans "Has cancelado el inicio de sesión con tu cuenta social. Puedes intentarlo de nuevo o usar tu correo y contraseña." %}
+      </p>
+      <a href="{% url 'account_login' %}" class="auth-btn auth-btn--primary">{% trans "Volver a iniciar sesión" %}</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

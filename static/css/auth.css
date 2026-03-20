@@ -1,0 +1,496 @@
+/* ==========================================================================
+   Auth Pages — Dark Theme Styles
+   Matches Cannamente v2 "Digital Botanical" design system.
+   Uses CSS custom properties from styles_v2.css.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Layout
+   -------------------------------------------------------------------------- */
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 200px);
+  padding: 60px var(--section-pad-x) 80px;
+}
+
+/* --------------------------------------------------------------------------
+   Card (glassmorphic container)
+   -------------------------------------------------------------------------- */
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: rgba(26, 34, 32, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 48px 40px;
+  box-shadow:
+    0 4px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+}
+
+.auth-card__header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.auth-card__title {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.auth-card__subtitle {
+  font-size: 0.938rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.auth-card__subtitle a {
+  color: var(--accent-green);
+  font-weight: 500;
+}
+
+.auth-card__subtitle a:hover {
+  text-decoration: underline;
+}
+
+/* --------------------------------------------------------------------------
+   Form Elements
+   -------------------------------------------------------------------------- */
+.auth-form .form-group {
+  margin-bottom: 20px;
+}
+
+.auth-form label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.auth-form input[type="text"],
+.auth-form input[type="email"],
+.auth-form input[type="password"] {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1rem;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+}
+
+.auth-form input[type="text"]::placeholder,
+.auth-form input[type="email"]::placeholder,
+.auth-form input[type="password"]::placeholder {
+  color: var(--text-muted);
+}
+
+.auth-form input[type="text"]:focus,
+.auth-form input[type="email"]:focus,
+.auth-form input[type="password"]:focus {
+  outline: none;
+  border-color: var(--accent-green);
+  box-shadow: 0 0 0 3px var(--accent-green-dim);
+}
+
+/* Help text under fields */
+.auth-form .helptext,
+.auth-form .help-text {
+  display: block;
+  font-size: 0.813rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.auth-form .helptext ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.auth-form .helptext ul li {
+  margin-bottom: 2px;
+}
+
+/* Checkbox styling */
+.auth-form input[type="checkbox"] {
+  accent-color: var(--accent-green);
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+/* --------------------------------------------------------------------------
+   Buttons
+   -------------------------------------------------------------------------- */
+.auth-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 24px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s var(--ease-out);
+}
+
+.auth-btn--primary {
+  background: var(--accent-green);
+  color: var(--bg-primary);
+}
+
+.auth-btn--primary:hover {
+  background: #00c864;
+  box-shadow: 0 4px 16px rgba(0, 230, 118, 0.3);
+}
+
+.auth-btn--primary:active {
+  transform: scale(0.98);
+}
+
+.auth-btn--secondary {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-light);
+}
+
+.auth-btn--secondary:hover {
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+  background: var(--accent-green-dim);
+}
+
+/* --------------------------------------------------------------------------
+   Social Login (Google)
+   -------------------------------------------------------------------------- */
+.auth-social {
+  margin-bottom: 24px;
+}
+
+.auth-social__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 24px;
+  font-family: var(--font-body);
+  font-size: 0.938rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.25s var(--ease-out);
+}
+
+.auth-social__btn:hover {
+  border-color: var(--text-secondary);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.auth-social__btn svg {
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Divider ("or" separator)
+   -------------------------------------------------------------------------- */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-subtle);
+}
+
+.auth-divider__text {
+  font-size: 0.813rem;
+  color: var(--text-muted);
+  text-transform: lowercase;
+}
+
+/* --------------------------------------------------------------------------
+   Error Messages
+   -------------------------------------------------------------------------- */
+.auth-errors {
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+
+.auth-errors ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.auth-errors li {
+  font-size: 0.875rem;
+  color: #f87171;
+  line-height: 1.5;
+}
+
+.auth-errors li + li {
+  margin-top: 4px;
+}
+
+/* Per-field errors */
+.auth-form .errorlist {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+}
+
+.auth-form .errorlist li {
+  font-size: 0.813rem;
+  color: #f87171;
+  line-height: 1.4;
+}
+
+/* --------------------------------------------------------------------------
+   Links & Extras
+   -------------------------------------------------------------------------- */
+.auth-card__footer {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.auth-card__footer a {
+  color: var(--accent-green);
+  font-weight: 500;
+}
+
+.auth-card__footer a:hover {
+  text-decoration: underline;
+}
+
+.auth-forgot-link {
+  display: block;
+  text-align: right;
+  font-size: 0.813rem;
+  color: var(--text-secondary);
+  margin-top: -12px;
+  margin-bottom: 24px;
+}
+
+.auth-forgot-link:hover {
+  color: var(--accent-green);
+}
+
+/* --------------------------------------------------------------------------
+   Success / Info Messages
+   -------------------------------------------------------------------------- */
+.auth-message {
+  text-align: center;
+  padding: 16px;
+}
+
+.auth-message__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: var(--accent-green-dim);
+}
+
+.auth-message__icon svg {
+  color: var(--accent-green);
+}
+
+.auth-message__text {
+  font-size: 0.938rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+/* --------------------------------------------------------------------------
+   Navbar Auth Items
+   -------------------------------------------------------------------------- */
+.header-v2__auth {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: 8px;
+}
+
+.header-v2__auth-link {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: color 0.2s var(--ease-out);
+  white-space: nowrap;
+}
+
+.header-v2__auth-link:hover {
+  color: var(--accent-green);
+}
+
+.header-v2__auth-link--login {
+  padding: 6px 16px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-pill);
+  color: var(--text-primary);
+}
+
+.header-v2__auth-link--login:hover {
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+  background: var(--accent-green-dim);
+}
+
+.header-v2__user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.header-v2__user-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent-green-dim);
+  color: var(--accent-green);
+  font-weight: 600;
+  font-size: 0.813rem;
+}
+
+.header-v2__user-logout {
+  font-size: 0.813rem;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+
+.header-v2__user-logout:hover {
+  color: #f87171;
+}
+
+/* Mobile auth in nav overlay */
+.header-v2__mobile-auth {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.header-v2__mobile-auth .auth-btn {
+  font-size: 0.938rem;
+  padding: 12px 20px;
+}
+
+.header-v2__mobile-auth .auth-btn--primary {
+  color: #0a0f0a;
+}
+
+/* --------------------------------------------------------------------------
+   Close button on auth pages
+   -------------------------------------------------------------------------- */
+.auth-card__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out);
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.auth-card__close:hover {
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.auth-card {
+  position: relative;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  .auth-page {
+    padding: 40px 16px 60px;
+    min-height: calc(100vh - 160px);
+  }
+
+  .auth-card {
+    padding: 32px 24px;
+  }
+
+  .auth-card__title {
+    font-size: 1.5rem;
+  }
+
+  /* Hide desktop auth items, show mobile */
+  .header-v2__auth {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 28px 20px;
+    border-radius: var(--radius-md);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .auth-btn,
+  .auth-social__btn,
+  .auth-form input {
+    transition: none;
+  }
+}

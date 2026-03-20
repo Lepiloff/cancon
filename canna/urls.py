@@ -54,6 +54,7 @@ urlpatterns = [
 # EN (new):     /en/strain/... - WITH /en/ prefix
 urlpatterns += i18n_patterns(
     path('jsi18n/', JavaScriptCatalog.as_view(domain='django'), name='javascript-catalog'),
+    path('accounts/', include('allauth.urls')),
     path('', include('apps.strains.urls')),
     path('store/', include('apps.store.urls')),
     path('api/chat/', include('apps.chat_bot.urls')),

@@ -1,0 +1,43 @@
+{% extends "base_v2.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Confirmar correo electrónico" %} — Cannamente{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/auth.css' %}" />
+{% endblock %}
+
+{% block content %}
+<section class="auth-page">
+  <div class="auth-card">
+    <div class="auth-card__header">
+      <h1 class="auth-card__title">{% trans "Confirmar correo electrónico" %}</h1>
+    </div>
+
+    {% if confirmation %}
+    <div class="auth-message">
+      <p class="auth-message__text">
+        {% blocktrans with email=confirmation.email_address.email %}
+        Por favor confirma que <strong>{{ email }}</strong> es tu dirección de correo electrónico.
+        {% endblocktrans %}
+      </p>
+
+      <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+        {% csrf_token %}
+        <button type="submit" class="auth-btn auth-btn--primary">{% trans "Confirmar" %}</button>
+      </form>
+    </div>
+    {% else %}
+    <div class="auth-errors">
+      <ul>
+        <li>{% trans "Este enlace de confirmación ha expirado o no es válido." %}</li>
+      </ul>
+    </div>
+    <div class="auth-card__footer">
+      <a href="{% url 'account_login' %}">{% trans "Iniciar sesión" %}</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
