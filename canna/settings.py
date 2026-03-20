@@ -12,8 +12,31 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 
+import sentry_sdk
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+# ========================================
+# Sentry Monitoring
+# ========================================
+SENTRY_DSN = os.environ.get('SENTRY_DSN', '')
+SENTRY_ENVIRONMENT = os.environ.get('SENTRY_ENVIRONMENT', 'development')
+
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        environment=SENTRY_ENVIRONMENT,
+        # Performance monitoring: sample 20% of transactions in production
+        traces_sample_rate=float(os.environ.get('SENTRY_TRACES_SAMPLE_RATE', '0.2')),
+        # Profiling: sample 10% of profiled transactions
+        profiles_sample_rate=float(os.environ.get('SENTRY_PROFILES_SAMPLE_RATE', '0.1')),
+        # Send user info (IP, user ID) with events
+        send_default_pii=True,
+        # Attach request data (headers, cookies, body) for debugging
+        max_request_body_size='medium',
+    )
 
 
 # Quick-start development settings - unsuitable for production
@@ -305,3 +328,41 @@ if not DEBUG:
     CSRF_COOKIE_HTTPONLY = True
     CSRF_COOKIE_SAMESITE = 'Lax'
     X_FRAME_OPTIONS = 'DENY'
+
+# ========================================
+# Logging
+# ========================================
+# Sentry SDK auto-captures WARNING+ as breadcrumbs and ERROR+ as events
+# via its built-in LoggingIntegration (no extra handler needed).
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+}
