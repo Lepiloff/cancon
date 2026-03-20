@@ -1,0 +1,33 @@
+{% extends "base_v2.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Error de autenticación" %} — Cannamente{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/auth.css' %}" />
+{% endblock %}
+
+{% block content %}
+<section class="auth-page">
+  <div class="auth-card">
+    <div class="auth-card__header">
+      <h1 class="auth-card__title">{% trans "Error de autenticación" %}</h1>
+    </div>
+
+    <div class="auth-message">
+      <div class="auth-message__icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="m15 9-6 6"/>
+          <path d="m9 9 6 6"/>
+        </svg>
+      </div>
+      <p class="auth-message__text">
+        {% trans "Ocurrió un error al intentar iniciar sesión con tu cuenta externa. Por favor, inténtalo de nuevo." %}
+      </p>
+      <a href="{% url 'account_login' %}" class="auth-btn auth-btn--primary">{% trans "Volver a iniciar sesión" %}</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
