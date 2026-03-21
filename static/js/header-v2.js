@@ -20,6 +20,7 @@
         burger.classList.add('header-v2__burger--active');
         burger.setAttribute('aria-expanded', 'true');
         nav.classList.add('header-v2__nav--open');
+        header.classList.add('header-v2--nav-open');
         document.body.classList.add('mobile-nav-open');
     }
 
@@ -27,6 +28,7 @@
         burger.classList.remove('header-v2__burger--active');
         burger.setAttribute('aria-expanded', 'false');
         nav.classList.remove('header-v2__nav--open');
+        header.classList.remove('header-v2--nav-open');
         document.body.classList.remove('mobile-nav-open');
     }
 
