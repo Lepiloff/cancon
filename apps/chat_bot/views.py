@@ -2,9 +2,9 @@
 AI Budtender Chat Views
 
 STORAGE ARCHITECTURE:
-- Chat messages: Stored in browser localStorage for instant UX and offline access
+- Chat messages: Stored in both browser localStorage (UX) and database (analysis)
 - Session metadata: Stored in database for analytics (user count, message count, response times)
-- Message content storage: DISABLED to save database space (see commented code blocks)
+- Message content: Logged to ChatMessage for LLM-driven quality analysis and JSONL export
 """
 
 from django.http import JsonResponse, StreamingHttpResponse
@@ -144,17 +144,13 @@ class ChatProxyView(View):
                     api_key=api_key
                 )
             
-            # NOTE: Message content storage disabled to save DB space
-            # Chat history is stored in localStorage (browser-side) for better UX
-            # Session metadata is kept for analytics, but message content is excluded
-            # 
-            # # Log user message
-            # ChatMessage.objects.create(
-            #     session=session,
-            #     message_type='user',
-            #     content=message,
-            #     ip_address=client_ip
-            # )
+            # Log user message
+            ChatMessage.objects.create(
+                session=session,
+                message_type='user',
+                content=message,
+                ip_address=client_ip
+            )
             
             # Forward request to canagent API
             api_start_time = time.time()
@@ -199,22 +195,18 @@ class ChatProxyView(View):
                         session.session_id = canagent_session_id
                         session.save(update_fields=['session_id'])
                     
-                    # NOTE: AI response storage disabled to save DB space
-                    # Chat history is stored in localStorage (browser-side) for better UX
-                    # Only response time metrics are tracked for performance monitoring
-                    #
-                    # # Log AI response with Context-Aware metadata  
-                    # ChatMessage.objects.create(
-                    #     session=session,
-                    #     message_type='ai',
-                    #     content=response_data.get('response', ''),
-                    #     recommended_strains=response_data.get('recommended_strains', []),
-                    #     api_response_time_ms=api_response_time,
-                    #     query_type=response_data.get('query_type', 'unknown'),
-                    #     detected_intent=response_data.get('detected_intent'),
-                    #     confidence_score=response_data.get('confidence'),
-                    #     ip_address=client_ip
-                    # )
+                    # Log AI response with analysis metadata
+                    ChatMessage.objects.create(
+                        session=session,
+                        message_type='ai',
+                        content=response_data.get('response', ''),
+                        recommended_strains=response_data.get('recommended_strains', []),
+                        api_response_time_ms=api_response_time,
+                        query_type=response_data.get('query_type', 'unknown'),
+                        detected_intent=response_data.get('detected_intent'),
+                        confidence_score=response_data.get('confidence'),
+                        ip_address=client_ip
+                    )
                     
                     # Update session with Context-Aware metadata
                     session.message_count += 2  # User message + AI response
@@ -229,29 +221,23 @@ class ChatProxyView(View):
                 
                 else:
                     error_msg = f"API request failed: {response.status_code}"
-                    # NOTE: Error message storage disabled to save DB space
-                    # Error details are returned to client and logged in browser console
-                    #
-                    # ChatMessage.objects.create(
-                    #     session=session,
-                    #     message_type='error',
-                    #     content=error_msg,
-                    #     api_response_time_ms=api_response_time,
-                    #     ip_address=client_ip
-                    # )
+                    ChatMessage.objects.create(
+                        session=session,
+                        message_type='error',
+                        content=error_msg,
+                        api_response_time_ms=api_response_time,
+                        ip_address=client_ip
+                    )
                     return JsonResponse({'error': error_msg}, status=response.status_code)
                     
             except requests.exceptions.RequestException as e:
                 error_msg = f"Failed to connect to AI service: {str(e)}"
-                # NOTE: Connection error storage disabled to save DB space
-                # Error details are returned to client for debugging purposes
-                #
-                # ChatMessage.objects.create(
-                #     session=session,
-                #     message_type='error',
-                #     content=error_msg,
-                #     ip_address=client_ip
-                # )
+                ChatMessage.objects.create(
+                    session=session,
+                    message_type='error',
+                    content=error_msg,
+                    ip_address=client_ip
+                )
                 return JsonResponse({'error': error_msg}, status=502)
                 
         except Exception as e:
@@ -335,7 +321,13 @@ class ChatStreamView(View):
                 'source_platform': 'cannamente',
             }
 
+            api_start_time = time.time()
+
             def event_stream():
+                # Accumulators for message logging
+                response_chunks = []
+                metadata = {}
+
                 try:
                     with requests.post(
                         canagent_url,
@@ -345,25 +337,61 @@ class ChatStreamView(View):
                         stream=True,
                     ) as r:
                         for raw_line in r.iter_lines(decode_unicode=True):
-                            if raw_line:
-                                yield f"{raw_line}\n\n"
-                                # Update Django session analytics on metadata chunk
-                                if raw_line.startswith('data: '):
+                            if raw_line and raw_line.startswith('data: '):
+                                try:
+                                    chunk = json.loads(raw_line[6:])
+                                except (json.JSONDecodeError, ValueError):
+                                    yield f"{raw_line}\n\n"
+                                    continue
+
+                                chunk_type = chunk.get('type')
+
+                                if chunk_type == 'metadata':
+                                    meta = chunk.get('data', {})
+                                    metadata.update(meta)
+                                    canagent_sid = meta.get('session_id')
+                                    if canagent_sid and str(django_session.session_id) != canagent_sid:
+                                        django_session.session_id = canagent_sid
+                                    django_session.message_count += 2
+                                    if meta.get('language'):
+                                        django_session.language = meta.get('language')
+                                    django_session.save(update_fields=[
+                                        'session_id', 'message_count', 'last_activity_at', 'language'
+                                    ])
+
+                                elif chunk_type == 'response_chunk':
+                                    text = chunk.get('text', '')
+                                    if text:
+                                        response_chunks.append(text)
+
+                                elif chunk_type == 'done':
+                                    # Write ChatMessage records before yielding done
+                                    api_response_time = int((time.time() - api_start_time) * 1000)
                                     try:
-                                        chunk = json.loads(raw_line[6:])
-                                        if chunk.get('type') == 'metadata':
-                                            meta = chunk.get('data', {})
-                                            canagent_sid = meta.get('session_id')
-                                            if canagent_sid and str(django_session.session_id) != canagent_sid:
-                                                django_session.session_id = canagent_sid
-                                            django_session.message_count += 2
-                                            if meta.get('language'):
-                                                django_session.language = meta.get('language')
-                                            django_session.save(update_fields=[
-                                                'session_id', 'message_count', 'last_activity_at', 'language'
-                                            ])
+                                        ChatMessage.objects.create(
+                                            session=django_session,
+                                            message_type='user',
+                                            content=message,
+                                            ip_address=client_ip
+                                        )
+                                        ChatMessage.objects.create(
+                                            session=django_session,
+                                            message_type='ai',
+                                            content=''.join(response_chunks),
+                                            recommended_strains=metadata.get('recommended_strains'),
+                                            api_response_time_ms=api_response_time,
+                                            query_type=metadata.get('query_type', 'unknown'),
+                                            detected_intent=metadata.get('detected_intent'),
+                                            confidence_score=metadata.get('confidence'),
+                                            ip_address=client_ip
+                                        )
                                     except Exception:
-                                        pass
+                                        logger.exception("Failed to save chat messages for stream")
+
+                                yield f"{raw_line}\n\n"
+
+                            elif raw_line:
+                                yield f"{raw_line}\n\n"
                 except requests.exceptions.RequestException as e:
                     yield f'data: {json.dumps({"type": "error", "message": f"AI service unavailable: {str(e)}"})}\n\n'
 

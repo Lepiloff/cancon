@@ -1,10 +1,13 @@
+import json
+from io import StringIO
+
 from django.contrib import admin
+from django.http import HttpResponse
 from django.utils.html import format_html
-from django.urls import reverse
-from django.utils.safestring import mark_safe
 from django.utils import timezone
 from django.conf import settings
 from datetime import timedelta
+
 from .models import ChatConfiguration, APIKey, ChatSession, ChatMessage, ChatRateLimit
 
 
@@ -67,36 +70,93 @@ class APIKeyAdmin(admin.ModelAdmin):
             return ['usage_count', 'last_used_at', 'created_at']
 
 
-class ChatMessageInline(admin.TabularInline):
-    model = ChatMessage
-    extra = 0
-    readonly_fields = ['message_type', 'content', 'timestamp', 'response_time_ms']
-    fields = ['message_type', 'content', 'timestamp', 'response_time_ms']
-    can_delete = False
+def _build_session_jsonl(session: ChatSession) -> dict | None:
+    """Build a JSONL-compatible dict for a single session."""
+    messages_qs = ChatMessage.objects.filter(
+        session=session,
+        message_type__in=['user', 'ai'],
+    ).order_by('timestamp')
 
-    def has_add_permission(self, request, obj=None):
-        return False
+    messages = []
+    for msg in messages_qs:
+        entry = {
+            'role': 'user' if msg.message_type == 'user' else 'assistant',
+            'content': msg.content,
+            'timestamp': msg.timestamp.isoformat(),
+        }
+        if msg.message_type == 'ai':
+            if msg.detected_intent:
+                entry['intent'] = msg.detected_intent
+            if msg.confidence_score is not None:
+                entry['confidence'] = msg.confidence_score
+            if msg.recommended_strains:
+                strains = msg.recommended_strains
+                if isinstance(strains, list):
+                    entry['strains'] = [
+                        s.get('name', s) if isinstance(s, dict) else s
+                        for s in strains
+                    ]
+            if msg.api_response_time_ms is not None:
+                entry['response_time_ms'] = msg.api_response_time_ms
+        messages.append(entry)
+
+    if not messages:
+        return None
+
+    duration_minutes = None
+    if session.last_activity_at and session.started_at:
+        delta = session.last_activity_at - session.started_at
+        duration_minutes = round(delta.total_seconds() / 60, 1)
+
+    return {
+        'session_id': str(session.session_id),
+        'language': session.language or '',
+        'ip': session.ip_address,
+        'user': session.user.email if session.user else None,
+        'started_at': session.started_at.isoformat(),
+        'duration_minutes': duration_minutes,
+        'exchanges': len([m for m in messages if m['role'] == 'user']),
+        'messages': messages,
+    }
 
 
 @admin.register(ChatSession)
 class ChatSessionAdmin(admin.ModelAdmin):
-    list_display = ['session_preview', 'user', 'ip_address', 'message_count', 'is_active', 'started_at', 'last_activity_at']
-    list_filter = ['is_active', 'started_at', 'last_activity_at']
+    list_display = [
+        'session_preview', 'user', 'ip_address', 'language',
+        'message_count', 'is_active', 'duration', 'started_at', 'last_activity_at',
+    ]
+    list_filter = ['is_active', 'language', 'started_at', 'last_activity_at']
     search_fields = ['session_id', 'user__email', 'ip_address']
-    readonly_fields = ['session_id', 'started_at', 'last_activity_at']
-    inlines = [ChatMessageInline]
+    readonly_fields = ['session_id', 'started_at', 'last_activity_at', 'duration']
     date_hierarchy = 'started_at'
+    actions = ['download_jsonl']
 
     def session_preview(self, obj):
         return f"{obj.session_id.hex[:8]}..."
     session_preview.short_description = "Session ID"
 
+    def duration(self, obj):
+        if obj.last_activity_at and obj.started_at:
+            delta = obj.last_activity_at - obj.started_at
+            total_seconds = int(delta.total_seconds())
+            if total_seconds < 60:
+                return f"{total_seconds}s"
+            minutes = total_seconds // 60
+            if minutes < 60:
+                return f"{minutes}m"
+            hours = minutes // 60
+            remaining = minutes % 60
+            return f"{hours}h {remaining}m"
+        return "-"
+    duration.short_description = "Duration"
+
     fieldsets = [
         ('Session Info', {
-            'fields': ['session_id', 'user', 'ip_address', 'user_agent']
+            'fields': ['session_id', 'user', 'ip_address', 'user_agent', 'language']
         }),
         ('Activity', {
-            'fields': ['started_at', 'last_activity_at', 'message_count', 'is_active']
+            'fields': ['started_at', 'last_activity_at', 'duration', 'message_count', 'is_active']
         }),
         ('API', {
             'fields': ['api_key'],
@@ -104,52 +164,21 @@ class ChatSessionAdmin(admin.ModelAdmin):
         })
     ]
 
+    @admin.action(description='Download JSONL')
+    def download_jsonl(self, request, queryset):
+        buf = StringIO()
+        count = 0
+        for session in queryset.select_related('user').order_by('started_at'):
+            record = _build_session_jsonl(session)
+            if record:
+                buf.write(json.dumps(record, ensure_ascii=False, default=str))
+                buf.write('\n')
+                count += 1
 
-@admin.register(ChatMessage)
-class ChatMessageAdmin(admin.ModelAdmin):
-    list_display = ['session_preview', 'message_type', 'content_preview', 'timestamp', 'response_time_ms']
-    list_filter = ['message_type', 'timestamp', 'session__is_active']
-    search_fields = ['content', 'session__session_id', 'session__ip_address']
-    readonly_fields = ['session', 'timestamp', 'recommended_strains_display']
-    date_hierarchy = 'timestamp'
-
-    def session_preview(self, obj):
-        return f"{obj.session.session_id.hex[:8]}..."
-    session_preview.short_description = "Session"
-
-    def content_preview(self, obj):
-        return obj.content[:100] + "..." if len(obj.content) > 100 else obj.content
-    content_preview.short_description = "Content"
-
-    def recommended_strains_display(self, obj):
-        if obj.recommended_strains:
-            strains = obj.recommended_strains
-            if isinstance(strains, list) and strains:
-                strain_names = [strain.get('name', 'Unknown') for strain in strains[:3]]
-                display = ", ".join(strain_names)
-                if len(strains) > 3:
-                    display += f" and {len(strains) - 3} more"
-                return display
-        return "No strains recommended"
-    recommended_strains_display.short_description = "Recommended Strains"
-
-    fieldsets = [
-        ('Message Details', {
-            'fields': ['session', 'message_type', 'content', 'timestamp']
-        }),
-        ('AI Response Data', {
-            'fields': ['recommended_strains_display'],
-            'classes': ['collapse']
-        }),
-        ('Performance', {
-            'fields': ['response_time_ms', 'api_response_time_ms'],
-            'classes': ['collapse']
-        }),
-        ('Metadata', {
-            'fields': ['ip_address'],
-            'classes': ['collapse']
-        })
-    ]
+        response = HttpResponse(buf.getvalue(), content_type='application/x-ndjson')
+        response['Content-Disposition'] = 'attachment; filename="chat_sessions.jsonl"'
+        self.message_user(request, f'Exported {count} session(s) to JSONL.')
+        return response
 
 
 @admin.register(ChatRateLimit)
