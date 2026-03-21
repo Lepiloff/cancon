@@ -135,10 +135,10 @@ class ChatMessage(models.Model):
     # For AI responses, store recommended strains
     recommended_strains = models.JSONField(blank=True, null=True)
 
-    # Context-Aware Architecture v2.0 fields (commented for space optimization)
-    # query_type = models.CharField(max_length=20, blank=True, null=True)
-    # detected_intent = models.CharField(max_length=50, blank=True, null=True)
-    # confidence_score = models.FloatField(blank=True, null=True)
+    # Context-Aware Architecture v2.0 analysis fields
+    query_type = models.CharField(max_length=20, blank=True, null=True)
+    detected_intent = models.CharField(max_length=50, blank=True, null=True)
+    confidence_score = models.FloatField(blank=True, null=True)
 
     # Performance tracking
     response_time_ms = models.PositiveIntegerField(blank=True, null=True)
@@ -152,6 +152,9 @@ class ChatMessage(models.Model):
         verbose_name = 'Chat Message'
         verbose_name_plural = 'Chat Messages'
         ordering = ['timestamp']
+        indexes = [
+            models.Index(fields=['session', 'timestamp']),
+        ]
 
     def __str__(self):
         return f"{self.get_message_type_display()} - {self.content[:50]}..."
