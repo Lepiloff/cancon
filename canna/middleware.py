@@ -1,17 +1,23 @@
 """
-Middleware for language URL management.
+Middleware for language URL management and cookie consent.
 
 Ensures that language and URL prefix are always consistent:
 - EN language → must be on /en/ path
 - ES language → must be on path without /en/
 - Admin panel → always English (regardless of LANGUAGE_CODE)
+
+Also handles restoring cookie consent on login.
 """
+
+import json
 
 from django.shortcuts import redirect
 from django.utils import translation
 from django.conf import settings
 import logging
 import geoip2.database
+
+from canna.views import COOKIE_CONSENT_MAX_AGE
 
 
 class AdminEnglishMiddleware:
@@ -96,6 +102,7 @@ class LanguageUrlRedirectMiddleware:
             '/tinymce/',
             '/robots.txt',
             '/favicon.ico',
+            '/cookie-consent/',
         ]
 
         return any(path.startswith(prefix) for prefix in skip_prefixes)
@@ -168,6 +175,7 @@ class GeoLanguageMiddleware:
             '/robots.txt',
             '/favicon.ico',
             '/sitemap.xml',
+            '/cookie-consent/',
         ]
         return any(path.startswith(prefix) for prefix in skip_prefixes)
 
@@ -299,3 +307,34 @@ class GeoLanguageMiddleware:
         language_session_key = 'django_language'
         if hasattr(request, 'session'):
             request.session[language_session_key] = language_code
+
+
+class CookieConsentMiddleware:
+    """
+    Restore cookie consent cookie after login.
+
+    When a user logs in, the login signal stores their saved consent
+    preferences in the session under '_restore_cookie_consent'. This
+    middleware detects that flag and sets the cookie on the response,
+    so the user doesn't see the consent banner again.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
+        # Check if we need to restore the cookie consent cookie
+        if hasattr(request, 'session') and '_restore_cookie_consent' in request.session:
+            consent = request.session.pop('_restore_cookie_consent')
+            response.set_cookie(
+                'cookie_consent',
+                json.dumps(consent),
+                max_age=COOKIE_CONSENT_MAX_AGE,
+                samesite='Lax',
+                path='/',
+                httponly=False,
+            )
+
+        return response

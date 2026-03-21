@@ -59,6 +59,7 @@
     <!-- New dark theme styles -->
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles_v2.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'css/auth.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/cookie-consent.css' %}" />
 
     {% block extra_css %}{% endblock %}
 </head>
@@ -216,6 +217,24 @@
 </footer>
 {% endblock footer %}
 
+<!-- Cookie Consent Banner -->
+{% if show_cookie_banner %}
+<div class="cookie-consent" id="cookie-consent-banner" role="region" aria-label="{% trans 'Consentimiento de cookies' %}">
+    <div class="cookie-consent__card">
+        <div class="cookie-consent__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="cookie-consent__body">
+            <p class="cookie-consent__text">{% trans "Usamos cookies para analizar el tráfico del sitio. Puedes aceptar todas o solo las necesarias." %}</p>
+        </div>
+        <div class="cookie-consent__actions">
+            <button class="cookie-consent__btn cookie-consent__btn--accept" id="cookie-consent-accept" type="button">{% trans "Aceptar todas" %}</button>
+            <button class="cookie-consent__btn cookie-consent__btn--decline" id="cookie-consent-decline" type="button">{% trans "Solo necesarias" %}</button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <!-- Chat Resume FAB (floating action button) -->
 {% if ENABLE_AI_CHAT %}
 <button class="chat-resume-fab" id="chat-resume-fab" aria-label="{% trans 'Continuar chat' %}">
@@ -271,6 +290,18 @@
     <script src="{% static 'js/script.js' %}"></script>
     <script src="{% static 'js/lang_toggle.js' %}"></script>
     <script src="{% static 'js/header-v2.js' %}"></script>
+
+    <!-- Cookie consent -->
+    {{ cookie_consent|json_script:"cookie-consent-data" }}
+    <script>
+        window.CookieConsentConfig = {
+            showBanner: {{ show_cookie_banner|yesno:"true,false" }},
+            restoreConsent: {{ restore_cookie_consent|yesno:"true,false" }},
+            consent: JSON.parse(document.getElementById('cookie-consent-data').textContent),
+            csrfToken: '{{ csrf_token }}'
+        };
+    </script>
+    <script src="{% static 'js/cookie-consent.js' %}"></script>
 
     {% if ENABLE_AI_CHAT %}
     <script>
