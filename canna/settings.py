@@ -93,6 +93,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'canna.middleware.CookieConsentMiddleware',  # Restore consent cookie after login
 ]
 
 ROOT_URLCONF = 'canna.urls'
@@ -109,6 +110,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'canna.context_processors.chat_settings',
+                'canna.context_processors.cookie_consent',
             ],
         },
     },

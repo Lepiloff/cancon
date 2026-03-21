@@ -24,7 +24,7 @@ from django.views.i18n import JavaScriptCatalog
 from django.urls import path, include
 
 from canna.sitemaps import StrainSitemap, ArticleSitemap, TerpeneSitemap, StaticPageSitemap
-from canna.views import robots_txt
+from canna.views import robots_txt, cookie_consent_view
 
 
 sitemaps = {
@@ -43,6 +43,7 @@ urlpatterns = [
     path('tinymce/', include('tinymce.urls')),
     path('i18n/', include('django.conf.urls.i18n')),  # Language switcher endpoint
     path('robots.txt', robots_txt, name='robots_txt'),  # SEO: robots.txt
+    path('cookie-consent/', cookie_consent_view, name='cookie_consent'),
     path('sitemap.xml', sitemap, {
         'sitemaps': sitemaps,
         'template_name': 'sitemap.xml',  # Custom template with hreflang support

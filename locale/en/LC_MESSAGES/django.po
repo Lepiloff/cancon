@@ -791,6 +791,22 @@ msgstr "Sign in cancelled"
 msgid "Has cancelado el inicio de sesión con tu cuenta social. Puedes intentarlo de nuevo o usar tu correo y contraseña."
 msgstr "You have cancelled the social login. You can try again or use your email and password."
 
+#: templates/base_v2.html
+msgid "Consentimiento de cookies"
+msgstr "Cookie consent"
+
+#: templates/base_v2.html
+msgid "Usamos cookies para analizar el tráfico del sitio. Puedes aceptar todas o solo las necesarias."
+msgstr "We use cookies to analyze site traffic. You can accept all or only necessary ones."
+
+#: templates/base_v2.html
+msgid "Aceptar todas"
+msgstr "Accept All"
+
+#: templates/base_v2.html
+msgid "Solo necesarias"
+msgstr "Necessary Only"
+
 #~ msgid "Efectos"
 #~ msgstr "Effects"
 

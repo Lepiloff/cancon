@@ -11,6 +11,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(default=timezone.now)
+    cookie_consent = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text=_("Cookie consent preferences"),
+    )
+    cookie_consent_date = models.DateTimeField(null=True, blank=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
