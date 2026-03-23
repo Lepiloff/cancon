@@ -96,6 +96,7 @@ class LanguageUrlRedirectMiddleware:
     def _should_skip(self, path):
         skip_prefixes = [
             '/admin/',
+            '/api/',
             '/i18n/',
             '/static/',
             '/media/',
@@ -168,6 +169,7 @@ class GeoLanguageMiddleware:
         """Skip certain paths that don't need language detection"""
         skip_prefixes = [
             '/admin/',
+            '/api/',
             '/i18n/',
             '/static/',
             '/media/',
