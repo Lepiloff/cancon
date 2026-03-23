@@ -41,7 +41,7 @@ class AdminEnglishMiddleware:
 
     def __call__(self, request):
         # Force English for admin panel
-        if request.path.startswith('/admin/'):
+        if request.path.startswith('/manage-canna/'):
             translation.activate('en')
             request.LANGUAGE_CODE = 'en'
 
@@ -49,7 +49,7 @@ class AdminEnglishMiddleware:
 
         # Ensure response has English set for admin
         # (in case view code changed language during request processing)
-        if request.path.startswith('/admin/'):
+        if request.path.startswith('/manage-canna/'):
             translation.activate('en')
 
         return response
@@ -95,13 +95,15 @@ class LanguageUrlRedirectMiddleware:
 
     def _should_skip(self, path):
         skip_prefixes = [
-            '/admin/',
+            '/manage-canna/',
+            '/api/',
             '/i18n/',
             '/static/',
             '/media/',
             '/tinymce/',
             '/robots.txt',
             '/favicon.ico',
+            '/sitemap.xml',
             '/cookie-consent/',
         ]
 
@@ -167,7 +169,8 @@ class GeoLanguageMiddleware:
     def _should_skip(self, path):
         """Skip certain paths that don't need language detection"""
         skip_prefixes = [
-            '/admin/',
+            '/manage-canna/',
+            '/api/',
             '/i18n/',
             '/static/',
             '/media/',
