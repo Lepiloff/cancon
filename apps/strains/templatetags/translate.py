@@ -112,7 +112,7 @@ def deactivate_strain_links(html):
     text = str(html)
     matches = list(_STRAIN_LINK_RE.finditer(text))
     if not matches:
-        return html
+        return mark_safe(text)
 
     # Collect unique slugs from all matches
     slugs = {m.group(2) for m in matches}
