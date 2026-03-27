@@ -1,6 +1,7 @@
 {% extends "base_v2.html" %}
 {% load static %}
 {% load i18n %}
+{% load translate %}
 
 {% block title %}
     {% blocktrans with name=terpene.title %}Descripción y propiedades del terpeno {{ name }}{% endblocktrans %}
@@ -45,7 +46,7 @@
                 {% endif %}
 
                 <div class="terpene-detail-v2__content">
-                    {{ terpene.text_content|safe }}
+                    {{ terpene.text_content|deactivate_strain_links }}
                 </div>
             </article>
 

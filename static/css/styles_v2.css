@@ -2159,6 +2159,11 @@ select:focus-visible,
   text-decoration: underline;
 }
 
+.terpene-detail-v2__content .strain-link-inactive {
+  color: var(--text-muted);
+  cursor: default;
+}
+
 .terpene-detail-v2__content ul,
 .terpene-detail-v2__content ol {
   padding-left: 24px;

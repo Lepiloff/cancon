@@ -1,7 +1,16 @@
+import re
+
 from django import template
 from django.conf import settings
+from django.utils.safestring import mark_safe
 
 register = template.Library()
+
+# Matches <a href="/strain/slug/"> or <a href="/en/strain/slug/">
+_STRAIN_LINK_RE = re.compile(
+    r'<a\b([^>]*href=["\'](?:/(?:en/)?strain/([\w-]+)/)["\'][^>]*)>(.*?)</a>',
+    re.IGNORECASE | re.DOTALL,
+)
 
 
 @register.filter
@@ -85,3 +94,40 @@ def alt_url(context, lang_code):
     else:
         # Other languages get prefix
         return f'/{lang_code}{path_without_lang}'
+
+
+@register.filter
+def deactivate_strain_links(html):
+    """
+    Replace <a> links to inactive strains with plain <span> tags.
+
+    Parses all strain links in the HTML, checks which slugs are active
+    in one DB query, and replaces inactive ones with styled spans.
+    """
+    if not html:
+        return html
+
+    text = str(html)
+    matches = list(_STRAIN_LINK_RE.finditer(text))
+    if not matches:
+        return html
+
+    # Collect unique slugs from all matches
+    slugs = {m.group(2) for m in matches}
+
+    # Single DB query: get set of active slugs
+    from apps.strains.models import Strain
+    active_slugs = set(
+        Strain.objects.filter(slug__in=slugs, active=True)
+        .values_list('slug', flat=True)
+    )
+
+    def _replace(match):
+        slug = match.group(2)
+        if slug in active_slugs:
+            return match.group(0)  # keep link as-is
+        link_text = match.group(3)
+        return f'<span class="strain-link-inactive">{link_text}</span>'
+
+    result = _STRAIN_LINK_RE.sub(_replace, text)
+    return mark_safe(result)

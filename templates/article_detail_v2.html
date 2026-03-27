@@ -1,6 +1,7 @@
 {% extends "base_v2.html" %}
 {% load static %}
 {% load i18n %}
+{% load translate %}
 
 {% block title %}
     {{ article.title }}
@@ -150,7 +151,7 @@
                     {% endif %}
 
                     <div class="article-detail-v2__content">
-                        {{ article.text_content|safe }}
+                        {{ article.text_content|deactivate_strain_links }}
                     </div>
 
                     {% if featured_strains %}

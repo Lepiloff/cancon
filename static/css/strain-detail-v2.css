@@ -210,6 +210,11 @@ h1.sd-name:before {
     color: #69f0ae;
 }
 
+.sd-top__desc .tovar_text .strain-link-inactive {
+    color: var(--text-muted);
+    cursor: default;
+}
+
 /* --- Section --- */
 .sd-section {
     margin-bottom: 28px;
@@ -459,6 +464,12 @@ h1.sd-name:before {
     background: var(--text-muted);
     font-style: italic;
     opacity: 0.5;
+}
+
+.sd-genetics__node--inactive {
+    background: var(--text-muted);
+    opacity: 0.5;
+    cursor: default;
 }
 
 .sd-genetics__node--current {
