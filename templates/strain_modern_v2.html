@@ -2,6 +2,7 @@
 {% load static %}
 {% load json_ld %}
 {% load i18n %}
+{% load translate %}
 
 {% block title %}
     {{ strain.name }} {% trans "cepas de marihuana" %}
@@ -74,7 +75,7 @@
                 {% endif %}
             </div>
             <div class="sd-top__desc">
-                <div class="tovar_text">{{ strain.text_content|safe }}</div>
+                <div class="tovar_text">{{ strain.text_content|deactivate_strain_links }}</div>
             </div>
         </div>
 
@@ -223,7 +224,11 @@
             <div class="sd-genetics" id="genetics-tree">
                 <div class="sd-genetics__parents" id="genetics-parents">
                     {% for parent in strain.parents.all %}
+                    {% if parent.active %}
                     <a href="{% url 'strain_detail' parent.slug %}" class="sd-genetics__node sd-genetics__node--parent">{{ parent.name }}</a>
+                    {% else %}
+                    <span class="sd-genetics__node sd-genetics__node--inactive">{{ parent.name }}</span>
+                    {% endif %}
                     {% endfor %}
                     {% if strain.parents.count == 1 %}
                     <span class="sd-genetics__node sd-genetics__node--unknown">{% trans "Desconocido" %}</span>

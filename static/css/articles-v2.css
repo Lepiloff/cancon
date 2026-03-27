@@ -548,6 +548,12 @@
     color: var(--article-link-hover);
 }
 
+.article-detail-v2__content .strain-link-inactive {
+    color: var(--text-muted);
+    text-decoration: none;
+    cursor: default;
+}
+
 .article-detail-v2__content strong {
     color: var(--article-text);
     font-weight: 600;
