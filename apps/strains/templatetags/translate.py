@@ -6,9 +6,11 @@ from django.utils.safestring import mark_safe
 
 register = template.Library()
 
-# Matches <a href="/strain/slug/"> or <a href="/en/strain/slug/">
+# Matches any <a> linking to a strain page regardless of path format:
+# absolute (/strain/slug/), with lang prefix (/en/strain/slug/),
+# or relative (../../../strain/slug/)
 _STRAIN_LINK_RE = re.compile(
-    r'<a\b([^>]*href=["\'](?:/(?:en/)?strain/([\w-]+)/)["\'][^>]*)>(.*?)</a>',
+    r'<a\b([^>]*href=["\'][^"\']*strain/([\w-]+)/["\'][^>]*)>(.*?)</a>',
     re.IGNORECASE | re.DOTALL,
 )
 
