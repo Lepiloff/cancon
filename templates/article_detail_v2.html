@@ -58,7 +58,7 @@
 
                 {% if intro_html %}
                 <div class="top10__intro">
-                    {{ intro_html|safe }}
+                    {{ intro_html|deactivate_strain_links }}
                 </div>
                 {% endif %}
 
@@ -69,7 +69,7 @@
                         <span class="top10-item__number">{{ forloop.counter }}</span>
                         <div class="top10-item__description">
                             <strong>{{ section.strain.name }}</strong>
-                            {{ section.description|safe }}
+                            {{ section.description|deactivate_strain_links }}
                         </div>
                         <a href="{% url 'strain_detail' slug=section.strain.slug %}" class="article-strain-card">
                                 <div class="article-strain-card__img">
@@ -112,7 +112,7 @@
 
                 {% if outro_html %}
                 <div class="top10__outro">
-                    {{ outro_html|safe }}
+                    {{ outro_html|deactivate_strain_links }}
                 </div>
                 {% endif %}
             </article>
