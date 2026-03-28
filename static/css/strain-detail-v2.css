@@ -322,6 +322,15 @@ h1.sd-name:before {
 .sd-terpene__dot--4 { background: #ff8a65; }
 .sd-terpene__dot--5 { background: #b388ff; }
 
+.sd-terpene--link {
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+.sd-terpene--link:hover {
+    opacity: 0.75;
+}
+
 /* --- Effects --- */
 .sd-effects {
     display: grid;

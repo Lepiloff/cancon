@@ -41,6 +41,23 @@ def main_page(request):
     return render(request, 'main_v2.html', context)
 
 
+def _get_terpene_article_slugs(terpenes):
+    """Build a dict mapping Terpene.id -> Article.slug for terpene detail links."""
+    if not terpenes:
+        return {}
+    slugs = {}
+    for terpene in terpenes:
+        es_prefix = TERPENE_EN_TO_ES.get(terpene.name.lower())
+        if es_prefix:
+            article_slug = Article.objects.filter(
+                category__name='Terpenes',
+                slug__startswith=es_prefix,
+            ).values_list('slug', flat=True).first()
+            if article_slug:
+                slugs[terpene.id] = article_slug
+    return slugs
+
+
 def strain_detail(request, slug):
     strain = get_object_or_404(
         Strain.objects.prefetch_related('feelings', 'negatives', 'flavors', 'helps_with',
@@ -52,6 +69,16 @@ def strain_detail(request, slug):
     cann_max = Strain.objects.filter(active=True).aggregate(
         max_thc=Max('thc'), max_cbd=Max('cbd'), max_cbg=Max('cbg')
     )
+
+    # Build terpene -> article slug mapping for clickable links
+    all_terpenes = list(filter(None, [strain.dominant_terpene])) + list(strain.other_terpenes.all())
+    terpene_slugs = _get_terpene_article_slugs(all_terpenes)
+
+    # Attach article slugs to terpene objects for template use
+    if strain.dominant_terpene:
+        strain.dominant_terpene.article_slug = terpene_slugs.get(strain.dominant_terpene.id)
+    for t in strain.other_terpenes.all():
+        t.article_slug = terpene_slugs.get(t.id)
 
     context = {
         'strain': strain,
@@ -357,6 +384,7 @@ TERPENE_ES_TO_EN = {
     'terpinoleno': 'terpinolene',
     'ocimeno': 'ocimene',
 }
+TERPENE_EN_TO_ES = {v: k for k, v in TERPENE_ES_TO_EN.items()}
 
 
 def _find_terpene_for_article(article: Article):
