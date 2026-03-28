@@ -19,6 +19,7 @@
     <meta name="keywords" content="{% block keywords %}{% endblock %}" />
     <meta name="description" content="{% block description %}{% endblock %}" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {% block robots_meta %}{% endblock %}
 
     <!-- SEO: Multi-language support -->
     {% get_current_language as CURRENT_LANG %}

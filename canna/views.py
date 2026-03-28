@@ -31,6 +31,9 @@ def robots_txt(request):
         "User-agent: *",
         "Allow: /",
         "",
+        "Disallow: /accounts/",
+        "Disallow: /en/accounts/",
+        "",
         f"Sitemap: {protocol}://{domain}/sitemap.xml",
     ]
     return HttpResponse("\n".join(lines), content_type="text/plain")

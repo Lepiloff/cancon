@@ -11,13 +11,13 @@
 {% endblock %}
 
 {% block description %}
-{% trans "Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos de cepas de cannabis para uso medicinal y recreativo. Encuentra la variedad perfecta de índica, sativa o híbrida para tus necesidades. Actualizado y detallado para tu conveniencia." %}
+{% trans "Catálogo de variedades de marihuana: índica, sativa e híbrida. Efectos, terpenos, THC y CBD de cada cepa para uso medicinal y recreativo." %}
 {% endblock %}
 
 {% block og_title %}{% trans "Catálogo de Variedades de Marihuana | Tu Guía Completa" %}{% endblock %}
-{% block og_description %}{% trans "Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos de cepas de cannabis para uso medicinal y recreativo." %}{% endblock %}
+{% block og_description %}{% trans "Catálogo de variedades de marihuana: índica, sativa e híbrida. Efectos, terpenos, THC y CBD de cada cepa." %}{% endblock %}
 {% block twitter_title %}{% trans "Catálogo de Variedades de Marihuana | Tu Guía Completa" %}{% endblock %}
-{% block twitter_description %}{% trans "Descubre nuestro completo catálogo de variedades de marihuana. Explora cientos de cepas de cannabis para uso medicinal y recreativo." %}{% endblock %}
+{% block twitter_description %}{% trans "Catálogo de variedades de marihuana: índica, sativa e híbrida. Efectos, terpenos, THC y CBD de cada cepa." %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/strains-filter-v2.css' %}" />
@@ -166,6 +166,7 @@
     <!-- Strain Results -->
     <section class="strains-results-v2">
         <div class="strains-results-v2__inner">
+            <h2 class="strains-results-v2__heading">{% trans "Variedades disponibles" %}</h2>
             {% if no_matches %}
             <p class="strains-results-v2__empty">{% trans "No hay cepas que coincidan. Nos encanta tu imaginación, pero ninguna variedad coincide con la descripción. Prueba a simplificar tus opciones o empieza de cero borrando los filtros." %}</p>
             {% else %}

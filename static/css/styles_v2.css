@@ -1838,6 +1838,13 @@ select:focus-visible,
   margin: 0 auto;
 }
 
+.strains-results-v2__heading {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 20px;
+}
+
 .strains-results-v2__empty {
   text-align: center;
   color: var(--text-secondary);
