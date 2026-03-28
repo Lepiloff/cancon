@@ -805,6 +805,14 @@ msgstr "Accept All"
 msgid "Solo necesarias"
 msgstr "Necessary Only"
 
+#: templates/article_detail_v2.html
+msgid "Artículos relacionados"
+msgstr "Related articles"
+
+#: templates/terpene_detail_v2.html
+msgid "Variedades con este terpeno"
+msgstr "Strains with this terpene"
+
 #~ msgid "Efectos"
 #~ msgstr "Effects"
 

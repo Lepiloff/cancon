@@ -20,6 +20,10 @@
 {% block twitter_title %}{{ terpene.title }} | Cannamente{% endblock %}
 {% block twitter_description %}{{ terpene.description }}{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/articles-v2.css' %}" />
+{% endblock %}
+
 {% block content %}
 <div class="terpene-detail-v2">
     <nav class="breadcrumb-v2" aria-label="{% trans 'Breadcrumb' %}">
@@ -50,6 +54,44 @@
                 </div>
             </article>
 
+            <!-- Strains with this terpene -->
+            {% if terpene_strains %}
+            <section class="terpene-detail-v2__strains">
+                <h2 class="section-title-v2">{% trans "Variedades con este terpeno" %}</h2>
+                <div class="strain-grid-v2">
+                    {% for strain in terpene_strains %}
+                    <div class="strain-card-v2">
+                        <a href="{% url 'strain_detail' slug=strain.slug %}" class="strain-card-v2__link">
+                            <div class="strain-card-v2__img">
+                                {% if strain.img %}
+                                <img src="{{ strain.img.url }}" alt="{{ strain.name }}" loading="lazy" decoding="async">
+                                {% else %}
+                                <img src="{% static 'img/no_img.png' %}" alt="{{ strain.name }}" loading="lazy" decoding="async">
+                                {% endif %}
+                            </div>
+                            <div class="strain-card-v2__info">
+                                <h3 class="strain-card-v2__name">{{ strain.name }}</h3>
+                                <span class="strain-card-v2__category strain-card-v2__category--{{ strain.category|lower }}">{{ strain.category }}</span>
+                                <div class="strain-card-v2__meta">
+                                    <span class="strain-card-v2__thc">THC {{ strain.thc|floatformat:0 }}%</span>
+                                    {% if strain.cbd is not none %}
+                                        <span class="strain-card-v2__cbd">CBD {{ strain.cbd|floatformat:0 }}%</span>
+                                    {% elif strain.cbg is not none %}
+                                        <span class="strain-card-v2__cbg">CBG {{ strain.cbg|floatformat:0 }}%</span>
+                                    {% endif %}
+                                </div>
+                                <div class="strain-card-v2__rating">
+                                    <span class="strain-card-v2__rating-value">{{ strain.rating }}</span>
+                                    <div class="raty" data-score="{{ strain.rating }}" data-readonly="true"></div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
             <!-- Sidebar -->
             {% if headings %}
             <aside class="terpene-detail-v2__sidebar">
@@ -66,6 +108,31 @@
             </aside>
             {% endif %}
         </div>
+
+        {% if related_terpenes %}
+        <section class="related-articles">
+            <h2 class="related-articles__title">{% trans "Otros terpenos" %}</h2>
+            <div class="related-articles__grid">
+                {% for rt in related_terpenes %}
+                <a href="{% url 'terpene_detail' slug=rt.slug %}" class="related-articles__card">
+                    <div class="related-articles__img">
+                        {% if rt.preview_images %}
+                        <img src="{{ rt.preview_images.0.img.url }}" alt="{{ rt.preview_images.0.img_alt_text|default:rt.title }}" loading="lazy" decoding="async">
+                        {% else %}
+                        <div class="related-articles__img-placeholder">
+                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="related-articles__body">
+                        <h3 class="related-articles__card-title">{{ rt.title }}</h3>
+                        <p class="related-articles__excerpt">{{ rt.description|truncatewords:15|striptags }}</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
     </div>
 </div>
 {% endblock content %}
