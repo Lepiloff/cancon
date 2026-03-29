@@ -42,22 +42,38 @@ def main_page(request):
 
 
 def _get_terpene_article_slugs(terpenes):
-    """Build a dict mapping Terpene.id -> Article.slug for terpene detail links."""
+    """Build a dict mapping Terpene.id -> Article.slug for terpene detail links.
+
+    Matches dynamically: extracts the first word from each Terpene.name
+    (e.g. "Linalool" from "Linalool (floral)") and finds a Terpenes-category
+    article whose slug starts with that word. No hardcoded mapping needed.
+    """
     if not terpenes:
         return {}
-    slugs = {}
+
+    # Collect candidate prefixes: first word of each terpene name (lowercased)
+    terpene_prefixes = {}  # prefix -> terpene.id
     for terpene in terpenes:
-        # Terpene names may include descriptors like "Linalool (floral)" — extract first word
-        first_word = terpene.name.split()[0].lower() if terpene.name else ''
-        es_prefix = TERPENE_EN_TO_ES.get(first_word)
-        if es_prefix:
-            # Slugs may be based on Spanish or English name
-            article_slug = Article.objects.filter(
-                Q(slug__startswith=es_prefix) | Q(slug__startswith=first_word),
-                category__name='Terpenes',
-            ).values_list('slug', flat=True).first()
-            if article_slug:
-                slugs[terpene.id] = article_slug
+        if terpene.name:
+            prefix = terpene.name.split()[0].lower()
+            terpene_prefixes[prefix] = terpene.id
+
+    if not terpene_prefixes:
+        return {}
+
+    # Single query: get all terpene-category article slugs
+    terpene_articles = list(
+        Article.objects.filter(category__name='Terpenes')
+        .values_list('slug', flat=True)
+    )
+
+    # Match each terpene prefix against article slugs
+    slugs = {}
+    for prefix, terpene_id in terpene_prefixes.items():
+        for article_slug in terpene_articles:
+            if article_slug.startswith(prefix):
+                slugs[terpene_id] = article_slug
+                break
     return slugs
 
 
@@ -375,33 +391,28 @@ def terpene_list(request):
     return render(request, 'terpene_list_v2.html', {'terpenes_with_images': terpenes_with_images})
 
 
-# Mapping from Spanish terpene name prefixes (as they appear in Article titles)
-# to English terpene name prefixes (as stored in Terpene.name).
-TERPENE_ES_TO_EN = {
-    'mirceno': 'myrcene',
-    'cariofileno': 'caryophyllene',
-    'limoneno': 'limonene',
-    'linalool': 'linalool',
-    'pineno': 'pinene',
-    'humuleno': 'humulene',
-    'terpinoleno': 'terpinolene',
-    'ocimeno': 'ocimene',
-}
-TERPENE_EN_TO_ES = {v: k for k, v in TERPENE_ES_TO_EN.items()}
-
-
 def _find_terpene_for_article(article: Article):
     """Match an Article (terpene page) to its corresponding Terpene model entry.
 
-    Strategy: extract the first word from the article title, map it from Spanish
-    to English using TERPENE_ES_TO_EN, then find the Terpene whose name contains
-    that English keyword (case-insensitive).
+    Strategy: use the article slug (e.g. "linalool", "caryophyllene") to find
+    a Terpene whose name starts with that slug (case-insensitive).
+    Falls back to matching by first word of the article title.
+    No hardcoded mapping needed.
     """
-    first_word = article.title.split(':')[0].split()[0].lower() if article.title else ''
-    en_keyword = TERPENE_ES_TO_EN.get(first_word)
-    if not en_keyword:
-        return None
-    return Terpene.objects.filter(name__icontains=en_keyword).first()
+    # Try matching by slug first (most reliable — slugs are stable identifiers)
+    if article.slug:
+        match = Terpene.objects.filter(name__istartswith=article.slug).first()
+        if match:
+            return match
+
+    # Fallback: match by first word of title
+    first_word = article.title.split(':')[0].split()[0].strip() if article.title else ''
+    if first_word:
+        match = Terpene.objects.filter(name__istartswith=first_word).first()
+        if match:
+            return match
+
+    return None
 
 
 def _get_related_terpenes(terpene_article, limit=3):
