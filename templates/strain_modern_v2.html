@@ -140,16 +140,30 @@
             <h2 class="sd-section__title">{% trans "Terpenos" %}</h2>
             <div class="sd-terpenes">
                 {% if strain.dominant_terpene %}
+                {% if strain.dominant_terpene.article_slug %}
+                <a href="{% url 'terpene_detail' slug=strain.dominant_terpene.article_slug %}" class="sd-terpene sd-terpene--dominant sd-terpene--link">
+                    <span class="sd-terpene__dot sd-terpene__dot--dominant"></span>
+                    {{ strain.dominant_terpene.name }}
+                </a>
+                {% else %}
                 <span class="sd-terpene sd-terpene--dominant">
                     <span class="sd-terpene__dot sd-terpene__dot--dominant"></span>
                     {{ strain.dominant_terpene.name }}
                 </span>
                 {% endif %}
+                {% endif %}
                 {% for terpene in strain.other_terpenes.all %}
+                {% if terpene.article_slug %}
+                <a href="{% url 'terpene_detail' slug=terpene.article_slug %}" class="sd-terpene sd-terpene--link">
+                    <span class="sd-terpene__dot sd-terpene__dot--{{ forloop.counter }}"></span>
+                    {{ terpene.name }}
+                </a>
+                {% else %}
                 <span class="sd-terpene">
                     <span class="sd-terpene__dot sd-terpene__dot--{{ forloop.counter }}"></span>
                     {{ terpene.name }}
                 </span>
+                {% endif %}
                 {% endfor %}
             </div>
         </div>

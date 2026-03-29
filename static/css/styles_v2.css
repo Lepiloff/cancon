@@ -2073,6 +2073,68 @@ select:focus-visible,
   min-width: 0;
 }
 
+.terpene-detail-v2__strains {
+  grid-column: 1 / -1;
+  margin-top: 48px;
+}
+
+.terpene-detail-v2__strains .strain-grid-v2 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 1024px) {
+  .terpene-detail-v2__strains .strain-grid-v2 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .terpene-detail-v2__strains .strain-grid-v2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .terpene-detail-v2__strains .strain-grid-v2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Related terpenes — dark context */
+.terpene-detail-v2 .related-articles {
+  border-top-color: var(--border-subtle, rgba(255, 255, 255, 0.06));
+  margin-top: 3em;
+  padding-top: 2.5em;
+}
+.terpene-detail-v2 .related-articles__title {
+  color: var(--text-primary, #e8e8e8);
+}
+.terpene-detail-v2 .related-articles__title::before {
+  background: var(--accent-green, #00e676);
+}
+.terpene-detail-v2 .related-articles__card {
+  background: var(--bg-card, #1a2220);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  box-shadow: none;
+}
+.terpene-detail-v2 .related-articles__card:hover {
+  border-color: rgba(0, 230, 118, 0.25);
+  box-shadow: 0 4px 20px rgba(0, 230, 118, 0.06);
+  transform: translateY(-3px);
+}
+.terpene-detail-v2 .related-articles__img {
+  background: var(--bg-primary, #0a0f0a);
+}
+.terpene-detail-v2 .related-articles__card-title {
+  color: var(--text-primary, #e8e8e8);
+}
+.terpene-detail-v2 .related-articles__excerpt {
+  color: var(--text-secondary, #9ca3af);
+}
+.terpene-detail-v2 .related-articles__img-placeholder {
+  color: var(--text-muted, #8b939b);
+}
+
 .terpene-detail-v2__meta {
   display: flex;
   align-items: center;

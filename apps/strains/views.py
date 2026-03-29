@@ -2,14 +2,14 @@ import re
 
 from bs4 import BeautifulSoup
 
-from django.db.models import Q, Max
+from django.db.models import Q, Max, Prefetch
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.urls import reverse
 
 from apps.strains.forms import StrainFilterForm
-from apps.strains.models import Article, ArticleCategory, Strain
+from apps.strains.models import Article, ArticleCategory, ArticleImage, Strain, Terpene
 from apps.strains.utils import get_related_strains, get_filtered_strains, is_ajax_request
 
 
@@ -41,6 +41,23 @@ def main_page(request):
     return render(request, 'main_v2.html', context)
 
 
+def _get_terpene_article_slugs(terpenes):
+    """Build a dict mapping Terpene.id -> Article.slug for terpene detail links."""
+    if not terpenes:
+        return {}
+    slugs = {}
+    for terpene in terpenes:
+        es_prefix = TERPENE_EN_TO_ES.get(terpene.name.lower())
+        if es_prefix:
+            article_slug = Article.objects.filter(
+                category__name='Terpenes',
+                slug__startswith=es_prefix,
+            ).values_list('slug', flat=True).first()
+            if article_slug:
+                slugs[terpene.id] = article_slug
+    return slugs
+
+
 def strain_detail(request, slug):
     strain = get_object_or_404(
         Strain.objects.prefetch_related('feelings', 'negatives', 'flavors', 'helps_with',
@@ -52,6 +69,16 @@ def strain_detail(request, slug):
     cann_max = Strain.objects.filter(active=True).aggregate(
         max_thc=Max('thc'), max_cbd=Max('cbd'), max_cbg=Max('cbg')
     )
+
+    # Build terpene -> article slug mapping for clickable links
+    all_terpenes = list(filter(None, [strain.dominant_terpene])) + list(strain.other_terpenes.all())
+    terpene_slugs = _get_terpene_article_slugs(all_terpenes)
+
+    # Attach article slugs to terpene objects for template use
+    if strain.dominant_terpene:
+        strain.dominant_terpene.article_slug = terpene_slugs.get(strain.dominant_terpene.id)
+    for t in strain.other_terpenes.all():
+        t.article_slug = terpene_slugs.get(t.id)
 
     context = {
         'strain': strain,
@@ -201,6 +228,44 @@ def _parse_top10_content(html_content, strains_by_slug):
     return intro, strain_sections, outro
 
 
+def _get_related_articles(article, limit=3, min_same_category=2):
+    """Get related articles for the detail page.
+
+    Finds articles sharing the same category as the current article,
+    excluding Terpenes category. If fewer than min_same_category are found,
+    pads with recent articles from any non-Terpenes category.
+    """
+    preview_image_prefetch = Prefetch(
+        'images',
+        queryset=ArticleImage.objects.filter(is_preview=True),
+        to_attr='preview_images',
+    )
+    category_ids = article.category.exclude(name='Terpenes').values_list('id', flat=True)
+
+    same_category = list(
+        Article.objects.filter(category__id__in=category_ids)
+        .exclude(pk=article.pk)
+        .order_by('-created_at')
+        .prefetch_related(preview_image_prefetch, 'category')
+        .distinct()[:limit]
+    )
+
+    if len(same_category) >= min_same_category:
+        return same_category
+
+    existing_ids = {a.pk for a in same_category} | {article.pk}
+    remaining = limit - len(same_category)
+    filler = list(
+        Article.objects.exclude(pk__in=existing_ids)
+        .exclude(category__name='Terpenes')
+        .order_by('-created_at')
+        .prefetch_related(preview_image_prefetch, 'category')
+        .distinct()[:remaining]
+    )
+
+    return same_category + filler
+
+
 def article_detail(request, slug):
     article = get_object_or_404(Article, slug=slug)
     image = article.images.filter(is_preview=False).first()
@@ -215,12 +280,15 @@ def article_detail(request, slug):
     }
     featured_strains = [strains_by_slug[s] for s in strain_slugs if s in strains_by_slug]
 
+    related_articles = [] if is_top10 else _get_related_articles(article)
+
     context = {
         'article': article,
         'image': image,
         'headings': headings,
         'featured_strains': featured_strains,
         'is_top10': is_top10,
+        'related_articles': related_articles,
     }
 
     if is_top10:
@@ -304,17 +372,79 @@ def terpene_list(request):
     return render(request, 'terpene_list_v2.html', {'terpenes_with_images': terpenes_with_images})
 
 
+# Mapping from Spanish terpene name prefixes (as they appear in Article titles)
+# to English terpene name prefixes (as stored in Terpene.name).
+TERPENE_ES_TO_EN = {
+    'mirceno': 'myrcene',
+    'cariofileno': 'caryophyllene',
+    'limoneno': 'limonene',
+    'linalool': 'linalool',
+    'pineno': 'pinene',
+    'humuleno': 'humulene',
+    'terpinoleno': 'terpinolene',
+    'ocimeno': 'ocimene',
+}
+TERPENE_EN_TO_ES = {v: k for k, v in TERPENE_ES_TO_EN.items()}
+
+
+def _find_terpene_for_article(article: Article):
+    """Match an Article (terpene page) to its corresponding Terpene model entry.
+
+    Strategy: extract the first word from the article title, map it from Spanish
+    to English using TERPENE_ES_TO_EN, then find the Terpene whose name contains
+    that English keyword (case-insensitive).
+    """
+    first_word = article.title.split(':')[0].split()[0].lower() if article.title else ''
+    en_keyword = TERPENE_ES_TO_EN.get(first_word)
+    if not en_keyword:
+        return None
+    return Terpene.objects.filter(name__icontains=en_keyword).first()
+
+
+def _get_related_terpenes(terpene_article, limit=3):
+    """Get other terpene articles for the related section."""
+    preview_image_prefetch = Prefetch(
+        'images',
+        queryset=ArticleImage.objects.filter(is_preview=True),
+        to_attr='preview_images',
+    )
+    return list(
+        Article.objects.filter(category__name='Terpenes')
+        .exclude(pk=terpene_article.pk)
+        .order_by('-created_at')
+        .prefetch_related(preview_image_prefetch)
+        .distinct()[:limit]
+    )
+
+
 def terpene_detail(request, slug):
     terpene = get_object_or_404(Article, slug=slug, category__name='Terpenes')
     image = terpene.images.filter(is_preview=False).first()
     headings = _extract_headings(terpene.text_content)
+
+    terpene_strains = []
+    matched_terpene = _find_terpene_for_article(terpene)
+    if matched_terpene:
+        terpene_strains = (
+            Strain.objects.filter(
+                Q(dominant_terpene=matched_terpene) | Q(other_terpenes=matched_terpene),
+                active=True,
+            )
+            .distinct()
+            .order_by('-rating')[:8]
+        )
+
+    related_terpenes = _get_related_terpenes(terpene)
+
     return render(
         request,
         'terpene_detail_v2.html',
         {
             'terpene': terpene,
             'image': image,
-            'headings': headings
+            'headings': headings,
+            'terpene_strains': terpene_strains,
+            'related_terpenes': related_terpenes,
         }
     )
 
