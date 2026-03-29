@@ -2074,7 +2074,6 @@ select:focus-visible,
 }
 
 .terpene-detail-v2__strains {
-  grid-column: 1 / -1;
   margin-top: 48px;
 }
 

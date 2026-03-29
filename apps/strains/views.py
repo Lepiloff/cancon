@@ -425,14 +425,23 @@ def terpene_detail(request, slug):
     terpene_strains = []
     matched_terpene = _find_terpene_for_article(terpene)
     if matched_terpene:
-        terpene_strains = (
-            Strain.objects.filter(
-                Q(dominant_terpene=matched_terpene) | Q(other_terpenes=matched_terpene),
-                active=True,
-            )
-            .distinct()
-            .order_by('-rating')[:8]
+        limit = 8
+        # Prioritize strains where this is the dominant terpene
+        dominant = list(
+            Strain.objects.filter(dominant_terpene=matched_terpene, active=True)
+            .order_by('-rating')[:limit]
         )
+        if len(dominant) < limit:
+            # Fill remaining with strains that have it as other terpene
+            exclude_ids = {s.pk for s in dominant}
+            filler = list(
+                Strain.objects.filter(other_terpenes=matched_terpene, active=True)
+                .exclude(pk__in=exclude_ids)
+                .order_by('-rating')[:(limit - len(dominant))]
+            )
+            terpene_strains = dominant + filler
+        else:
+            terpene_strains = dominant
 
     related_terpenes = _get_related_terpenes(terpene)
 
