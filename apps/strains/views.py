@@ -47,11 +47,14 @@ def _get_terpene_article_slugs(terpenes):
         return {}
     slugs = {}
     for terpene in terpenes:
-        es_prefix = TERPENE_EN_TO_ES.get(terpene.name.lower())
+        # Terpene names may include descriptors like "Linalool (floral)" — extract first word
+        first_word = terpene.name.split()[0].lower() if terpene.name else ''
+        es_prefix = TERPENE_EN_TO_ES.get(first_word)
         if es_prefix:
+            # Slugs may be based on Spanish or English name
             article_slug = Article.objects.filter(
+                Q(slug__startswith=es_prefix) | Q(slug__startswith=first_word),
                 category__name='Terpenes',
-                slug__startswith=es_prefix,
             ).values_list('slug', flat=True).first()
             if article_slug:
                 slugs[terpene.id] = article_slug
