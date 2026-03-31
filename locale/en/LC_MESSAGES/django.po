@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Canna 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-15 22:14+0000\n"
+"POT-Creation-Date: 2026-03-31 15:02+0000\n"
 "PO-Revision-Date: 2025-10-08 12:07+0000\n"
 "Last-Translator: Claude\n"
 "Language-Team: English\n"
@@ -28,6 +28,148 @@ msgstr "Medium"
 msgid "Alto"
 msgstr "High"
 
+msgid "Confirmar correo electrónico"
+msgstr "Confirm email address"
+
+#, fuzzy, python-format
+#| msgid ""
+#| "Por favor confirma que <strong>%(email)s</strong> es tu dirección de "
+#| "correo electrónico."
+msgid ""
+"\n"
+"        Por favor confirma que <strong>%(email)s</strong> es tu dirección de "
+"correo electrónico.\n"
+"        "
+msgstr "Please confirm that <strong>%(email)s</strong> is your email address."
+
+msgid "Confirmar"
+msgstr "Confirm"
+
+msgid "Este enlace de confirmación ha expirado o no es válido."
+msgstr "This confirmation link has expired or is invalid."
+
+msgid "Iniciar sesión"
+msgstr "Sign in"
+
+msgid "Cerrar"
+msgstr "Close"
+
+msgid "¿No tienes cuenta?"
+msgstr "Don't have an account?"
+
+msgid "Regístrate"
+msgstr "Sign up"
+
+msgid "Continuar con Google"
+msgstr "Continue with Google"
+
+msgid "o"
+msgstr "or"
+
+msgid "Correo electrónico"
+msgstr "Email"
+
+msgid "Contraseña"
+msgstr "Password"
+
+msgid "¿Olvidaste tu contraseña?"
+msgstr "Forgot your password?"
+
+msgid "Cerrar sesión"
+msgstr "Sign out"
+
+msgid "¿Estás seguro de que quieres cerrar sesión?"
+msgstr "Are you sure you want to sign out?"
+
+msgid "Volver al inicio"
+msgstr "Back to home"
+
+msgid "Restablecer contraseña"
+msgstr "Reset password"
+
+msgid ""
+"Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu "
+"contraseña."
+msgstr "Enter your email and we'll send you a link to reset your password."
+
+msgid "Enviar enlace"
+msgstr "Send link"
+
+msgid "Volver a iniciar sesión"
+msgstr "Back to sign in"
+
+msgid "Correo enviado"
+msgstr "Email sent"
+
+msgid "Revisa tu correo"
+msgstr "Check your email"
+
+msgid ""
+"Te hemos enviado un correo electrónico con instrucciones para restablecer tu "
+"contraseña. Si no lo ves, revisa tu carpeta de spam."
+msgstr ""
+"We've sent you an email with instructions to reset your password. If you "
+"don't see it, check your spam folder."
+
+msgid "Nueva contraseña"
+msgstr "New password"
+
+msgid "Ingresa tu nueva contraseña a continuación."
+msgstr "Enter your new password below."
+
+msgid ""
+"Este enlace para restablecer la contraseña ha expirado o no es válido. Por "
+"favor solicita uno nuevo."
+msgstr ""
+"This password reset link has expired or is invalid. Please request a new one."
+
+msgid "Solicitar nuevo enlace"
+msgstr "Request new link"
+
+msgid "Confirmar nueva contraseña"
+msgstr "Confirm new password"
+
+msgid "Cambiar contraseña"
+msgstr "Change password"
+
+msgid "Contraseña actualizada"
+msgstr "Password updated"
+
+msgid ""
+"Tu contraseña ha sido actualizada exitosamente. Ya puedes iniciar sesión con "
+"tu nueva contraseña."
+msgstr ""
+"Your password has been updated successfully. You can now sign in with your "
+"new password."
+
+msgid "Crear cuenta"
+msgstr "Create account"
+
+msgid "¿Ya tienes cuenta?"
+msgstr "Already have an account?"
+
+msgid "Inicia sesión"
+msgstr "Sign in"
+
+msgid "Confirmar contraseña"
+msgstr "Confirm password"
+
+msgid "Verificación enviada"
+msgstr "Verification sent"
+
+msgid "Verifica tu correo"
+msgstr "Verify your email"
+
+msgid ""
+"Te hemos enviado un correo de verificación. Por favor revisa tu bandeja de "
+"entrada y haz clic en el enlace para activar tu cuenta."
+msgstr ""
+"We've sent you a verification email. Please check your inbox and click the "
+"link to activate your account."
+
+msgid "Si no ves el correo, revisa tu carpeta de spam."
+msgstr "If you don't see the email, check your spam folder."
+
 msgid "Strain Copywriter"
 msgstr "Strain Copywriter"
 
@@ -37,9 +179,31 @@ msgstr "Generate"
 msgid "Apply to strain"
 msgstr "Apply to strain"
 
+msgid "Breadcrumb"
+msgstr ""
+
+msgid "Artículos"
+msgstr "Articles"
+
+#, fuzzy
+#| msgid "Variedades disponibles"
+msgid "Variedades mencionadas"
+msgstr "Available strains"
+
+msgid "Contenido"
+msgstr "Contents"
+
+msgid "Artículos relacionados"
+msgstr "Related articles"
+
 msgid ""
 "Artículos y Noticias sobre Marihuana - Información Actualizada en Cannamente"
 msgstr "Cannabis Articles and News - Updated Information at Cannamente"
+
+msgid ""
+"cannabis, marihuana, artículos, noticias, información, blog, CBD, THC, "
+"terpenos"
+msgstr ""
 
 msgid ""
 "Descubre las últimas noticias y los artículos más informativos sobre "
@@ -62,18 +226,54 @@ msgstr ""
 "Discover the latest news and most informative articles about cannabis at "
 "Cannamente."
 
-msgid "No articles found"
-msgstr "No articles found"
+msgid "Información actualizada sobre cannabis, terpenos, efectos y cultura."
+msgstr ""
 
+msgid "Todos"
+msgstr ""
+
+#, fuzzy
+#| msgid "Ver más"
+msgid "Leer más"
+msgstr "See more"
+
+#, fuzzy
+#| msgid "Artículos"
+msgid "Más artículos"
+msgstr "Articles"
+
+msgid "Leer"
+msgstr ""
+
+msgid "No se encontraron artículos."
+msgstr ""
+
+#, fuzzy
+#| msgid ""
+#| "Explora las últimas noticias e información sobre el cannabis en nuestro "
+#| "blog. Mantente al día con tendencias, investigaciones y consejos sobre la "
+#| "marihuana. Amplía tus conocimientos y mantente informado sobre el mundo "
+#| "del cannabis."
 msgid ""
 "Explora las últimas noticias e información sobre el cannabis en nuestro "
 "blog. Mantente al día con tendencias, investigaciones y consejos sobre la "
-"marihuana. Amplía tus conocimientos y mantente informado sobre el mundo del "
-"cannabis."
+"marihuana."
 msgstr ""
 "Explore the latest news and information about cannabis on our blog. Stay up "
 "to date with trends, research, and tips about marijuana. Expand your "
 "knowledge and stay informed about the world of cannabis."
+
+msgid "Ir al contenido principal"
+msgstr ""
+
+msgid "Menú"
+msgstr ""
+
+msgid "Cerrar menú"
+msgstr "Close menu"
+
+msgid "Inicio"
+msgstr "Home"
 
 msgid "Variedades"
 msgstr "Strains"
@@ -81,74 +281,239 @@ msgstr "Strains"
 msgid "Terpenos"
 msgstr "Terpenes"
 
-msgid "Artículos"
-msgstr "Articles"
+#, fuzzy
+#| msgid "Buscar..."
+msgid "Buscar"
+msgstr "Search..."
 
-msgid "Inicio"
-msgstr "Home"
+msgid "Buscar..."
+msgstr "Search..."
 
-msgid "Cerrar menú"
-msgstr "Close menu"
+#, fuzzy
+#| msgid "Resultado de la búsqueda"
+msgid "Resultados de búsqueda"
+msgstr "Search results"
 
-msgid "Tiendas/Dispensarios"
-msgstr "Stores/Dispensaries"
+msgid "Resultado de la búsqueda"
+msgstr "Search results"
+
+msgid "Cerrar resultados"
+msgstr ""
+
+msgid "Explorar"
+msgstr "Explore"
+
+msgid "Contacto"
+msgstr "Contact"
+
+msgid "Consentimiento de cookies"
+msgstr "Cookie consent"
 
 msgid ""
-"Cepas de Marihuana: Catálogo Exhaustivo y Recursos Informativos en Cannamente"
+"Usamos cookies para analizar el tráfico del sitio. Puedes aceptar todas o "
+"solo las necesarias."
 msgstr ""
-"Cannabis Strains: Comprehensive Catalog and Information Resources at "
-"Cannamente"
+"We use cookies to analyze site traffic. You can accept all or only necessary "
+"ones."
+
+msgid "Aceptar todas"
+msgstr "Accept All"
+
+msgid "Solo necesarias"
+msgstr "Necessary Only"
+
+msgid "Continuar chat"
+msgstr "Resume chat"
+
+msgid "Hola! Soy tu AI Budtender"
+msgstr "Hi! I'm your AI Budtender"
 
 msgid ""
-"Descubre el mundo de la marihuana con Cannamente: un catálogo exhaustivo de "
-"cepas y artículos educativos para expandir tus conocimientos. Únete a "
-"nosotros en esta exploración."
+"Cuéntame qué efectos buscas y te recomendaré las mejores variedades de "
+"cannabis."
 msgstr ""
-"Discover the world of cannabis with Cannamente: a comprehensive catalog of "
-"strains and educational articles to expand your knowledge. Join us in this "
-"exploration."
+"Tell me what effects you're looking for and I'll recommend the best cannabis "
+"strains."
+
+#, fuzzy
+#| msgid "Escribe tu mensaje..."
+msgid "Escribe tu mensaje"
+msgstr "Type your message..."
+
+msgid "Escribe tu mensaje..."
+msgstr "Type your message..."
+
+msgid "Enviar"
+msgstr "Send"
+
+msgid "Has alcanzado el límite de mensajes. Por favor, inténtalo más tarde."
+msgstr "You have reached the message limit. Please try again later."
+
+msgid "El servicio no está disponible en este momento. Inténtalo más tarde."
+msgstr "The service is currently unavailable. Please try again later."
+
+msgid "Error del servidor. Por favor, inténtalo de nuevo."
+msgstr "Server error. Please try again."
+
+msgid "Error de conexión. Inténtalo de nuevo."
+msgstr "Connection error. Please try again."
+
+msgid "No se puede conectar con el servidor. Verifica tu conexión a internet."
+msgstr "Cannot connect to the server. Check your internet connection."
+
+msgid "AI Budtender y Base de Datos de Variedades de Cannabis | Cannamente"
+msgstr "AI Budtender and Cannabis Strain Database | Cannamente"
 
 msgid ""
-"Descubre el mundo de la marihuana con Cannamente: un catálogo exhaustivo de "
-"cepas y artículos educativos para expandir tus conocimientos."
+"AI budtender, variedades de cannabis, marihuana, recomendaciones de "
+"cannabis, buscador de variedades, terpenos, THC, CBD"
 msgstr ""
-"Discover the world of cannabis with Cannamente: a comprehensive catalog of "
-"strains and educational articles to expand your knowledge."
-
-msgid "Cannamente: Tu Guía Completa de Cepas de Marihuana"
-msgstr "Cannamente: Your Complete Cannabis Strains Guide"
+"AI budtender, cannabis strains, marijuana, cannabis recommendations, strain "
+"finder, terpenes, THC, CBD"
 
 msgid ""
-"Explora nuestra extensa colección de cepas de marihuana y sumérgete en "
-"nuestro recurso informativo para expandir tus conocimientos. Con Cannamente, "
-"podrás encontrar la cepa perfecta según tus necesidades y gustos. Comienza "
-"tu viaje ahora."
+"AI Budtender: recomendaciones personalizadas de cannabis con IA. Más de 500 "
+"variedades con efectos, terpenos y datos de THC/CBD."
 msgstr ""
-"Explore our extensive collection of cannabis strains and immerse yourself in "
-"our informational resource to expand your knowledge. With Cannamente, you "
-"can find the perfect strain according to your needs and tastes. Start your "
-"journey now."
-
-msgid "Ver todas las cepas"
-msgstr "View all strains"
-
-msgid "Las mejores variedades de cannabis"
-msgstr "The best cannabis varieties"
-
-msgid "Descubre variedades de cannabis TOP"
-msgstr "Discover TOP cannabis varieties"
-
-msgid "Ver más"
-msgstr "See more"
+"AI Budtender: personalized cannabis recommendations powered by AI. 500+ "
+"strains with effects, terpenes, and THC/CBD data."
 
 msgid ""
-"Bienvenidos a nuestro catálogo dedicado a las cepas de marihuana. Descubre "
-"descripciones detalladas y amplía tu conocimiento con nuestros artículos "
-"educativos. Sumérgete en el mundo fascinante de la marihuana con nosotros."
+"Recomendaciones personalizadas de variedades de cannabis con nuestro AI "
+"Budtender. Explora por efectos, terpenos y niveles de THC/CBD."
 msgstr ""
-"Welcome to our catalog dedicated to cannabis strains. Discover detailed "
-"descriptions and expand your knowledge with our educational articles. "
-"Immerse yourself in the fascinating world of cannabis with us."
+"Personalized cannabis strain recommendations from our AI Budtender. Browse "
+"by effects, terpenes, and THC/CBD levels."
+
+msgid ""
+"AI-powered cannabis strain recommendation engine. Get personalized "
+"suggestions based on desired effects, flavors, terpenes, and medical needs."
+msgstr ""
+
+msgid "Tu Asesor de Cannabis con IA"
+msgstr "Your AI Cannabis Advisor"
+
+msgid ""
+"Describe lo que buscas y obtén recomendaciones personalizadas de variedades"
+msgstr "Describe what you need and get personalized strain recommendations"
+
+msgid "Pregunta al AI Budtender"
+msgstr "Ask the AI Budtender"
+
+msgid "Necesito algo para relajación y creatividad..."
+msgstr "I need something for relaxation and creativity..."
+
+msgid "Necesito algo para relajarme después del trabajo"
+msgstr "I need something to relax after work"
+
+msgid "Relajación"
+msgstr "Relaxation"
+
+msgid "Busco una variedad que estimule la creatividad"
+msgstr "I'm looking for a strain that boosts creativity"
+
+msgid "Creatividad"
+msgstr "Creativity"
+
+msgid "Necesito aliviar el dolor de forma natural"
+msgstr "I need natural pain relief"
+
+msgid "Alivio del dolor"
+msgstr "Pain relief"
+
+msgid "Quiero algo que me ayude a dormir mejor"
+msgstr "I want something that helps me sleep better"
+
+msgid "Mejor sueño"
+msgstr "Better sleep"
+
+msgid "Busco energía y motivación para el día"
+msgstr "I'm looking for energy and motivation for the day"
+
+msgid "Energía"
+msgstr "Energy"
+
+msgid "Necesito concentración para trabajar o estudiar"
+msgstr "I need focus for work or study"
+
+msgid "Concentración"
+msgstr "Focus"
+
+msgid "Explorar variedades"
+msgstr "Explore strains"
+
+msgid "IA Personalizada"
+msgstr "AI-Powered"
+
+msgid "Basado en Terpenos"
+msgstr "Terpene-Based"
+
+msgid "Explora Variedades de Cannabis"
+msgstr "Explore Cannabis Strains"
+
+msgid "Ver más variedades"
+msgstr "View more strains"
+
+msgid "Aprende sobre Cannabis"
+msgstr "Learn About Cannabis"
+
+msgid "Ver todos los artículos"
+msgstr "View all articles"
+
+msgid ""
+"Cannamente es una base de datos de variedades de cannabis con un AI "
+"Budtender que te da recomendaciones personalizadas. Explora variedades y "
+"perfiles de terpenos."
+msgstr ""
+"Cannamente is a cannabis strain database with an AI Budtender that provides "
+"personalized recommendations. Explore strains and terpene profiles."
+
+msgid "No se encontraron variedades que coincidan con tu búsqueda."
+msgstr ""
+
+msgid "Error de autenticación"
+msgstr "Authentication error"
+
+msgid ""
+"Ocurrió un error al intentar iniciar sesión con tu cuenta externa. Por "
+"favor, inténtalo de nuevo."
+msgstr ""
+"An error occurred while attempting to sign in with your external account. "
+"Please try again."
+
+msgid "Iniciar sesión con Google"
+msgstr "Sign in with Google"
+
+#, python-format
+msgid "Vas a iniciar sesión con tu cuenta de %(provider_name)s."
+msgstr "You are about to sign in using your %(provider_name)s account."
+
+msgid "Continuar"
+msgstr "Continue"
+
+msgid "Inicio de sesión cancelado"
+msgstr "Sign in cancelled"
+
+msgid ""
+"Has cancelado el inicio de sesión con tu cuenta social. Puedes intentarlo de "
+"nuevo o usar tu correo y contraseña."
+msgstr ""
+"You have cancelled the social login. You can try again or use your email and "
+"password."
+
+msgid "Completar registro"
+msgstr "Complete registration"
+
+#, python-format
+msgid ""
+"Vas a usar tu cuenta de %(provider_name)s para acceder. Como paso final, "
+"completa el siguiente formulario:"
+msgstr ""
+"You are about to use your %(provider_name)s account to sign in. As a final "
+"step, please complete the following form:"
+
+msgid "Registrarse"
+msgstr "Sign up"
 
 #, python-format
 msgid "Mapa de tiendas y dispensarios en %(country)s"
@@ -182,47 +547,14 @@ msgstr ""
 "Find the best stores and dispensaries in %(country)s with our interactive "
 "map."
 
-msgid "cepas de marihuana"
-msgstr "cannabis strains"
+msgid "Marihuana"
+msgstr "Weed"
 
-msgid "Categoría"
-msgstr "Category"
-
-msgid "THC"
-msgstr "THC"
-
-msgid "CBD"
-msgstr "CBD"
-
-msgid "CBG"
-msgstr "CBG"
+msgid "Efectos y Terpenos"
+msgstr "Effects & Terpenes"
 
 msgid "Valoración"
 msgstr "Rating"
-
-msgid "Sensaciones"
-msgstr "Feelings"
-
-msgid "Negativos"
-msgstr "Negatives"
-
-msgid "Sabores"
-msgstr "Flavors"
-
-msgid "Ayuda con"
-msgstr "Helps with"
-
-msgid "Terpeno dominante"
-msgstr "Dominant terpene"
-
-msgid "Otros terpenos"
-msgstr "Other terpenes"
-
-msgid "Parámetros similares"
-msgstr "Similar strains"
-
-msgid "Más información"
-msgstr "More information"
 
 msgid ""
 "Valoración media basada en datos de recursos especializados de cannabis en "
@@ -237,8 +569,17 @@ msgstr "Cannabinoids"
 msgid "Efectos y Características"
 msgstr "Effects and Characteristics"
 
+msgid "Sensaciones"
+msgstr "Feelings"
+
+msgid "Ayuda con"
+msgstr "Helps with"
+
 msgid "Efectos Adversos"
 msgstr "Adverse Effects"
+
+msgid "Sabores"
+msgstr "Flavors"
 
 msgid "Árbol Genético"
 msgstr "Genetic Tree"
@@ -246,8 +587,14 @@ msgstr "Genetic Tree"
 msgid "Desconocido"
 msgstr "Unknown"
 
-msgid "Catálogo de Variedades de Marihuana | Tu Guía Completa"
-msgstr "Cannabis Strains Catalog | Your Complete Guide"
+msgid "Parámetros similares"
+msgstr "Similar strains"
+
+msgid "Ver más"
+msgstr "See more"
+
+msgid "Variedades de Marihuana: Índica, Sativa e Híbrida | Cannamente"
+msgstr "Weed Strains: Indica, Sativa & Hybrid | Cannamente"
 
 msgid ""
 "Catálogo de marihuana, variedades de marihuana, cepas de cannabis, guía de "
@@ -270,8 +617,8 @@ msgstr ""
 "Cannabis strain catalog: indica, sativa and hybrid. Effects, terpenes, THC "
 "and CBD data for each strain."
 
-msgid "Nuestro Catálogo de Cepas de Marihuana: Diversidad y Calidad"
-msgstr "Our Cannabis Strains Catalog: Diversity and Quality"
+msgid "Variedades de Marihuana: Índica, Sativa e Híbrida"
+msgstr "Weed Strains: Indica, Sativa & Hybrid"
 
 msgid ""
 "Descubre la variedad y unicidad de cada cepa de marihuana en nuestro "
@@ -283,6 +630,9 @@ msgstr ""
 "Here, you can explore in detail the characteristics, therapeutic benefits, "
 "flavors, and THC levels of each strain. Find the strain that perfectly fits "
 "your needs and preferences."
+
+msgid "No sabes qué elegir? Pregúntale a la IA"
+msgstr "Not sure what to pick? Ask the AI"
 
 msgid "Tipo"
 msgstr "Type"
@@ -314,87 +664,46 @@ msgstr ""
 "descriptions, therapeutic benefits, and THC levels. Find the ideal strain "
 "for you with us."
 
-msgid "The Email must be set"
-msgstr "The Email must be set"
-
-msgid ""
-"AI Budtender y Base de Datos de Variedades de Cannabis | Cannamente"
-msgstr ""
-"AI Budtender and Cannabis Strain Database | Cannamente"
-
-msgid ""
-"AI budtender, variedades de cannabis, marihuana, recomendaciones de "
-"cannabis, buscador de variedades, terpenos, THC, CBD"
-msgstr ""
-"AI budtender, cannabis strains, marijuana, cannabis recommendations, "
-"strain finder, terpenes, THC, CBD"
-
-msgid ""
-"AI Budtender: recomendaciones personalizadas de cannabis con IA. Más de 500 "
-"variedades con efectos, terpenos y datos de THC/CBD."
-msgstr ""
-"AI Budtender: personalized cannabis recommendations powered by AI. 500+ "
-"strains with effects, terpenes, and THC/CBD data."
-
-msgid ""
-"Recomendaciones personalizadas de variedades de cannabis con nuestro AI "
-"Budtender. Explora por efectos, terpenos y niveles de THC/CBD."
-msgstr ""
-"Personalized cannabis strain recommendations from our AI Budtender. Browse "
-"by effects, terpenes, and THC/CBD levels."
-
-msgid "AI Budtender: Encuentra tu Variedad de Cannabis Perfecta"
-msgstr "AI Budtender: Find Your Perfect Cannabis Strain"
-
-msgid ""
-"Cannamente combina una base de datos completa de variedades de cannabis con "
-"un AI Budtender que recomienda variedades segun tus efectos, sabores y "
-"necesidades. Describe lo que buscas y obtiene recomendaciones instantaneas "
-"y personalizadas."
-msgstr ""
-"Cannamente combines a comprehensive cannabis strain database with an AI "
-"Budtender that recommends strains based on your desired effects, flavors, "
-"and needs. Describe what you're looking for and get instant, personalized "
-"recommendations."
-
-msgid "Herramienta AI Budtender para recomendar variedades de cannabis"
-msgstr "AI Budtender tool for cannabis strain recommendations"
-
-msgid "AI Budtender - recomendaciones personalizadas de cannabis"
-msgstr "AI Budtender - personalized cannabis recommendations"
-
-msgid "AI Budtender: Tu Asesor Personal de Cannabis"
-msgstr "AI Budtender: Your Personal Cannabis Advisor"
-
-msgid ""
-"Dile al AI Budtender lo que necesitas: relajacion, creatividad, alivio del "
-"dolor, mejor sueno, y obtiene recomendaciones de variedades basadas en "
-"terpenos y cannabinoides."
-msgstr ""
-"Tell the AI Budtender what you need: relaxation, creativity, pain relief, "
-"better sleep, and get instant strain recommendations backed by terpene and "
-"cannabinoid data."
-
-msgid "Pregunta al AI Budtender"
-msgstr "Ask the AI Budtender"
-
-msgid "Mascota AI Budtender de Cannamente"
-msgstr "Cannamente AI Budtender mascot"
-
-msgid ""
-"Cannamente es una base de datos de variedades de cannabis con un AI "
-"Budtender que te da recomendaciones personalizadas. Explora variedades, "
-"perfiles de terpenos y encuentra dispensarios cerca de ti."
-msgstr ""
-"Cannamente is a cannabis strain database with an AI Budtender that gives "
-"you personalized strain recommendations. Browse strains, explore terpene "
-"profiles, and find dispensaries near you."
+#, python-format
+msgid "Descripción y propiedades del terpeno %(name)s"
+msgstr "Description and properties of terpene %(name)s"
 
 msgid "Terpeno"
 msgstr "Terpene"
 
-msgid "Descripción y propiedades del terpeno %(name)s"
-msgstr "Description and properties of terpene %(name)s"
+msgid "Variedades con este terpeno"
+msgstr "Strains with this terpene"
+
+msgid "Otros terpenos"
+msgstr "Other terpenes"
+
+msgid "Catálogo de Terpenos en Cannamente"
+msgstr "Terpene Catalog at Cannamente"
+
+msgid "Terpenos, Catálogo de Terpenos, Cannamente"
+msgstr "Terpenes, Terpene Catalog, Cannamente"
+
+msgid ""
+"Explora nuestro catálogo de terpenos en Cannamente. Conoce los diferentes "
+"terpenos, sus efectos y características."
+msgstr ""
+"Explore our terpene catalog at Cannamente. Learn about different terpenes, "
+"their effects and characteristics."
+
+msgid "Catálogo de Terpenos"
+msgstr "Terpene Catalog"
+
+msgid ""
+"Descubre los terpenos del cannabis, sus aromas, efectos y propiedades "
+"terapéuticas."
+msgstr ""
+"Discover cannabis terpenes, their aromas, effects and therapeutic properties."
+
+msgid "El catálogo de terpenos estará disponible próximamente."
+msgstr "The terpene catalog will be available soon."
+
+msgid "The Email must be set"
+msgstr "The Email must be set"
 
 msgid "Superuser must have is_staff=True."
 msgstr "Superuser must have is_staff=True."
@@ -405,413 +714,144 @@ msgstr "Superuser must have is_superuser=True."
 msgid "email address"
 msgstr "email address"
 
-#: templates/main_v2.html
-msgid "Tu Asesor de Cannabis con IA"
-msgstr "Your AI Cannabis Advisor"
-
-#: templates/main_v2.html
-msgid "Describe lo que buscas y obtén recomendaciones personalizadas de variedades"
-msgstr "Describe what you need and get personalized strain recommendations"
-
-#: templates/main_v2.html
-msgid "Necesito algo para relajación y creatividad..."
-msgstr "I need something for relaxation and creativity..."
-
-#: templates/main_v2.html
-msgid "Enviar"
-msgstr "Send"
-
-#: templates/main_v2.html
-msgid "Necesito algo para relajarme después del trabajo"
-msgstr "I need something to relax after work"
-
-#: templates/main_v2.html
-msgid "Busco una variedad que estimule la creatividad"
-msgstr "I'm looking for a strain that boosts creativity"
-
-#: templates/main_v2.html
-msgid "Necesito aliviar el dolor de forma natural"
-msgstr "I need natural pain relief"
-
-#: templates/main_v2.html
-msgid "Quiero algo que me ayude a dormir mejor"
-msgstr "I want something that helps me sleep better"
-
-#: templates/main_v2.html
-msgid "Busco energía y motivación para el día"
-msgstr "I'm looking for energy and motivation for the day"
-
-#: templates/main_v2.html
-msgid "Necesito concentración para trabajar o estudiar"
-msgstr "I need focus for work or study"
-
-#: templates/main_v2.html
-msgid "Relajación"
-msgstr "Relaxation"
-
-#: templates/main_v2.html
-msgid "Creatividad"
-msgstr "Creativity"
-
-#: templates/main_v2.html
-msgid "Alivio del dolor"
-msgstr "Pain relief"
-
-#: templates/main_v2.html
-msgid "Mejor sueño"
-msgstr "Better sleep"
-
-#: templates/main_v2.html
-msgid "Energía"
-msgstr "Energy"
-
-#: templates/main_v2.html
-msgid "Concentración"
-msgstr "Focus"
-
-#: templates/main_v2.html
-msgid "Explorar variedades"
-msgstr "Explore strains"
-
-#: templates/main_v2.html
-msgid "IA Personalizada"
-msgstr "AI-Powered"
-
-#: templates/main_v2.html
-msgid "Basado en Terpenos"
-msgstr "Terpene-Based"
-
-#: templates/main_v2.html
-msgid "Explora Variedades de Cannabis"
-msgstr "Explore Cannabis Strains"
-
-#: templates/main_v2.html
-msgid "Ver más variedades"
-msgstr "View more strains"
-
-#: templates/main_v2.html
-msgid "Aprende sobre Cannabis"
-msgstr "Learn About Cannabis"
-
-#: templates/main_v2.html
-msgid "Ver todos los artículos"
-msgstr "View all articles"
-
-#: templates/base_v2.html
-msgid "Buscar..."
-msgstr "Search..."
-
-#: templates/base_v2.html
-msgid "Explorar"
-msgstr "Explore"
-
-#: templates/base_v2.html
-msgid "Contacto"
-msgstr "Contact"
-
-#: templates/base_v2.html
-msgid "Hola! Soy tu AI Budtender"
-msgstr "Hi! I'm your AI Budtender"
-
-#: templates/base_v2.html
-msgid "Cuéntame qué efectos buscas y te recomendaré las mejores variedades de cannabis."
-msgstr "Tell me what effects you're looking for and I'll recommend the best cannabis strains."
-
-#: templates/base_v2.html
-msgid "Escribe tu mensaje..."
-msgstr "Type your message..."
-
-#: templates/base_v2.html
-msgid "Has alcanzado el límite de mensajes. Por favor, inténtalo más tarde."
-msgstr "You have reached the message limit. Please try again later."
-
-#: templates/base_v2.html
-msgid "Error de conexión. Inténtalo de nuevo."
-msgstr "Connection error. Please try again."
-
-#: templates/main_v2.html templates/base_v2.html
-msgid ""
-"Cannamente es una base de datos de variedades de cannabis con un AI "
-"Budtender que te da recomendaciones personalizadas. Explora variedades y "
-"perfiles de terpenos."
+msgid "Cookie consent preferences"
 msgstr ""
-"Cannamente is a cannabis strain database with an AI Budtender that provides "
-"personalized recommendations. Explore strains and terpene profiles."
-
-#: templates/base_v2.html
-msgid "El servicio no está disponible en este momento. Inténtalo más tarde."
-msgstr "The service is currently unavailable. Please try again later."
-
-#: templates/base_v2.html
-msgid "Error del servidor. Por favor, inténtalo de nuevo."
-msgstr "Server error. Please try again."
-
-#: templates/base_v2.html
-msgid "No se puede conectar con el servidor. Verifica tu conexión a internet."
-msgstr "Cannot connect to the server. Check your internet connection."
-
-#: templates/strains_v2.html
-msgid "No sabes qué elegir? Pregúntale a la IA"
-msgstr "Not sure what to pick? Ask the AI"
-
-#: templates/terpene_list_v2.html
-msgid "Catálogo de Terpenos en Cannamente"
-msgstr "Terpene Catalog at Cannamente"
-
-#: templates/terpene_list_v2.html
-msgid "Terpenos, Catálogo de Terpenos, Cannamente"
-msgstr "Terpenes, Terpene Catalog, Cannamente"
-
-#: templates/terpene_list_v2.html
-msgid "Explora nuestro catálogo de terpenos en Cannamente. Conoce los diferentes terpenos, sus efectos y características."
-msgstr "Explore our terpene catalog at Cannamente. Learn about different terpenes, their effects and characteristics."
-
-#: templates/terpene_list_v2.html
-msgid "Catálogo de Terpenos"
-msgstr "Terpene Catalog"
-
-#: templates/terpene_list_v2.html
-msgid "Descubre los terpenos del cannabis, sus aromas, efectos y propiedades terapéuticas."
-msgstr "Discover cannabis terpenes, their aromas, effects and therapeutic properties."
-
-#: templates/terpene_list_v2.html
-msgid "El catálogo de terpenos estará disponible próximamente."
-msgstr "The terpene catalog will be available soon."
-
-#: templates/terpene_detail_v2.html
-msgid "Contenido"
-msgstr "Contents"
-
-#: templates/base_v2.html
-msgid "Resultado de la búsqueda"
-msgstr "Search results"
-
-#: templates/base_v2.html
-msgid "Continuar chat"
-msgstr "Resume chat"
-
-#: templates/account/login.html templates/account/password_reset_from_key_done.html
-#: templates/account/email_confirm.html templates/base_v2.html
-msgid "Iniciar sesión"
-msgstr "Sign in"
-
-#: templates/account/login.html
-msgid "¿No tienes cuenta?"
-msgstr "Don't have an account?"
-
-#: templates/account/login.html
-msgid "Regístrate"
-msgstr "Sign up"
-
-#: templates/account/login.html templates/account/signup.html
-msgid "Continuar con Google"
-msgstr "Continue with Google"
-
-#: templates/account/login.html templates/account/signup.html
-msgid "o"
-msgstr "or"
-
-#: templates/account/login.html templates/account/signup.html
-#: templates/account/password_reset.html
-msgid "Correo electrónico"
-msgstr "Email"
-
-#: templates/account/login.html templates/account/signup.html
-msgid "Contraseña"
-msgstr "Password"
-
-#: templates/account/login.html
-msgid "¿Olvidaste tu contraseña?"
-msgstr "Forgot your password?"
-
-#: templates/account/signup.html templates/base_v2.html
-msgid "Crear cuenta"
-msgstr "Create account"
-
-#: templates/account/signup.html
-msgid "¿Ya tienes cuenta?"
-msgstr "Already have an account?"
-
-#: templates/account/signup.html
-msgid "Inicia sesión"
-msgstr "Sign in"
-
-#: templates/account/signup.html
-msgid "Confirmar contraseña"
-msgstr "Confirm password"
 
-#: templates/account/logout.html templates/base_v2.html
-msgid "Cerrar sesión"
-msgstr "Sign out"
-
-#: templates/account/logout.html
-msgid "¿Estás seguro de que quieres cerrar sesión?"
-msgstr "Are you sure you want to sign out?"
-
-#: templates/account/logout.html
-msgid "Volver al inicio"
-msgstr "Back to home"
-
-#: templates/account/password_reset.html
-msgid "Restablecer contraseña"
-msgstr "Reset password"
-
-#: templates/account/password_reset.html
-msgid "Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña."
-msgstr "Enter your email and we'll send you a link to reset your password."
-
-#: templates/account/password_reset.html
-msgid "Enviar enlace"
-msgstr "Send link"
-
-#: templates/account/password_reset.html templates/account/password_reset_done.html
-#: templates/socialaccount/login_cancelled.html
-msgid "Volver a iniciar sesión"
-msgstr "Back to sign in"
-
-#: templates/account/password_reset_done.html
-msgid "Correo enviado"
-msgstr "Email sent"
-
-#: templates/account/password_reset_done.html
-msgid "Revisa tu correo"
-msgstr "Check your email"
-
-#: templates/account/password_reset_done.html
-msgid "Te hemos enviado un correo electrónico con instrucciones para restablecer tu contraseña. Si no lo ves, revisa tu carpeta de spam."
-msgstr "We've sent you an email with instructions to reset your password. If you don't see it, check your spam folder."
-
-#: templates/account/password_reset_from_key.html
-msgid "Nueva contraseña"
-msgstr "New password"
-
-#: templates/account/password_reset_from_key.html
-msgid "Ingresa tu nueva contraseña a continuación."
-msgstr "Enter your new password below."
-
-#: templates/account/password_reset_from_key.html
-msgid "Este enlace para restablecer la contraseña ha expirado o no es válido. Por favor solicita uno nuevo."
-msgstr "This password reset link has expired or is invalid. Please request a new one."
-
-#: templates/account/password_reset_from_key.html
-msgid "Solicitar nuevo enlace"
-msgstr "Request new link"
-
-#: templates/account/password_reset_from_key.html
-msgid "Confirmar nueva contraseña"
-msgstr "Confirm new password"
-
-#: templates/account/password_reset_from_key.html
-msgid "Cambiar contraseña"
-msgstr "Change password"
-
-#: templates/account/password_reset_from_key_done.html
-msgid "Contraseña actualizada"
-msgstr "Password updated"
-
-#: templates/account/password_reset_from_key_done.html
-msgid "Tu contraseña ha sido actualizada exitosamente. Ya puedes iniciar sesión con tu nueva contraseña."
-msgstr "Your password has been updated successfully. You can now sign in with your new password."
-
-#: templates/account/email_confirm.html
-msgid "Confirmar correo electrónico"
-msgstr "Confirm email address"
-
-#: templates/account/email_confirm.html
-msgid "Confirmar"
-msgstr "Confirm"
-
-#: templates/account/email_confirm.html
-msgid "Este enlace de confirmación ha expirado o no es válido."
-msgstr "This confirmation link has expired or is invalid."
-
-#: templates/account/email_confirm.html
-msgid "Por favor confirma que <strong>%(email)s</strong> es tu dirección de correo electrónico."
-msgstr "Please confirm that <strong>%(email)s</strong> is your email address."
-
-#: templates/account/verification_sent.html
-msgid "Verificación enviada"
-msgstr "Verification sent"
-
-#: templates/account/verification_sent.html
-msgid "Verifica tu correo"
-msgstr "Verify your email"
-
-#: templates/account/verification_sent.html
-msgid "Te hemos enviado un correo de verificación. Por favor revisa tu bandeja de entrada y haz clic en el enlace para activar tu cuenta."
-msgstr "We've sent you a verification email. Please check your inbox and click the link to activate your account."
-
-#: templates/account/verification_sent.html
-msgid "Si no ves el correo, revisa tu carpeta de spam."
-msgstr "If you don't see the email, check your spam folder."
-
-#: templates/account/login.html templates/account/signup.html
-msgid "Cerrar"
-msgstr "Close"
-
-#: templates/socialaccount/login.html
-msgid "Iniciar sesión con Google"
-msgstr "Sign in with Google"
-
-#: templates/socialaccount/login.html
-msgid "Vas a iniciar sesión con tu cuenta de %(provider_name)s."
-msgstr "You are about to sign in using your %(provider_name)s account."
-
-#: templates/socialaccount/login.html
-msgid "Continuar"
-msgstr "Continue"
-
-#: templates/socialaccount/signup.html
-msgid "Completar registro"
-msgstr "Complete registration"
-
-#: templates/socialaccount/signup.html
-msgid "Vas a usar tu cuenta de %(provider_name)s para acceder. Como paso final, completa el siguiente formulario:"
-msgstr "You are about to use your %(provider_name)s account to sign in. As a final step, please complete the following form:"
-
-#: templates/socialaccount/signup.html
-msgid "Registrarse"
-msgstr "Sign up"
-
-#: templates/socialaccount/authentication_error.html
-msgid "Error de autenticación"
-msgstr "Authentication error"
-
-#: templates/socialaccount/authentication_error.html
-msgid "Ocurrió un error al intentar iniciar sesión con tu cuenta externa. Por favor, inténtalo de nuevo."
-msgstr "An error occurred while attempting to sign in with your external account. Please try again."
-
-#: templates/socialaccount/login_cancelled.html
-msgid "Inicio de sesión cancelado"
-msgstr "Sign in cancelled"
-
-#: templates/socialaccount/login_cancelled.html
-msgid "Has cancelado el inicio de sesión con tu cuenta social. Puedes intentarlo de nuevo o usar tu correo y contraseña."
-msgstr "You have cancelled the social login. You can try again or use your email and password."
-
-#: templates/base_v2.html
-msgid "Consentimiento de cookies"
-msgstr "Cookie consent"
-
-#: templates/base_v2.html
-msgid "Usamos cookies para analizar el tráfico del sitio. Puedes aceptar todas o solo las necesarias."
-msgstr "We use cookies to analyze site traffic. You can accept all or only necessary ones."
-
-#: templates/base_v2.html
-msgid "Aceptar todas"
-msgstr "Accept All"
-
-#: templates/base_v2.html
-msgid "Solo necesarias"
-msgstr "Necessary Only"
-
-#: templates/article_detail_v2.html
-msgid "Artículos relacionados"
-msgstr "Related articles"
-
-#: templates/terpene_detail_v2.html
-msgid "Variedades con este terpeno"
-msgstr "Strains with this terpene"
+#~ msgid "Catálogo de Variedades de Marihuana | Tu Guía Completa"
+#~ msgstr "Cannabis Strains Catalog | Your Complete Guide"
+
+#~ msgid "Nuestro Catálogo de Cepas de Marihuana: Diversidad y Calidad"
+#~ msgstr "Our Cannabis Strains Catalog: Diversity and Quality"
+
+#~ msgid "No articles found"
+#~ msgstr "No articles found"
+
+#~ msgid "Tiendas/Dispensarios"
+#~ msgstr "Stores/Dispensaries"
+
+#~ msgid ""
+#~ "Cepas de Marihuana: Catálogo Exhaustivo y Recursos Informativos en "
+#~ "Cannamente"
+#~ msgstr ""
+#~ "Cannabis Strains: Comprehensive Catalog and Information Resources at "
+#~ "Cannamente"
+
+#~ msgid ""
+#~ "Descubre el mundo de la marihuana con Cannamente: un catálogo exhaustivo "
+#~ "de cepas y artículos educativos para expandir tus conocimientos. Únete a "
+#~ "nosotros en esta exploración."
+#~ msgstr ""
+#~ "Discover the world of cannabis with Cannamente: a comprehensive catalog "
+#~ "of strains and educational articles to expand your knowledge. Join us in "
+#~ "this exploration."
+
+#~ msgid ""
+#~ "Descubre el mundo de la marihuana con Cannamente: un catálogo exhaustivo "
+#~ "de cepas y artículos educativos para expandir tus conocimientos."
+#~ msgstr ""
+#~ "Discover the world of cannabis with Cannamente: a comprehensive catalog "
+#~ "of strains and educational articles to expand your knowledge."
+
+#~ msgid "Cannamente: Tu Guía Completa de Cepas de Marihuana"
+#~ msgstr "Cannamente: Your Complete Cannabis Strains Guide"
+
+#~ msgid ""
+#~ "Explora nuestra extensa colección de cepas de marihuana y sumérgete en "
+#~ "nuestro recurso informativo para expandir tus conocimientos. Con "
+#~ "Cannamente, podrás encontrar la cepa perfecta según tus necesidades y "
+#~ "gustos. Comienza tu viaje ahora."
+#~ msgstr ""
+#~ "Explore our extensive collection of cannabis strains and immerse yourself "
+#~ "in our informational resource to expand your knowledge. With Cannamente, "
+#~ "you can find the perfect strain according to your needs and tastes. Start "
+#~ "your journey now."
+
+#~ msgid "Ver todas las cepas"
+#~ msgstr "View all strains"
+
+#~ msgid "Las mejores variedades de cannabis"
+#~ msgstr "The best cannabis varieties"
+
+#~ msgid "Descubre variedades de cannabis TOP"
+#~ msgstr "Discover TOP cannabis varieties"
+
+#~ msgid ""
+#~ "Bienvenidos a nuestro catálogo dedicado a las cepas de marihuana. "
+#~ "Descubre descripciones detalladas y amplía tu conocimiento con nuestros "
+#~ "artículos educativos. Sumérgete en el mundo fascinante de la marihuana "
+#~ "con nosotros."
+#~ msgstr ""
+#~ "Welcome to our catalog dedicated to cannabis strains. Discover detailed "
+#~ "descriptions and expand your knowledge with our educational articles. "
+#~ "Immerse yourself in the fascinating world of cannabis with us."
+
+#~ msgid "cepas de marihuana"
+#~ msgstr "cannabis strains"
+
+#~ msgid "Categoría"
+#~ msgstr "Category"
+
+#~ msgid "THC"
+#~ msgstr "THC"
+
+#~ msgid "CBD"
+#~ msgstr "CBD"
+
+#~ msgid "CBG"
+#~ msgstr "CBG"
+
+#~ msgid "Negativos"
+#~ msgstr "Negatives"
+
+#~ msgid "Terpeno dominante"
+#~ msgstr "Dominant terpene"
+
+#~ msgid "Más información"
+#~ msgstr "More information"
+
+#~ msgid "AI Budtender: Encuentra tu Variedad de Cannabis Perfecta"
+#~ msgstr "AI Budtender: Find Your Perfect Cannabis Strain"
+
+#~ msgid ""
+#~ "Cannamente combina una base de datos completa de variedades de cannabis "
+#~ "con un AI Budtender que recomienda variedades segun tus efectos, sabores "
+#~ "y necesidades. Describe lo que buscas y obtiene recomendaciones "
+#~ "instantaneas y personalizadas."
+#~ msgstr ""
+#~ "Cannamente combines a comprehensive cannabis strain database with an AI "
+#~ "Budtender that recommends strains based on your desired effects, flavors, "
+#~ "and needs. Describe what you're looking for and get instant, personalized "
+#~ "recommendations."
+
+#~ msgid "Herramienta AI Budtender para recomendar variedades de cannabis"
+#~ msgstr "AI Budtender tool for cannabis strain recommendations"
+
+#~ msgid "AI Budtender - recomendaciones personalizadas de cannabis"
+#~ msgstr "AI Budtender - personalized cannabis recommendations"
+
+#~ msgid "AI Budtender: Tu Asesor Personal de Cannabis"
+#~ msgstr "AI Budtender: Your Personal Cannabis Advisor"
+
+#~ msgid ""
+#~ "Dile al AI Budtender lo que necesitas: relajacion, creatividad, alivio "
+#~ "del dolor, mejor sueno, y obtiene recomendaciones de variedades basadas "
+#~ "en terpenos y cannabinoides."
+#~ msgstr ""
+#~ "Tell the AI Budtender what you need: relaxation, creativity, pain relief, "
+#~ "better sleep, and get instant strain recommendations backed by terpene "
+#~ "and cannabinoid data."
+
+#~ msgid "Mascota AI Budtender de Cannamente"
+#~ msgstr "Cannamente AI Budtender mascot"
+
+#~ msgid ""
+#~ "Cannamente es una base de datos de variedades de cannabis con un AI "
+#~ "Budtender que te da recomendaciones personalizadas. Explora variedades, "
+#~ "perfiles de terpenos y encuentra dispensarios cerca de ti."
+#~ msgstr ""
+#~ "Cannamente is a cannabis strain database with an AI Budtender that gives "
+#~ "you personalized strain recommendations. Browse strains, explore terpene "
+#~ "profiles, and find dispensaries near you."
 
 #~ msgid "Efectos"
 #~ msgstr "Effects"
