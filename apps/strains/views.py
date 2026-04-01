@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.urls import reverse
+from django.utils.translation import gettext as _
 
 from apps.strains.forms import StrainFilterForm
 from apps.strains.models import Article, ArticleCategory, ArticleImage, Strain, Terpene
@@ -77,6 +78,38 @@ def _get_terpene_article_slugs(terpenes):
     return slugs
 
 
+def _build_strain_meta_description(strain):
+    """Build a keyword-rich meta description from strain structured data.
+    Falls back to strain.description if no structured data is available."""
+    parts = []
+
+    # Name + category
+    category = strain.get_category_display()
+    parts.append(f"{strain.name}: {_('variedad de marihuana')} {category}.")
+
+    # THC
+    if strain.thc:
+        thc_val = int(strain.thc) if strain.thc == int(strain.thc) else float(strain.thc)
+        parts.append(f"THC {thc_val}%.")
+
+    # Effects (feelings)
+    feelings = list(strain.feelings.all()[:3])
+    if feelings:
+        names = ", ".join(f.name.lower() for f in feelings)
+        parts.append(f"{_('Efectos')}: {names}.")
+
+    # Terpenes (strip parenthetical descriptors like "Mirceno (herbal)" -> "Mirceno")
+    terpenes = list(filter(None, [strain.dominant_terpene])) + list(strain.other_terpenes.all()[:2])
+    if terpenes:
+        names = ", ".join(re.sub(r'\s*\(.*?\)', '', t.name) for t in terpenes)
+        parts.append(f"{_('Terpenos')}: {names}.")
+
+    if len(parts) <= 1:
+        return strain.description
+
+    return " ".join(parts)
+
+
 def strain_detail(request, slug):
     strain = get_object_or_404(
         Strain.objects.prefetch_related('feelings', 'negatives', 'flavors', 'helps_with',
@@ -105,6 +138,7 @@ def strain_detail(request, slug):
         'max_thc': cann_max['max_thc'] or 1,
         'max_cbd': cann_max['max_cbd'] or 1,
         'max_cbg': cann_max['max_cbg'] or 1,
+        'meta_description': _build_strain_meta_description(strain),
     }
 
     return render(request, 'strain_modern_v2.html', context)

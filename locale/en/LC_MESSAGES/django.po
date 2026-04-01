@@ -553,6 +553,12 @@ msgstr "Weed"
 msgid "Efectos y Terpenos"
 msgstr "Effects & Terpenes"
 
+msgid "variedad de marihuana"
+msgstr "weed strain"
+
+msgid "Efectos"
+msgstr "Effects"
+
 msgid "Valoración"
 msgstr "Rating"
 
@@ -853,8 +859,6 @@ msgstr ""
 #~ "you personalized strain recommendations. Browse strains, explore terpene "
 #~ "profiles, and find dispensaries near you."
 
-#~ msgid "Efectos"
-#~ msgstr "Effects"
 
 #~ msgid "FILTROS"
 #~ msgstr "FILTERS"
