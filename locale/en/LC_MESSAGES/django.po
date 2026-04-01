@@ -361,8 +361,8 @@ msgstr "Connection error. Please try again."
 msgid "No se puede conectar con el servidor. Verifica tu conexión a internet."
 msgstr "Cannot connect to the server. Check your internet connection."
 
-msgid "AI Budtender y Base de Datos de Variedades de Cannabis | Cannamente"
-msgstr "AI Budtender and Cannabis Strain Database | Cannamente"
+msgid "Cannamente | Variedades de Marihuana, Efectos y Terpenos"
+msgstr "Cannamente | Cannabis Strains, Effects & Terpenes"
 
 msgid ""
 "AI budtender, variedades de cannabis, marihuana, recomendaciones de "
