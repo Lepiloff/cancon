@@ -273,6 +273,102 @@
         {% endif %}
 
         <!-- Similar Strains -->
+        <div class="sd-section sd-comments-section">
+            <div class="sd-comments-section__head">
+                <div>
+                    <h2 class="sd-section__title">{% trans "Comentarios de la Comunidad" %}</h2>
+                    <p class="sd-comments-section__subtitle">
+                        <span data-comments-count>{{ approved_comments_count }}</span>
+                        {% trans "comentarios aprobados de usuarios registrados" %}
+                    </p>
+                </div>
+            </div>
+
+            {% if user.is_authenticated %}
+            <div class="sd-comment-form-card">
+                <div class="sd-comment-form-card__head">
+                    <h3>{% trans "Comparte tu experiencia" %}</h3>
+                    {% if user_comment %}
+                    <span class="sd-comment-form-card__hint">{% trans "Puedes actualizar tu comentario en cualquier momento." %}</span>
+                    {% endif %}
+                </div>
+
+                {% if user_comment and user_comment.status == 'pending' %}
+                <div class="sd-comment-status sd-comment-status--pending">
+                    {% trans "Tu comentario está pendiente de revisión antes de aparecer públicamente." %}
+                </div>
+                {% elif user_comment and user_comment.status == 'rejected' %}
+                <div class="sd-comment-status sd-comment-status--rejected">
+                    {% trans "Tu comentario no pudo publicarse. Ajusta el texto e inténtalo de nuevo." %}
+                </div>
+                {% elif user_comment and user_comment.status == 'approved' %}
+                <div class="sd-comment-status sd-comment-status--approved">
+                    {% trans "Tu comentario está publicado." %}
+                </div>
+                {% endif %}
+
+                <form class="sd-comment-form" id="strain-comment-form" novalidate>
+                    <div class="sd-comment-form__grid">
+                        <div class="sd-comment-form__field">
+                            <label for="comment-pros">{% trans "Pros" %}</label>
+                            <textarea id="comment-pros" name="pros" rows="4" maxlength="600" placeholder="{% trans '¿Qué te gustó de esta variedad?' %}">{{ comment_form.pros.value|default_if_none:'' }}</textarea>
+                        </div>
+                        <div class="sd-comment-form__field">
+                            <label for="comment-cons">{% trans "Contras" %}</label>
+                            <textarea id="comment-cons" name="cons" rows="4" maxlength="600" placeholder="{% trans '¿Qué no te convenció o qué efectos negativos notaste?' %}">{{ comment_form.cons.value|default_if_none:'' }}</textarea>
+                        </div>
+                    </div>
+
+                    <fieldset class="sd-comment-form__reactions">
+                        <legend>{% trans "Valoración rápida" %}</legend>
+                        <label class="sd-comment-reaction">
+                            <input type="radio" name="reaction" value="thumbs_up" {% if comment_form.reaction.value == 'thumbs_up' %}checked{% endif %}>
+                            <span>{% trans "Pulgar arriba" %}</span>
+                        </label>
+                        <label class="sd-comment-reaction">
+                            <input type="radio" name="reaction" value="thumbs_down" {% if comment_form.reaction.value == 'thumbs_down' %}checked{% endif %}>
+                            <span>{% trans "Pulgar abajo" %}</span>
+                        </label>
+                    </fieldset>
+
+                    <div class="sd-comment-form__footer">
+                        <p class="sd-comment-form__error" id="strain-comment-form-error" hidden></p>
+                        <p class="sd-comment-form__notice" id="strain-comment-form-notice" hidden></p>
+                        <button type="submit" class="btn-v2 btn-v2--outline" id="strain-comment-submit">
+                            {% if user_comment %}{% trans "Actualizar comentario" %}{% else %}{% trans "Enviar comentario" %}{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% else %}
+            <div class="sd-comment-guest-card">
+                <h3>{% trans "¿Quieres dejar tu comentario?" %}</h3>
+                <p>{% trans "Regístrate para publicar pros, contras y tu valoración rápida de esta variedad." %}</p>
+                <a href="{% url 'account_signup' %}" class="btn-v2 btn-v2--outline">{% trans "Crear cuenta" %}</a>
+            </div>
+            {% endif %}
+
+            <div class="sd-comments-list" id="strain-comments-list">
+                {% include "partials/strain_comments_items.html" with comments=approved_comments %}
+            </div>
+
+            <div class="sd-comments-empty{% if approved_comments %} sd-comments-empty--hidden{% endif %}" id="strain-comments-empty">
+                {% trans "Todavía no hay comentarios aprobados para esta variedad." %}
+            </div>
+
+            {% if comments_has_more %}
+            <div class="sd-comments-more">
+                <button
+                    type="button"
+                    class="btn-v2 btn-v2--outline"
+                    id="strain-comments-more"
+                    data-next-page="{{ comments_next_page }}">
+                    {% trans "Ver más comentarios" %}
+                </button>
+            </div>
+            {% endif %}
+        </div>
+
         <div class="sd-section">
             <h2 class="section-title-v2">{% trans "Parámetros similares" %}</h2>
             <div class="strain-grid-v2">
@@ -330,11 +426,29 @@
     </div>
 </div>
 
-{% if strain.parents.all %}
-<script src="{% static 'js/genetics-tree.js' %}"></script>
-{% endif %}
 {% endblock content %}
 
 {% block footer_description %}
 {{ strain.name }} - {{ strain.description|truncatewords:20 }}
 {% endblock %}
+
+{% block page_scripts %}
+{% if strain.parents.all %}
+<script src="{% static 'js/genetics-tree.js' %}"></script>
+{% endif %}
+<script>
+    window.StrainCommentsConfig = {
+        strainId: {{ strain.id }},
+        submitUrl: '{% url "strains_api:comment_submit" %}',
+        listUrl: '{% url "strains_api:comment_list" %}',
+        isAuthenticated: {{ user.is_authenticated|yesno:"true,false" }},
+        initialCount: {{ approved_comments_count }},
+        approvedMessage: '{% trans "Tu comentario ya está publicado." %}',
+        pendingMessage: '{% trans "Tu comentario se guardó y está pendiente de revisión." %}',
+        rejectedMessage: '{% trans "Tu comentario no pudo publicarse. Ajusta el texto e inténtalo de nuevo." %}',
+        genericError: '{% trans "No se pudo guardar tu comentario. Inténtalo de nuevo." %}',
+        emptyError: '{% trans "Añade pros o contras antes de enviar." %}'
+    };
+</script>
+<script src="{% static 'js/strain-comments.js' %}"></script>
+{% endblock page_scripts %}

@@ -18,6 +18,17 @@ CATEGORY_CHOICES = [
     ('Indica', 'Indica'),
 ]
 
+COMMENT_REACTION_CHOICES = [
+    ('thumbs_up', 'Thumbs Up'),
+    ('thumbs_down', 'Thumbs Down'),
+]
+
+COMMENT_STATUS_CHOICES = [
+    ('approved', 'Approved'),
+    ('pending', 'Pending'),
+    ('rejected', 'Rejected'),
+]
+
 
 class BaseText(models.Model):
     title = models.CharField(max_length=255)
@@ -280,6 +291,40 @@ class FavoriteStrain(models.Model):
 
     def __str__(self):
         return f"{self.user_id}:{self.strain_id}"
+
+
+class StrainComment(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='strain_comments',
+    )
+    strain = models.ForeignKey(
+        Strain,
+        on_delete=models.CASCADE,
+        related_name='comments',
+    )
+    pros = models.TextField(blank=True)
+    cons = models.TextField(blank=True)
+    reaction = models.CharField(max_length=20, choices=COMMENT_REACTION_CHOICES)
+    status = models.CharField(
+        max_length=20,
+        choices=COMMENT_STATUS_CHOICES,
+        default='pending',
+        db_index=True,
+    )
+    moderation_reason = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'strain'], name='unique_strain_comment'),
+        ]
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user_id}:{self.strain_id}:{self.status}"
 
 
 class Article(BaseText, TranslationMixin):

@@ -12,6 +12,7 @@ from apps.strains.models import (
     ArticleImage,
     FavoriteStrain,
     Strain,
+    StrainComment,
     Feeling,
     Negative,
     HelpsWith,
@@ -378,6 +379,14 @@ class TaxonomyAdmin(TranslationAdmin):
             return f'🇪🇸 {es}'
         return '-'
     name_display.short_description = 'Name'
+
+
+@admin.register(StrainComment)
+class StrainCommentAdmin(admin.ModelAdmin):
+    list_display = ('strain', 'user', 'status', 'reaction', 'created_at')
+    list_filter = ('status', 'reaction', 'created_at')
+    search_fields = ('strain__name', 'user__email', 'pros', 'cons')
+    raw_id_fields = ('strain', 'user')
 
 
 admin.site.register(Strain, StrainAdmin)

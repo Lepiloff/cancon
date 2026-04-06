@@ -1,11 +1,13 @@
 import random
 
+from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 import factory
 
 from apps.strains.models import (
     Strain, Article, ArticleImage, ArticleCategory,
-    Feeling, Negative, HelpsWith, Flavor, Terpene, AlternativeStrainName
+    Feeling, Negative, HelpsWith, Flavor, Terpene, AlternativeStrainName,
+    StrainComment,
 )
 
 
@@ -181,3 +183,20 @@ class ArticleImageFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = ArticleImage
+
+
+class StrainCommentFactory(factory.django.DjangoModelFactory):
+    user = factory.LazyFunction(
+        lambda: get_user_model().objects.create_user(
+            email=f'commenter_{factory.random.randgen.randint(1, 10_000_000)}@example.com',
+            password='testpass123',
+        )
+    )
+    strain = factory.SubFactory(StrainFactory)
+    pros = factory.Faker('sentence')
+    cons = factory.Faker('sentence')
+    reaction = factory.Iterator(['thumbs_up', 'thumbs_down'])
+    status = 'approved'
+
+    class Meta:
+        model = StrainComment
