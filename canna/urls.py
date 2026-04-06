@@ -24,7 +24,11 @@ from django.views.i18n import JavaScriptCatalog
 from django.urls import path, include
 
 from canna.sitemaps import StrainSitemap, ArticleSitemap, TerpeneSitemap, StaticPageSitemap
-from canna.views import robots_txt, cookie_consent_view
+from canna.views import (
+    cookie_consent_view,
+    registration_banner_dismiss_view,
+    robots_txt,
+)
 
 
 sitemaps = {
@@ -46,6 +50,11 @@ urlpatterns = [
     path('api/strains/', include('apps.strains.api_urls')),
     path('robots.txt', robots_txt, name='robots_txt'),  # SEO: robots.txt
     path('cookie-consent/', cookie_consent_view, name='cookie_consent'),
+    path(
+        'registration-banner-dismiss/',
+        registration_banner_dismiss_view,
+        name='registration_banner_dismiss',
+    ),
     path('sitemap.xml', sitemap, {
         'sitemaps': sitemaps,
         'template_name': 'sitemap.xml',  # Custom template with hreflang support

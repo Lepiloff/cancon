@@ -40,6 +40,8 @@ def robots_txt(request):
 
 
 COOKIE_CONSENT_MAX_AGE = 15552000  # 6 months
+REGISTRATION_BANNER_DISMISS_MAX_AGE = 604800  # 7 days
+REGISTRATION_BANNER_DISMISS_COOKIE = 'reg_banner_dismissed'
 
 
 @csrf_exempt
@@ -75,5 +77,23 @@ def cookie_consent_view(request):
         samesite="Lax",
         path="/",
         httponly=False,  # JS needs to read this to conditionally load GA4
+    )
+    return response
+
+
+@csrf_exempt
+@require_POST
+def registration_banner_dismiss_view(request):
+    """
+    Dismiss the anonymous registration promotion banner for a short cooldown.
+    """
+    response = JsonResponse({"status": "ok"})
+    response.set_cookie(
+        REGISTRATION_BANNER_DISMISS_COOKIE,
+        "1",
+        max_age=REGISTRATION_BANNER_DISMISS_MAX_AGE,
+        samesite="Lax",
+        path="/",
+        httponly=True,
     )
     return response

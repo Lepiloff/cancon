@@ -61,6 +61,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles_v2.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'css/auth.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'css/cookie-consent.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/registration-banner.css' %}" />
 
     {% block extra_css %}{% endblock %}
 </head>
@@ -236,6 +237,29 @@
 </div>
 {% endif %}
 
+{% if show_registration_banner and not show_cookie_banner %}
+<div class="registration-banner" id="registration-banner" role="region" aria-label="{% trans 'Crear cuenta' %}">
+    <div class="registration-banner__card">
+        <div class="registration-banner__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M19 8v6"/>
+                <path d="M16 11h6"/>
+            </svg>
+        </div>
+        <div class="registration-banner__body">
+            <p class="registration-banner__eyebrow">{% trans "Solo para usuarios registrados" %}</p>
+            <p class="registration-banner__text">{% trans "Crea una cuenta para guardar favoritos, desbloquear el diario privado y subir el límite del chat a 10 mensajes por hora." %}</p>
+        </div>
+        <div class="registration-banner__actions">
+            <a class="registration-banner__btn registration-banner__btn--primary" href="{% url 'account_signup' %}">{% trans "Crear cuenta" %}</a>
+            <button class="registration-banner__btn registration-banner__btn--secondary" id="registration-banner-dismiss" type="button">{% trans "Ahora no" %}</button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <!-- Chat Resume FAB (floating action button) -->
 {% if ENABLE_AI_CHAT %}
 <button class="chat-resume-fab" id="chat-resume-fab" aria-label="{% trans 'Continuar chat' %}">
@@ -317,6 +341,22 @@
         };
     </script>
     <script src="{% static 'js/favorites.js' %}"></script>
+
+    <script>
+        window.RegistrationBannerConfig = {
+            showBanner: {{ show_registration_banner|yesno:"true,false" }},
+            cookieBannerVisible: {{ show_cookie_banner|yesno:"true,false" }},
+            signupUrl: '{% url "account_signup" %}',
+            dismissUrl: '{% url "registration_banner_dismiss" %}',
+            dismissCookieName: 'reg_banner_dismissed',
+            dismissCookieAgeSeconds: 604800,
+            defaultText: '{% trans "Crea una cuenta para guardar favoritos, desbloquear el diario privado y subir el límite del chat a 10 mensajes por hora." %}',
+            ctaLabel: '{% trans "Crear cuenta" %}',
+            dismissLabel: '{% trans "Ahora no" %}',
+            errorText: '{% trans "No se pudo actualizar la promoción. Inténtalo de nuevo." %}'
+        };
+    </script>
+    <script src="{% static 'js/registration-banner.js' %}"></script>
 
     {% if ENABLE_AI_CHAT %}
     <script>

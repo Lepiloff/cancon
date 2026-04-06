@@ -94,6 +94,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'canna.middleware.CookieConsentMiddleware',  # Restore consent cookie after login
+    'canna.middleware.RegistrationBannerMiddleware',
 ]
 
 ROOT_URLCONF = 'canna.urls'
@@ -111,6 +112,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'canna.context_processors.chat_settings',
                 'canna.context_processors.cookie_consent',
+                'canna.context_processors.registration_banner',
             ],
         },
     },
@@ -308,6 +310,9 @@ CHAT_RATE_LIMIT_ANON_MAX_REQUESTS = int(os.getenv('CHAT_RATE_LIMIT_ANON_MAX_REQU
 CHAT_RATE_LIMIT_AUTH_MAX_REQUESTS = int(os.getenv('CHAT_RATE_LIMIT_AUTH_MAX_REQUESTS', 10))
 CHAT_RATE_LIMIT_MAX_REQUESTS = CHAT_RATE_LIMIT_ANON_MAX_REQUESTS  # Backward compatibility
 CHAT_RATE_LIMIT_WINDOW_SECONDS = int(os.getenv('CHAT_RATE_LIMIT_WINDOW_SECONDS', 3600))
+
+# Registration banner cooldown
+REGISTRATION_BANNER_COOLDOWN_SECONDS = int(os.getenv('REGISTRATION_BANNER_COOLDOWN_SECONDS', 7 * 24 * 60 * 60))
 
 # Chat message length limit
 CHAT_MAX_MESSAGE_LENGTH = int(os.getenv('CHAT_MAX_MESSAGE_LENGTH', 2000))
