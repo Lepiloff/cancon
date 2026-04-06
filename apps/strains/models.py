@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from tinymce.models import HTMLField
 
+from django.conf import settings
 from django.db import models
 
 from django.db.models.signals import post_delete
@@ -256,6 +257,29 @@ class AlternativeStrainName(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class FavoriteStrain(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='favorite_strains',
+    )
+    strain = models.ForeignKey(
+        Strain,
+        on_delete=models.CASCADE,
+        related_name='favorited_by',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'strain'], name='unique_favorite_strain'),
+        ]
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user_id}:{self.strain_id}"
 
 
 class Article(BaseText, TranslationMixin):

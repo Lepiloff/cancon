@@ -43,6 +43,7 @@ urlpatterns = [
     path('tinymce/', include('tinymce.urls')),
     path('i18n/', include('django.conf.urls.i18n')),  # Language switcher endpoint
     path('api/chat/', include('apps.chat_bot.urls')),
+    path('api/strains/', include('apps.strains.api_urls')),
     path('robots.txt', robots_txt, name='robots_txt'),  # SEO: robots.txt
     path('cookie-consent/', cookie_consent_view, name='cookie_consent'),
     path('sitemap.xml', sitemap, {

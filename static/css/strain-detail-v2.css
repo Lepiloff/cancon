@@ -49,6 +49,7 @@ h1.sd-name:before {
 .sd-meta {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 10px;
 }
 
@@ -87,6 +88,13 @@ h1.sd-name:before {
     font-size: 13px;
     color: var(--text-muted);
     position: relative;
+}
+
+.favorite-toggle--detail {
+    min-height: 36px;
+    padding: 0 14px;
+    font-size: 13px;
+    font-weight: 600;
 }
 
 .sd-rating-value {
@@ -591,6 +599,11 @@ h1.sd-name:before {
     .sd-name {
         font-size: 24px;
         width: auto;
+    }
+
+    .favorite-toggle--detail {
+        width: 100%;
+        justify-content: center;
     }
 
     .sd-top {

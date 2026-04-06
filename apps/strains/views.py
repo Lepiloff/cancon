@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from apps.strains.forms import StrainFilterForm
-from apps.strains.models import Article, ArticleCategory, ArticleImage, Strain, Terpene
+from apps.strains.models import Article, ArticleCategory, ArticleImage, FavoriteStrain, Strain, Terpene
 from apps.strains.utils import get_related_strains, get_filtered_strains, is_ajax_request
 
 
@@ -139,7 +139,14 @@ def strain_detail(request, slug):
         'max_cbd': cann_max['max_cbd'] or 1,
         'max_cbg': cann_max['max_cbg'] or 1,
         'meta_description': _build_strain_meta_description(strain),
+        'is_favorited': False,
     }
+
+    if request.user.is_authenticated:
+        context['is_favorited'] = FavoriteStrain.objects.filter(
+            user=request.user,
+            strain=strain,
+        ).exists()
 
     return render(request, 'strain_modern_v2.html', context)
 
@@ -504,4 +511,3 @@ def terpene_detail(request, slug):
             'related_terpenes': related_terpenes,
         }
     )
-

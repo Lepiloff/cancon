@@ -750,6 +750,7 @@ select:focus-visible,
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  position: relative;
   transition: transform 0.3s var(--ease-out),
               border-color 0.3s var(--ease-out),
               box-shadow 0.3s var(--ease-out);
@@ -2756,6 +2757,70 @@ select:focus-visible,
 
 .strain-card-v2:hover .strain-card-v2__img img {
   transform: scale(1.05);
+}
+
+.favorite-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(10, 14, 11, 0.72);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: transform 0.2s var(--ease-out),
+              background-color 0.2s var(--ease-out),
+              border-color 0.2s var(--ease-out),
+              color 0.2s var(--ease-out),
+              opacity 0.2s var(--ease-out);
+}
+
+.favorite-toggle:hover {
+  transform: translateY(-1px);
+  border-color: rgba(0, 230, 118, 0.45);
+}
+
+.favorite-toggle:focus-visible {
+  outline: 2px solid rgba(0, 230, 118, 0.45);
+  outline-offset: 2px;
+}
+
+.favorite-toggle.is-busy {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.favorite-toggle.is-active {
+  background: rgba(0, 230, 118, 0.14);
+  border-color: rgba(0, 230, 118, 0.38);
+  color: #c9ffd9;
+}
+
+.favorite-toggle__icon {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: fill 0.2s var(--ease-out), stroke 0.2s var(--ease-out);
+}
+
+.favorite-toggle.is-active .favorite-toggle__icon {
+  fill: currentColor;
+}
+
+.favorite-toggle--card {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  z-index: 3;
+  backdrop-filter: blur(8px);
 }
 
 /* Strain card info (HTML uses __info, CSS has __body) */

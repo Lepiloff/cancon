@@ -304,6 +304,20 @@
     </script>
     <script src="{% static 'js/cookie-consent.js' %}"></script>
 
+    <script>
+        window.FavoritesConfig = {
+            toggleUrl: '{% url "strains_api:favorite_toggle" %}',
+            statusUrl: '{% url "strains_api:favorite_status" %}',
+            isAuthenticated: {{ user.is_authenticated|yesno:"true,false" }},
+            addLabel: '{% trans "Guardar en favoritos" %}',
+            removeLabel: '{% trans "Quitar de favoritos" %}',
+            defaultText: '{% trans "Favorito" %}',
+            activeText: '{% trans "En favoritos" %}',
+            errorText: '{% trans "No se pudo actualizar favoritos. Inténtalo de nuevo." %}'
+        };
+    </script>
+    <script src="{% static 'js/favorites.js' %}"></script>
+
     {% if ENABLE_AI_CHAT %}
     <script>
         window.ChatFullscreenConfig = {

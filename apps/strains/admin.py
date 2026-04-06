@@ -10,6 +10,7 @@ from apps.strains.models import (
     Article,
     ArticleCategory,
     ArticleImage,
+    FavoriteStrain,
     Strain,
     Feeling,
     Negative,
@@ -387,3 +388,4 @@ admin.site.register(Feeling, TaxonomyAdmin)
 admin.site.register(Negative, TaxonomyAdmin)
 admin.site.register(HelpsWith, TaxonomyAdmin)
 admin.site.register(Flavor, TaxonomyAdmin)
+admin.site.register(FavoriteStrain)
