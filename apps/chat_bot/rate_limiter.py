@@ -5,7 +5,7 @@ Uses PostgreSQL for storage with atomic counters and row-level locking.
 """
 
 from django.conf import settings
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.utils import timezone
 from datetime import timedelta
 
@@ -19,86 +19,96 @@ class RateLimitExceeded(Exception):
         super().__init__(self.message)
 
 
-def get_rate_limit_settings():
-    """Get rate limit configuration from settings"""
-    max_requests = getattr(settings, 'CHAT_RATE_LIMIT_MAX_REQUESTS', 10)
+def get_rate_limit_settings(user=None):
+    """Get rate limit configuration from settings."""
+    legacy_default = getattr(settings, 'CHAT_RATE_LIMIT_MAX_REQUESTS', 10)
+    anon_requests = getattr(settings, 'CHAT_RATE_LIMIT_ANON_MAX_REQUESTS', legacy_default)
+    auth_requests = getattr(settings, 'CHAT_RATE_LIMIT_AUTH_MAX_REQUESTS', legacy_default)
     window_seconds = getattr(settings, 'CHAT_RATE_LIMIT_WINDOW_SECONDS', 3600)
-    return max_requests, window_seconds
+    if user is not None and getattr(user, 'is_authenticated', False):
+        return auth_requests, window_seconds
+    return anon_requests, window_seconds
 
 
-def check_rate_limit(ip_address: str) -> bool:
-    """
-    Check and increment rate limit for an IP address.
+def _get_or_create_locked_record(model, now, **lookup):
+    """Fetch a rate-limit row with a lock, tolerating first-write races."""
+    try:
+        return model.objects.select_for_update().get(**lookup)
+    except model.DoesNotExist:
+        try:
+            return model.objects.create(window_start=now, **lookup)
+        except IntegrityError:
+            return model.objects.select_for_update().get(**lookup)
 
-    Uses atomic operations with row-level locking to ensure thread safety.
 
-    Args:
-        ip_address: The client IP address
-
-    Returns:
-        True if request is allowed
-
-    Raises:
-        RateLimitExceeded: If rate limit is exceeded
-    """
-    from .models import ChatRateLimit
-
-    max_requests, window_seconds = get_rate_limit_settings()
-    now = timezone.now()
+def _check_rate_limit_record(model, now, max_requests, window_seconds, **lookup) -> bool:
+    """Check and increment a single rate-limit counter row."""
     window_start_threshold = now - timedelta(seconds=window_seconds)
-
-    # Store rate limit exceeded info to raise after transaction commits
     rate_exceeded_info = None
 
     with transaction.atomic():
-        # Try to get existing record with row-level lock
-        rate_limit = ChatRateLimit.objects.select_for_update().filter(
-            ip_address=ip_address
-        ).first()
+        rate_limit = _get_or_create_locked_record(model, now, **lookup)
 
-        if rate_limit is None:
-            # No record exists, create new one
-            ChatRateLimit.objects.create(
-                ip_address=ip_address,
-                request_count=1,
-                window_start=now
-            )
-            return True
-
-        # Check if window has expired
         if rate_limit.window_start < window_start_threshold:
-            # Reset the counter for new window
             rate_limit.request_count = 1
             rate_limit.window_start = now
-            rate_limit.save(update_fields=['request_count', 'window_start'])
+            rate_limit.last_exceeded_at = None
+            rate_limit.save(update_fields=['request_count', 'window_start', 'last_exceeded_at'])
             return True
 
-        # Window is still active, check limit
         if rate_limit.request_count >= max_requests:
-            # Rate limit exceeded
             rate_limit.last_exceeded_at = now
             rate_limit.save(update_fields=['last_exceeded_at'])
-
-            # Calculate retry_after - seconds until window expires
             window_end = rate_limit.window_start + timedelta(seconds=window_seconds)
             retry_after = int((window_end - now).total_seconds())
-            retry_after = max(1, retry_after)  # At least 1 second
-
-            # Store info to raise exception after transaction commits
-            rate_exceeded_info = retry_after
+            rate_exceeded_info = max(1, retry_after)
         else:
-            # Increment counter
             rate_limit.request_count += 1
             rate_limit.save(update_fields=['request_count'])
 
-    # Raise exception outside of transaction block so last_exceeded_at is saved
     if rate_exceeded_info is not None:
         raise RateLimitExceeded(
             retry_after_seconds=rate_exceeded_info,
             message=f"Rate limit exceeded. Try again in {rate_exceeded_info} seconds."
         )
-
     return True
+
+
+def _check_ip_rate_limit(ip_address: str, max_requests: int, window_seconds: int) -> bool:
+    from .models import ChatRateLimit
+
+    return _check_rate_limit_record(
+        ChatRateLimit,
+        timezone.now(),
+        max_requests,
+        window_seconds,
+        ip_address=ip_address,
+    )
+
+
+def _check_user_rate_limit(user, max_requests: int, window_seconds: int) -> bool:
+    from .models import ChatRateLimitUser
+
+    return _check_rate_limit_record(
+        ChatRateLimitUser,
+        timezone.now(),
+        max_requests,
+        window_seconds,
+        user=user,
+    )
+
+
+def check_rate_limit(ip_address: str, user=None) -> bool:
+    """
+    Check and increment rate limit for the current request.
+
+    Anonymous requests are tracked by IP.
+    Authenticated requests are tracked by user.
+    """
+    max_requests, window_seconds = get_rate_limit_settings(user)
+    if user is not None and getattr(user, 'is_authenticated', False):
+        return _check_user_rate_limit(user, max_requests, window_seconds)
+    return _check_ip_rate_limit(ip_address, max_requests, window_seconds)
 
 
 def format_retry_after_human(seconds: int, language: str = 'en') -> str:

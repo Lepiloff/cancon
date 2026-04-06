@@ -307,7 +307,13 @@
     {% if ENABLE_AI_CHAT %}
     <script>
         window.ChatFullscreenConfig = {
+            chatUrl: '{% url "chat_bot:chat" %}',
+            streamUrl: '{% url "chat_bot:stream" %}',
+            signupUrl: '{% url "account_signup" %}',
+            isAuthenticated: {{ user.is_authenticated|yesno:"true,false" }},
             errRateLimit: '{% trans "Has alcanzado el límite de mensajes. Por favor, inténtalo más tarde." %}',
+            errRateLimitCta: '{% trans "Crea una cuenta para seguir chateando." %}',
+            errRateLimitCtaLabel: '{% trans "Crear cuenta" %}',
             errUnavailable: '{% trans "El servicio no está disponible en este momento. Inténtalo más tarde." %}',
             errServer: '{% trans "Error del servidor. Por favor, inténtalo de nuevo." %}',
             errConnection: '{% trans "Error de conexión. Inténtalo de nuevo." %}',

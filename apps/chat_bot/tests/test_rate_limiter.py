@@ -3,41 +3,83 @@ Tests for chat rate limiter functionality.
 """
 
 from datetime import timedelta
-from unittest.mock import patch
 
+from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
-from apps.chat_bot.models import ChatRateLimit
+from apps.chat_bot.models import ChatRateLimit, ChatRateLimitUser
 from apps.chat_bot.rate_limiter import (
-    check_rate_limit,
     RateLimitExceeded,
+    check_rate_limit,
     format_retry_after_human,
     get_rate_limit_settings,
 )
 
 
-@override_settings(CHAT_RATE_LIMIT_MAX_REQUESTS=5, CHAT_RATE_LIMIT_WINDOW_SECONDS=3600)
+User = get_user_model()
+
+
+@override_settings(
+    CHAT_RATE_LIMIT_ANON_MAX_REQUESTS=5,
+    CHAT_RATE_LIMIT_AUTH_MAX_REQUESTS=10,
+    CHAT_RATE_LIMIT_WINDOW_SECONDS=3600,
+)
 class RateLimiterTestCase(TestCase):
-    """Tests for rate limiting logic"""
+    """Tests for rate limiting logic."""
 
     def setUp(self):
         self.test_ip = '192.168.1.100'
+        self.user = User.objects.create_user(
+            email='rate-limit@example.com',
+            password='testpass123',
+        )
 
-    def test_first_request_creates_record(self):
-        """First request should create a new rate limit record"""
+    def test_first_request_creates_ip_record(self):
         self.assertEqual(ChatRateLimit.objects.count(), 0)
 
         result = check_rate_limit(self.test_ip)
 
         self.assertTrue(result)
         self.assertEqual(ChatRateLimit.objects.count(), 1)
+        self.assertEqual(ChatRateLimit.objects.get(ip_address=self.test_ip).request_count, 1)
 
-        record = ChatRateLimit.objects.get(ip_address=self.test_ip)
-        self.assertEqual(record.request_count, 1)
+    def test_authenticated_first_request_creates_user_record(self):
+        self.assertEqual(ChatRateLimitUser.objects.count(), 0)
+
+        result = check_rate_limit(self.test_ip, self.user)
+
+        self.assertTrue(result)
+        self.assertEqual(ChatRateLimitUser.objects.count(), 1)
+        self.assertEqual(ChatRateLimitUser.objects.get(user=self.user).request_count, 1)
+        self.assertFalse(ChatRateLimit.objects.filter(ip_address=self.test_ip).exists())
+
+    def test_anonymous_limit_is_5(self):
+        for _ in range(5):
+            check_rate_limit(self.test_ip)
+
+        with self.assertRaises(RateLimitExceeded):
+            check_rate_limit(self.test_ip)
+
+    def test_authenticated_limit_is_10(self):
+        for _ in range(10):
+            check_rate_limit(self.test_ip, self.user)
+
+        with self.assertRaises(RateLimitExceeded):
+            check_rate_limit(self.test_ip, self.user)
+
+    def test_authenticated_requests_do_not_consume_ip_bucket(self):
+        for _ in range(3):
+            check_rate_limit(self.test_ip, self.user)
+
+        self.assertFalse(ChatRateLimit.objects.filter(ip_address=self.test_ip).exists())
+        self.assertEqual(ChatRateLimitUser.objects.get(user=self.user).request_count, 3)
+
+    def test_backward_compat_without_user_param_uses_anonymous_settings(self):
+        check_rate_limit(self.test_ip)
+        self.assertEqual(ChatRateLimit.objects.get(ip_address=self.test_ip).request_count, 1)
 
     def test_subsequent_requests_increment_counter(self):
-        """Subsequent requests should increment the counter"""
         check_rate_limit(self.test_ip)
         check_rate_limit(self.test_ip)
         check_rate_limit(self.test_ip)
@@ -45,85 +87,87 @@ class RateLimiterTestCase(TestCase):
         record = ChatRateLimit.objects.get(ip_address=self.test_ip)
         self.assertEqual(record.request_count, 3)
 
-    def test_rate_limit_exceeded_raises_exception(self):
-        """Should raise RateLimitExceeded when limit is reached"""
-        # Make 5 requests (the limit)
-        for _ in range(5):
-            check_rate_limit(self.test_ip)
+    def test_different_ips_have_separate_limits(self):
+        ip1 = '192.168.1.1'
+        ip2 = '192.168.1.2'
 
-        # 6th request should fail
-        with self.assertRaises(RateLimitExceeded) as context:
-            check_rate_limit(self.test_ip)
+        for _ in range(3):
+            check_rate_limit(ip1)
+        for _ in range(2):
+            check_rate_limit(ip2)
 
-        self.assertGreater(context.exception.retry_after_seconds, 0)
-        self.assertLessEqual(context.exception.retry_after_seconds, 3600)
+        self.assertEqual(ChatRateLimit.objects.get(ip_address=ip1).request_count, 3)
+        self.assertEqual(ChatRateLimit.objects.get(ip_address=ip2).request_count, 2)
+
+    def test_different_users_have_separate_limits(self):
+        other_user = User.objects.create_user(
+            email='other-rate-limit@example.com',
+            password='testpass123',
+        )
+
+        for _ in range(4):
+            check_rate_limit(self.test_ip, self.user)
+        for _ in range(2):
+            check_rate_limit(self.test_ip, other_user)
+
+        self.assertEqual(ChatRateLimitUser.objects.get(user=self.user).request_count, 4)
+        self.assertEqual(ChatRateLimitUser.objects.get(user=other_user).request_count, 2)
 
     def test_rate_limit_exceeded_updates_last_exceeded_at(self):
-        """Should update last_exceeded_at when limit is exceeded"""
         for _ in range(5):
             check_rate_limit(self.test_ip)
 
         with self.assertRaises(RateLimitExceeded):
             check_rate_limit(self.test_ip)
 
-        record = ChatRateLimit.objects.get(ip_address=self.test_ip)
-        self.assertIsNotNone(record.last_exceeded_at)
+        self.assertIsNotNone(ChatRateLimit.objects.get(ip_address=self.test_ip).last_exceeded_at)
 
-    def test_expired_window_resets_counter(self):
-        """Counter should reset when window expires"""
-        # Create initial record
+    def test_expired_ip_window_resets_counter(self):
         check_rate_limit(self.test_ip)
         check_rate_limit(self.test_ip)
 
-        # Manually set window_start to the past (expired)
         record = ChatRateLimit.objects.get(ip_address=self.test_ip)
         record.window_start = timezone.now() - timedelta(hours=2)
         record.save()
 
-        # Next request should reset counter
         check_rate_limit(self.test_ip)
 
         record.refresh_from_db()
         self.assertEqual(record.request_count, 1)
+        self.assertIsNone(record.last_exceeded_at)
 
-    def test_different_ips_have_separate_limits(self):
-        """Each IP should have its own rate limit"""
-        ip1 = '192.168.1.1'
-        ip2 = '192.168.1.2'
+    def test_expired_user_window_resets_counter(self):
+        check_rate_limit(self.test_ip, self.user)
+        check_rate_limit(self.test_ip, self.user)
 
-        # Make requests from both IPs
-        for _ in range(3):
-            check_rate_limit(ip1)
-        for _ in range(2):
-            check_rate_limit(ip2)
+        record = ChatRateLimitUser.objects.get(user=self.user)
+        record.window_start = timezone.now() - timedelta(hours=2)
+        record.last_exceeded_at = timezone.now() - timedelta(minutes=5)
+        record.save()
 
-        record1 = ChatRateLimit.objects.get(ip_address=ip1)
-        record2 = ChatRateLimit.objects.get(ip_address=ip2)
+        check_rate_limit(self.test_ip, self.user)
 
-        self.assertEqual(record1.request_count, 3)
-        self.assertEqual(record2.request_count, 2)
+        record.refresh_from_db()
+        self.assertEqual(record.request_count, 1)
+        self.assertIsNone(record.last_exceeded_at)
 
     def test_retry_after_calculation(self):
-        """retry_after_seconds should be time until window expires"""
-        # Create record with known window_start
         check_rate_limit(self.test_ip)
 
         record = ChatRateLimit.objects.get(ip_address=self.test_ip)
-        # Set window_start to 30 minutes ago
         record.window_start = timezone.now() - timedelta(minutes=30)
-        record.request_count = 5  # At the limit
+        record.request_count = 5
         record.save()
 
         with self.assertRaises(RateLimitExceeded) as context:
             check_rate_limit(self.test_ip)
 
-        # Should be approximately 30 minutes (1800 seconds)
         self.assertGreater(context.exception.retry_after_seconds, 1700)
         self.assertLessEqual(context.exception.retry_after_seconds, 1900)
 
 
 class FormatRetryAfterHumanTestCase(TestCase):
-    """Tests for human-readable retry_after formatting"""
+    """Tests for human-readable retry_after formatting."""
 
     def test_format_seconds_english(self):
         self.assertEqual(format_retry_after_human(1), '1 second')
@@ -162,25 +206,45 @@ class FormatRetryAfterHumanTestCase(TestCase):
 
 
 class GetRateLimitSettingsTestCase(TestCase):
-    """Tests for settings retrieval"""
+    """Tests for settings retrieval."""
 
-    @override_settings(CHAT_RATE_LIMIT_MAX_REQUESTS=20, CHAT_RATE_LIMIT_WINDOW_SECONDS=7200)
-    def test_custom_settings(self):
-        max_requests, window_seconds = get_rate_limit_settings()
-        self.assertEqual(max_requests, 20)
-        self.assertEqual(window_seconds, 7200)
+    def setUp(self):
+        self.user = User.objects.create_user(
+            email='settings@example.com',
+            password='testpass123',
+        )
+
+    @override_settings(
+        CHAT_RATE_LIMIT_ANON_MAX_REQUESTS=5,
+        CHAT_RATE_LIMIT_AUTH_MAX_REQUESTS=12,
+        CHAT_RATE_LIMIT_WINDOW_SECONDS=7200,
+    )
+    def test_custom_settings_for_anonymous_and_authenticated_users(self):
+        anon_max, anon_window = get_rate_limit_settings()
+        auth_max, auth_window = get_rate_limit_settings(self.user)
+
+        self.assertEqual(anon_max, 5)
+        self.assertEqual(auth_max, 12)
+        self.assertEqual(anon_window, 7200)
+        self.assertEqual(auth_window, 7200)
 
     def test_default_settings(self):
-        """When settings are not defined, should use defaults"""
-        # Delete settings if they exist
         with override_settings():
-            # Remove the settings by not setting them
             from django.conf import settings
-            if hasattr(settings, 'CHAT_RATE_LIMIT_MAX_REQUESTS'):
-                delattr(settings, 'CHAT_RATE_LIMIT_MAX_REQUESTS')
-            if hasattr(settings, 'CHAT_RATE_LIMIT_WINDOW_SECONDS'):
-                delattr(settings, 'CHAT_RATE_LIMIT_WINDOW_SECONDS')
 
-            max_requests, window_seconds = get_rate_limit_settings()
-            self.assertEqual(max_requests, 10)  # Default
-            self.assertEqual(window_seconds, 3600)  # Default
+            for attr in (
+                'CHAT_RATE_LIMIT_MAX_REQUESTS',
+                'CHAT_RATE_LIMIT_ANON_MAX_REQUESTS',
+                'CHAT_RATE_LIMIT_AUTH_MAX_REQUESTS',
+                'CHAT_RATE_LIMIT_WINDOW_SECONDS',
+            ):
+                if hasattr(settings, attr):
+                    delattr(settings, attr)
+
+            anon_max, anon_window = get_rate_limit_settings()
+            auth_max, auth_window = get_rate_limit_settings(self.user)
+
+            self.assertEqual(anon_max, 10)
+            self.assertEqual(auth_max, 10)
+            self.assertEqual(anon_window, 3600)
+            self.assertEqual(auth_window, 3600)

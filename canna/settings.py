@@ -303,8 +303,10 @@ SITE_PROTOCOL = os.getenv('SITE_PROTOCOL', 'https')  # Canonical protocol for SE
 ENABLE_AI_CHAT = os.getenv('ENABLE_AI_CHAT', 'false').lower() == 'true'
 
 # Chat Rate Limiting Configuration
-# Limits chat requests per IP address to prevent abuse
-CHAT_RATE_LIMIT_MAX_REQUESTS = int(os.getenv('CHAT_RATE_LIMIT_MAX_REQUESTS', 10))
+# Anonymous requests are limited by IP. Authenticated requests are limited by user.
+CHAT_RATE_LIMIT_ANON_MAX_REQUESTS = int(os.getenv('CHAT_RATE_LIMIT_ANON_MAX_REQUESTS', 5))
+CHAT_RATE_LIMIT_AUTH_MAX_REQUESTS = int(os.getenv('CHAT_RATE_LIMIT_AUTH_MAX_REQUESTS', 10))
+CHAT_RATE_LIMIT_MAX_REQUESTS = CHAT_RATE_LIMIT_ANON_MAX_REQUESTS  # Backward compatibility
 CHAT_RATE_LIMIT_WINDOW_SECONDS = int(os.getenv('CHAT_RATE_LIMIT_WINDOW_SECONDS', 3600))
 
 # Chat message length limit
