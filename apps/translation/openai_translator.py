@@ -18,6 +18,7 @@ from .base_translator import (
     TranslationParseError,
 )
 from .config import TranslationConfig
+from .openai_compat import create_chat_completion
 from .prompts import TranslationPrompts
 
 logger = logging.getLogger(__name__)
@@ -76,7 +77,8 @@ class OpenAITranslator(BaseTranslator):
             )
 
             # Call OpenAI API
-            response = self.client.chat.completions.create(
+            response = create_chat_completion(
+                self.client,
                 model=self.model,
                 messages=[
                     {"role": "system", "content": system_prompt},
@@ -131,7 +133,8 @@ class OpenAITranslator(BaseTranslator):
         """
         try:
             # Simple test with minimal tokens
-            response = self.client.chat.completions.create(
+            response = create_chat_completion(
+                self.client,
                 model=self.model,
                 messages=[
                     {"role": "user", "content": "Hello"}
