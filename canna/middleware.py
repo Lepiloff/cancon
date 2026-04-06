@@ -397,6 +397,8 @@ class RegistrationBannerMiddleware:
         'jsi18n',
     }
 
+    BOT_USER_AGENTS = GeoLanguageMiddleware.BOT_USER_AGENTS
+
     def __init__(self, get_response):
         self.get_response = get_response
 
@@ -407,6 +409,9 @@ class RegistrationBannerMiddleware:
 
     def _prepare_registration_banner_state(self, request):
         if not hasattr(request, 'session'):
+            return
+
+        if self._is_bot(request):
             return
 
         if getattr(request, 'user', None) and request.user.is_authenticated:
@@ -471,6 +476,10 @@ class RegistrationBannerMiddleware:
 
     def _cookie_banner_hidden(self, request):
         return not cookie_consent(request)['show_cookie_banner']
+
+    def _is_bot(self, request):
+        ua = request.META.get('HTTP_USER_AGENT', '').lower()
+        return any(bot in ua for bot in self.BOT_USER_AGENTS)
 
     def _classify_source(self, request):
         referrer = request.META.get('HTTP_REFERER', '')

@@ -93,6 +93,23 @@ class RegistrationBannerFunnelTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context['show_registration_banner'])
 
+    def test_search_bots_do_not_get_banner(self):
+        self._set_cookie_consent()
+
+        self.client.get(
+            reverse('main_page'),
+            HTTP_REFERER='https://www.google.com/search?q=cannamente',
+            HTTP_USER_AGENT='Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+        )
+        response = self.client.get(
+            reverse('strain_list'),
+            HTTP_REFERER='http://testserver/',
+            HTTP_USER_AGENT='Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context['show_registration_banner'])
+
 
 class RegistrationBannerDismissViewTest(TestCase):
     def test_dismiss_sets_cooldown_cookie(self):
