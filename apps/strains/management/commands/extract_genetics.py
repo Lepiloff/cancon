@@ -10,6 +10,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 from apps.strains.models import AlternativeStrainName, Strain
 from apps.translation.config import TranslationConfig
+from apps.translation.openai_compat import create_chat_completion
 
 SYSTEM_PROMPT = """You are a cannabis genetics expert. You analyze strain descriptions and extract genetic lineage information.
 Return ONLY valid JSON, no explanations."""
@@ -303,7 +304,8 @@ class Command(BaseCommand):
         )
 
         try:
-            response = self.client.chat.completions.create(
+            response = create_chat_completion(
+                self.client,
                 model=self.model,
                 messages=[
                     {"role": "system", "content": SYSTEM_PROMPT},

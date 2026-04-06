@@ -17,7 +17,12 @@ from apps.strains.models import (
     Flavor,
     Terpene,
 )
-from apps.strains.leafly_import import get_copywriter, CopywritingError
+from apps.strains.copywriter import (
+    CopywritingError,
+    get_copywriter_for_content_type,
+    get_handler,
+)
+from apps.strains.llm_output import clean_generated_output
 from apps.strains.signals import perform_translation
 from apps.translation import get_translator
 from apps.translation.base_translator import TranslationError
@@ -44,11 +49,13 @@ class StrainAdminForm(TranslatedModelForm):
         fields = '__all__'
 
 
-class StrainCopywriterForm(forms.Form):
-    strain = forms.ModelChoiceField(
-        queryset=Strain.objects.order_by('name'),
+class CopywriterForm(forms.Form):
+    """Generic copywriter form, parameterized by content type."""
+
+    target_object = forms.ModelChoiceField(
+        queryset=Strain.objects.none(),
         required=False,
-        label='Strain (optional)',
+        label='Target (optional)',
     )
     source_text = forms.CharField(
         widget=forms.Textarea(attrs={'rows': 8, 'style': 'width: 100%;'}),
@@ -68,11 +75,17 @@ class StrainCopywriterForm(forms.Form):
     confirm_overwrite = forms.BooleanField(
         required=False,
         label='Confirm overwrite',
-        help_text='Check to overwrite the selected strain text.',
+        help_text='Check to overwrite the selected object text.',
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, content_type='strain', **kwargs):
         super().__init__(*args, **kwargs)
+        handler = get_handler(content_type)
+        model_class = handler['_model_class']
+        self.fields['target_object'].queryset = model_class.objects.order_by(
+            handler['queryset_order']
+        )
+        self.fields['target_object'].label = f'{handler["label"]} (optional)'
         self.fields['generated_text_en'].widget.attrs['readonly'] = True
         self.fields['generated_text_es'].widget.attrs['readonly'] = True
 
@@ -123,13 +136,134 @@ class TranslatedModelAdmin(TranslationAdmin):
     translation_status_badge.short_description = 'Translation Status'
 
 
+class CopywriterAdminMixin:
+    """Mixin that adds a copywriter view to any TranslatedModelAdmin."""
+
+    copywriter_content_type = None  # Set in subclass: 'strain', 'terpene', 'article'
+
+    def get_urls(self):
+        urls = super().get_urls()
+        if self.copywriter_content_type:
+            custom_urls = [
+                path(
+                    'copywriter/',
+                    self.admin_site.admin_view(self.copywriter_view),
+                    name=f'strains_{self.copywriter_content_type}_copywriter',
+                ),
+            ]
+            return custom_urls + urls
+        return urls
+
+    def copywriter_view(self, request):
+        ct = self.copywriter_content_type
+        handler = get_handler(ct)
+        form = CopywriterForm(content_type=ct)
+
+        if request.method == 'POST':
+            action = request.POST.get('action')
+            form = CopywriterForm(request.POST, content_type=ct)
+
+            if not form.is_valid():
+                self.message_user(request, 'Please correct the errors below.', level=messages.ERROR)
+            else:
+                target_obj = form.cleaned_data['target_object']
+                source_text = form.cleaned_data['source_text']
+                generated_en = (form.cleaned_data.get('generated_text_en') or '').strip()
+                generated_es = (form.cleaned_data.get('generated_text_es') or '').strip()
+
+                if action == 'generate':
+                    try:
+                        copywriter = get_copywriter_for_content_type(ct)
+                        result = copywriter.generate(source_text, obj=target_obj, content_type=ct)
+                        generated_en = clean_generated_output(result.get(handler['output_key'], ''), ct)
+
+                        translator = get_translator()
+                        translations = translator.translate(
+                            handler['translate_model_name'],
+                            {handler['translate_field']: generated_en},
+                            'en',
+                            'es',
+                        )
+                        generated_es = clean_generated_output(
+                            translations.get(handler['translate_field']) or '',
+                            ct,
+                        )
+                        if not generated_es:
+                            raise TranslationError('Translation returned empty text')
+
+                        form = CopywriterForm(
+                            initial={
+                                'target_object': target_obj.id if target_obj else None,
+                                'source_text': source_text,
+                                'generated_text_en': generated_en,
+                                'generated_text_es': generated_es,
+                            },
+                            content_type=ct,
+                        )
+                    except (CopywritingError, TranslationError, ValueError) as exc:
+                        self.message_user(request, f'Generation failed: {exc}', level=messages.ERROR)
+
+                elif action == 'apply':
+                    if generated_en:
+                        generated_en = clean_generated_output(generated_en, ct)
+                    if generated_es:
+                        generated_es = clean_generated_output(generated_es, ct)
+                    if not target_obj:
+                        form.add_error('target_object', f'Select a {handler["label"].lower()} to overwrite.')
+                    if not form.cleaned_data.get('confirm_overwrite'):
+                        form.add_error('confirm_overwrite', 'Confirmation is required.')
+                    if not generated_en or not generated_es:
+                        form.add_error(None, 'Generate text first before applying.')
+
+                    if not form.errors:
+                        target_field = handler['target_field']
+                        en_field = f'{target_field}_en'
+                        es_field = f'{target_field}_es'
+
+                        setattr(target_obj, target_field, generated_en)
+                        setattr(target_obj, en_field, generated_en)
+                        setattr(target_obj, es_field, generated_es)
+                        target_obj.translation_status = 'synced'
+                        target_obj.translation_error = None
+                        target_obj.last_translated_at = timezone.now()
+                        target_obj.translation_source_hash = target_obj.get_translatable_content_hash()
+                        target_obj._skip_translation_check = True
+
+                        update_fields = [
+                            target_field, en_field, es_field,
+                            'translation_status', 'translation_error',
+                            'last_translated_at', 'translation_source_hash',
+                        ]
+                        if hasattr(target_obj, 'updated_at'):
+                            update_fields.append('updated_at')
+                        target_obj.save(update_fields=update_fields)
+
+                        obj_name = getattr(target_obj, handler['name_field'], str(target_obj))
+                        self.message_user(
+                            request,
+                            f'Text updated for {obj_name}.',
+                            level=messages.SUCCESS,
+                        )
+                else:
+                    self.message_user(request, 'Unknown action.', level=messages.ERROR)
+
+        context = {
+            **self.admin_site.each_context(request),
+            'form': form,
+            'title': f'{handler["label"]} Copywriter',
+            'content_type_label': handler['label'],
+        }
+        return render(request, 'admin/strains/copywriter.html', context)
+
+
 class AlternativeNameInline(admin.TabularInline):
     model = AlternativeStrainName
     extra = 1
 
 
-class StrainAdmin(TranslatedModelAdmin):
+class StrainAdmin(CopywriterAdminMixin, TranslatedModelAdmin):
     form = StrainAdminForm
+    copywriter_content_type = 'strain'
     change_list_template = 'admin/strains/strain/change_list.html'
     list_display = (
         'name',
@@ -152,109 +286,6 @@ class StrainAdmin(TranslatedModelAdmin):
     inlines = [AlternativeNameInline]
     actions = ['force_retranslate']
 
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [
-            path(
-                'copywriter/',
-                self.admin_site.admin_view(self.copywriter_view),
-                name='strains_strain_copywriter',
-            ),
-        ]
-        return custom_urls + urls
-
-    def copywriter_view(self, request):
-        form = StrainCopywriterForm()
-        if request.method == 'POST':
-            action = request.POST.get('action')
-            form = StrainCopywriterForm(request.POST)
-
-            if not form.is_valid():
-                self.message_user(
-                    request,
-                    'Please correct the errors below.',
-                    level=messages.ERROR,
-                )
-            else:
-                strain = form.cleaned_data['strain']
-                source_text = form.cleaned_data['source_text']
-                generated_en = (form.cleaned_data.get('generated_text_en') or '').strip()
-                generated_es = (form.cleaned_data.get('generated_text_es') or '').strip()
-
-                if action == 'generate':
-                    try:
-                        copywriter = get_copywriter()
-                        generated_en = copywriter.rewrite_raw_text(
-                            source_text,
-                            strain_name=strain.name if strain else None,
-                        )
-                        translator = get_translator()
-                        translations = translator.translate(
-                            'Strain',
-                            {'text_content': generated_en},
-                            'en',
-                            'es',
-                        )
-                        generated_es = (translations.get('text_content') or '').strip()
-                        if not generated_es:
-                            raise TranslationError('Translation returned empty text_content')
-
-                        form = StrainCopywriterForm(initial={
-                            'strain': strain.id if strain else None,
-                            'source_text': source_text,
-                            'generated_text_en': generated_en,
-                            'generated_text_es': generated_es,
-                        })
-                    except (CopywritingError, TranslationError, ValueError) as exc:
-                        self.message_user(request, f'Generation failed: {exc}', level=messages.ERROR)
-
-                elif action == 'apply':
-                    if not strain:
-                        form.add_error('strain', 'Select a strain to overwrite.')
-                    if not form.cleaned_data.get('confirm_overwrite'):
-                        form.add_error('confirm_overwrite', 'Confirmation is required.')
-                    if not generated_en or not generated_es:
-                        form.add_error(None, 'Generate text first before applying.')
-
-                    if not form.errors:
-                        strain.text_content = generated_en
-                        strain.text_content_en = generated_en
-                        strain.text_content_es = generated_es
-                        strain.translation_status = 'synced'
-                        strain.translation_error = None
-                        strain.last_translated_at = timezone.now()
-                        strain.translation_source_hash = strain.get_translatable_content_hash()
-                        strain._skip_translation_check = True
-                        strain.save(update_fields=[
-                            'text_content',
-                            'text_content_en',
-                            'text_content_es',
-                            'translation_status',
-                            'translation_error',
-                            'last_translated_at',
-                            'translation_source_hash',
-                            'updated_at',
-                        ])
-                        self.message_user(
-                            request,
-                            f'Text updated for {strain.name}.',
-                            level=messages.SUCCESS,
-                        )
-
-                else:
-                    self.message_user(
-                        request,
-                        'Unknown action. Use Generate or Apply.',
-                        level=messages.ERROR,
-                    )
-
-        context = {
-            **self.admin_site.each_context(request),
-            'form': form,
-            'title': 'Strain Copywriter',
-        }
-        return render(request, 'admin/strains/strain/copywriter.html', context)
-
     @admin.action(description='Force retranslate selected items')
     def force_retranslate(self, request, queryset):
         """Force retranslate selected items"""
@@ -272,8 +303,10 @@ class ArticleImageInline(admin.TabularInline):
     extra = 1
 
 
-class ArticleAdmin(TranslatedModelAdmin):
+class ArticleAdmin(CopywriterAdminMixin, TranslatedModelAdmin):
     form = ArticleAdminForm
+    copywriter_content_type = 'article'
+    change_list_template = 'admin/strains/article/change_list.html'
     inlines = [ArticleImageInline]
     list_display = ('title_display', 'translation_status_badge', 'last_translated_at')
     search_fields = ('title_en', 'title_es')
@@ -306,8 +339,10 @@ class ArticleAdmin(TranslatedModelAdmin):
         self.message_user(request, f'{count} articles translated successfully')
 
 
-class TerpeneAdmin(TranslatedModelAdmin):
+class TerpeneAdmin(CopywriterAdminMixin, TranslatedModelAdmin):
     form = TerpeneAdminForm
+    copywriter_content_type = 'terpene'
+    change_list_template = 'admin/strains/terpene/change_list.html'
     list_display = ('name', 'translation_status_badge', 'last_translated_at')
     search_fields = ('name',)  # name is NOT translated (Limonene, Myrcene, etc.)
     actions = ['force_retranslate']

@@ -25,16 +25,16 @@ from apps.strains.models import (
 )
 from apps.translation import TranslationConfig, get_translator
 from apps.translation.base_translator import TranslationError
+from apps.translation.openai_compat import create_chat_completion
+from apps.strains.llm_output import (
+    clean_generated_output,
+    normalize_ascii_punctuation as shared_normalize_ascii_punctuation,
+    strip_code_fences as shared_strip_code_fences,
+)
 
 
 def _strip_code_fences(content: str) -> str:
-    if content.startswith('```'):
-        lines = content.split('\n')
-        lines = lines[1:]
-        if lines and lines[-1].strip() == '```':
-            lines = lines[:-1]
-        return '\n'.join(lines).strip()
-    return content
+    return shared_strip_code_fences(content)
 
 
 class LeaflyFetchError(Exception):
@@ -707,10 +707,7 @@ class _CopywriterOutputMixin:
         except json.JSONDecodeError as exc:
             raise CopywritingError(f'Invalid JSON from copywriter: {exc}') from exc
 
-        text_content = str(result.get('text_content', '')).strip()
-        text_content = self._normalize_ascii_punctuation(text_content)
-        text_content = self._strip_links(text_content)
-        text_content = self._ensure_paragraph(text_content)
+        text_content = clean_generated_output(result.get('text_content', ''), 'strain')
 
         img_alt_text = str(result.get('img_alt_text', '')).strip()
         img_alt_text = self._normalize_ascii_punctuation(img_alt_text)
@@ -747,19 +744,7 @@ class _CopywriterOutputMixin:
         return str(soup)
 
     def _normalize_ascii_punctuation(self, text: str) -> str:
-        replacements = {
-            '\u2018': "'",
-            '\u2019': "'",
-            '\u201c': '"',
-            '\u201d': '"',
-            '\u2013': '-',
-            '\u2014': '-',
-            '\u2026': '...',
-            '\u00a0': ' ',
-        }
-        for original, replacement in replacements.items():
-            text = text.replace(original, replacement)
-        return text
+        return shared_normalize_ascii_punctuation(text)
 
     def _clean_alternative_names(self, primary: str, names: List[str]) -> List[str]:
         cleaned = []
@@ -895,7 +880,8 @@ class LeaflyCopywriter(_CopywriterOutputMixin):
         from openai import OpenAIError
         user_prompt = self._build_payload(parsed)
         try:
-            response = self.client.chat.completions.create(
+            response = create_chat_completion(
+                self.client,
                 model=self.model,
                 messages=[
                     {"role": "system", "content": self.SYSTEM_PROMPT},
@@ -923,7 +909,8 @@ class LeaflyCopywriter(_CopywriterOutputMixin):
         }, ensure_ascii=False, indent=2)
 
         try:
-            response = self.client.chat.completions.create(
+            response = create_chat_completion(
+                self.client,
                 model=self.model,
                 messages=[
                     {"role": "system", "content": self.SYSTEM_PROMPT},
@@ -949,7 +936,8 @@ class LeaflyCopywriter(_CopywriterOutputMixin):
         numbered = '\n'.join(f'{i + 1}. {r}' for i, r in enumerate(reviews))
         prompt = f'Strain: {strain_name}\n\nUser reviews:\n{numbered}'
         try:
-            response = self.client.chat.completions.create(
+            response = create_chat_completion(
+                self.client,
                 model=self.model,
                 messages=[
                     {"role": "system", "content": REVIEW_SUMMARY_SYSTEM_PROMPT},
@@ -1089,7 +1077,8 @@ class TaxonomyTranslator:
                 )
                 content = response.content[0].text.strip()
             else:
-                response = self._client.chat.completions.create(
+                response = create_chat_completion(
+                    self._client,
                     model=self.model,
                     messages=[
                         {"role": "system", "content": system_prompt},
