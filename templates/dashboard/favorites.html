@@ -17,7 +17,9 @@
   <div class="dashboard-list">
     {% for item in favorite_items %}
       <article class="dashboard-list__item">
-        <h3 class="dashboard-list__title">{{ item.strain.name }}</h3>
+        <h3 class="dashboard-list__title">
+          <a class="dashboard-inline-link" href="{% url 'strain_detail' item.strain.slug %}">{{ item.strain.name }}</a>
+        </h3>
         <div class="dashboard-list__meta">
           <span class="dashboard-chip">{{ item.strain.get_category_display }}</span>
           {% if item.created_at %}

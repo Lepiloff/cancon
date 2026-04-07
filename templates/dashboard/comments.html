@@ -19,7 +19,9 @@
       <article class="dashboard-list__item">
         <div class="dashboard-note__head">
           <div>
-            <h3 class="dashboard-note__title">{{ item.strain.name }}</h3>
+            <h3 class="dashboard-note__title">
+              <a class="dashboard-inline-link" href="{% url 'strain_detail' item.strain.slug %}">{{ item.strain.name }}</a>
+            </h3>
             <div class="dashboard-list__meta">
               <span class="dashboard-status dashboard-status--{{ item.status }}">{{ item.get_status_display }}</span>
               <span class="dashboard-chip">{{ item.get_reaction_display }}</span>

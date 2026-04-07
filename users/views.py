@@ -121,10 +121,10 @@ def _journal_form_for_note(note=None):
     )
 
 
-def _journal_context(user, *, form=None, editing_note=None, status=200):
+def _journal_context(user, *, form=None, editing_note=None):
     notes_qs = _journal_queryset(user)
     page = Paginator(notes_qs, 12).get_page(None)
-    context = {
+    return {
         **_dashboard_counts(user),
         'dashboard_section': 'journal',
         'note_page': page,
@@ -133,7 +133,6 @@ def _journal_context(user, *, form=None, editing_note=None, status=200):
         'editing_note': editing_note,
         'strain_autocomplete_url': reverse('strains_api:strain_autocomplete'),
     }
-    return context, status
 
 
 @login_required
@@ -230,7 +229,7 @@ def journal_create(request):
         return render(
             request,
             'dashboard/journal.html',
-            _journal_context(request.user, form=form, status=400)[0],
+            _journal_context(request.user, form=form),
             status=400,
         )
 
@@ -255,7 +254,7 @@ def journal_update(request, note_id):
         return render(
             request,
             'dashboard/journal.html',
-            _journal_context(request.user, form=form, editing_note=note, status=400)[0],
+            _journal_context(request.user, form=form, editing_note=note),
             status=400,
         )
 

@@ -44,7 +44,9 @@
       {% for favorite in recent_favorites %}
         <article class="dashboard-card">
           <p class="dashboard-card__eyebrow">{% trans "Favorito" %}</p>
-          <h3 class="dashboard-card__title">{{ favorite.strain.name }}</h3>
+          <h3 class="dashboard-card__title">
+            <a class="dashboard-inline-link" href="{% url 'strain_detail' favorite.strain.slug %}">{{ favorite.strain.name }}</a>
+          </h3>
           <div class="dashboard-card__meta">
             <span class="dashboard-chip">{{ favorite.strain.get_category_display }}</span>
           </div>
@@ -66,7 +68,9 @@
     <div class="dashboard-list">
       {% for comment in recent_comments %}
         <article class="dashboard-list__item">
-          <h3 class="dashboard-list__title">{{ comment.strain.name }}</h3>
+          <h3 class="dashboard-list__title">
+            <a class="dashboard-inline-link" href="{% url 'strain_detail' comment.strain.slug %}">{{ comment.strain.name }}</a>
+          </h3>
           <div class="dashboard-list__meta">
             <span class="dashboard-status dashboard-status--{{ comment.status }}">{{ comment.get_status_display }}</span>
             <span class="dashboard-chip">{{ comment.get_reaction_display }}</span>
