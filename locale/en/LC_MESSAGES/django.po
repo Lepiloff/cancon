@@ -723,6 +723,257 @@ msgstr "email address"
 msgid "Cookie consent preferences"
 msgstr ""
 
+# -----------------------------------------------------------------------
+# Dashboard / User Cabinet
+# -----------------------------------------------------------------------
+
+msgid "Mi cuenta"
+msgstr "My account"
+
+msgid "Área privada"
+msgstr "Private area"
+
+msgid "Gestiona tus favoritos, comentarios y diario privado en un solo lugar."
+msgstr "Manage your favorites, comments, and private journal in one place."
+
+msgid "Cuenta"
+msgstr "Account"
+
+msgid "Visible solo para ti"
+msgstr "Only visible to you"
+
+msgid "Ir al diario"
+msgstr "Go to journal"
+
+msgid "Navegación del cabinet"
+msgstr "Cabinet navigation"
+
+msgid "Secciones"
+msgstr "Sections"
+
+msgid "Resumen"
+msgstr "Overview"
+
+msgid "Favoritos"
+msgstr "Favorites"
+
+msgid "Comentarios"
+msgstr "Comments"
+
+msgid "Diario"
+msgstr "Journal"
+
+msgid "Ajustes"
+msgstr "Settings"
+
+# Dashboard overview
+
+msgid "Panel"
+msgstr "Dashboard"
+
+msgid "Resumen rápido de favoritos, comentarios y diario privado."
+msgstr "Quick overview of your favorites, comments, and private journal."
+
+msgid "Vista rápida de tu actividad privada."
+msgstr "Quick view of your private activity."
+
+msgid "Variedades guardadas"
+msgstr "Saved strains"
+
+msgid "Opiniones publicadas o en revisión"
+msgstr "Published or pending reviews"
+
+msgid "Notas"
+msgstr "Notes"
+
+msgid "Entradas privadas del diario"
+msgstr "Private journal entries"
+
+msgid "Favoritos recientes"
+msgstr "Recent favorites"
+
+msgid "Favorito"
+msgstr "Favorite"
+
+msgid "Aún no tienes favoritos."
+msgstr "You have no favorites yet."
+
+msgid "Comentarios recientes"
+msgstr "Recent comments"
+
+msgid "Aún no has dejado comentarios."
+msgstr "You haven't left any comments yet."
+
+msgid "Notas recientes"
+msgstr "Recent notes"
+
+msgid "Aún no has creado notas."
+msgstr "You haven't created any notes yet."
+
+# Dashboard favorites
+
+msgid "Las variedades que guardaste para volver a ellas después."
+msgstr "The strains you saved to come back to later."
+
+msgid "Tus favoritos"
+msgstr "Your favorites"
+
+msgid "Solo tú puedes ver esta lista."
+msgstr "Only you can see this list."
+
+msgid "Marca una variedad como favorita para verla aquí."
+msgstr "Mark a strain as a favorite to see it here."
+
+# Dashboard comments
+
+msgid "Opiniones que dejaste sobre variedades."
+msgstr "Reviews you left on strains."
+
+msgid "Tus comentarios"
+msgstr "Your comments"
+
+msgid "Incluye estados pendientes o rechazados para que puedas revisarlos."
+msgstr "Includes pending or rejected ones so you can review them."
+
+msgid "Cuando publiques una opinión, aparecerá aquí."
+msgstr "When you post a review, it will appear here."
+
+# Dashboard journal
+
+msgid "Notas privadas sobre tu experiencia de consumo."
+msgstr "Private notes about your consumption experience."
+
+msgid "Editar nota"
+msgstr "Edit note"
+
+msgid "Nueva nota"
+msgstr "New note"
+
+msgid "Puedes guardar el nombre de la variedad manualmente o elegir una coincidencia desde autocomplete."
+msgstr "You can type the strain name manually or pick a match from autocomplete."
+
+msgid "No se encontraron coincidencias."
+msgstr "No matches found."
+
+msgid "Variedad"
+msgstr "Strain"
+
+msgid "Limpiar"
+msgstr "Clear"
+
+msgid "Escribe al menos 2 letras para ver coincidencias."
+msgstr "Type at least 2 letters to see matches."
+
+msgid "Fecha"
+msgstr "Date"
+
+msgid "Método"
+msgstr "Method"
+
+msgid "Ánimo antes"
+msgstr "Mood before"
+
+msgid "Ánimo después"
+msgstr "Mood after"
+
+msgid "Actualizar nota"
+msgstr "Update note"
+
+msgid "Guardar nota"
+msgstr "Save note"
+
+msgid "Cancelar edición"
+msgstr "Cancel editing"
+
+msgid "Entradas"
+msgstr "Entries"
+
+msgid "Editar"
+msgstr "Edit"
+
+msgid "¿Eliminar esta nota privada?"
+msgstr "Delete this private note?"
+
+msgid "Eliminar"
+msgstr "Delete"
+
+msgid "Tus notas privadas aparecerán aquí y solo serán visibles para ti."
+msgstr "Your private notes will appear here and will only be visible to you."
+
+# Dashboard settings
+
+msgid "Configuración"
+msgstr "Settings"
+
+msgid "Resumen de tu cuenta y preferencias básicas."
+msgstr "Overview of your account and basic preferences."
+
+msgid "Nombre público"
+msgstr "Public name"
+
+msgid "Correo"
+msgstr "Email"
+
+msgid "No registrado"
+msgstr "Not recorded"
+
+msgid "Este nombre se mostrará en tus comentarios públicos."
+msgstr "This name will be shown on your public comments."
+
+msgid "Guardar cambios"
+msgstr "Save changes"
+
+# Journal form validation
+
+msgid "Añade una variedad o un nombre manual para la entrada."
+msgstr "Add a strain or manual name for the entry."
+
+# Consumption method choices
+
+msgid "Fumar"
+msgstr "Smoke"
+
+msgid "Vapear"
+msgstr "Vape"
+
+msgid "Comestible"
+msgstr "Edible"
+
+msgid "Tintura"
+msgstr "Tincture"
+
+msgid "Tópico"
+msgstr "Topical"
+
+msgid "Otro"
+msgstr "Other"
+
+msgid "Nota sin título"
+msgstr "Untitled note"
+
+# Comment status and reaction choices
+
+msgid "Aprobado"
+msgstr "Approved"
+
+msgid "Pendiente"
+msgstr "Pending"
+
+msgid "Rechazado"
+msgstr "Rejected"
+
+msgid "Me gusta"
+msgstr "Thumbs up"
+
+msgid "No me gusta"
+msgstr "Thumbs down"
+
+msgid "display name"
+msgstr "display name"
+
+msgid "Anonymous"
+msgstr "Anonymous"
+
 #~ msgid "Catálogo de Variedades de Marihuana | Tu Guía Completa"
 #~ msgstr "Cannabis Strains Catalog | Your Complete Guide"
 

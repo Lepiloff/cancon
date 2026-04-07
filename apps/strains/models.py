@@ -7,6 +7,7 @@ from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.template.defaultfilters import slugify
+from django.utils.translation import gettext_lazy as _
 
 from apps.strains.mixins import TranslationMixin
 
@@ -19,14 +20,14 @@ CATEGORY_CHOICES = [
 ]
 
 COMMENT_REACTION_CHOICES = [
-    ('thumbs_up', 'Thumbs Up'),
-    ('thumbs_down', 'Thumbs Down'),
+    ('thumbs_up', _('Me gusta')),
+    ('thumbs_down', _('No me gusta')),
 ]
 
 COMMENT_STATUS_CHOICES = [
-    ('approved', 'Approved'),
-    ('pending', 'Pending'),
-    ('rejected', 'Rejected'),
+    ('approved', _('Aprobado')),
+    ('pending', _('Pendiente')),
+    ('rejected', _('Rechazado')),
 ]
 
 

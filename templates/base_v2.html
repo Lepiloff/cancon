@@ -123,11 +123,10 @@
                 </div>
                 <div class="header-v2__mobile-auth">
                     {% if user.is_authenticated %}
-                    <span class="header-v2__user">
+                    <a href="{% url 'dashboard' %}" class="auth-btn auth-btn--secondary header-v2__mobile-dashboard-link">
                         <span class="header-v2__user-icon">{{ user.email|first|upper }}</span>
-                        {{ user.email }}
-                    </span>
-                    <a href="{% url 'dashboard' %}" class="auth-btn auth-btn--secondary header-v2__mobile-dashboard-link">{% trans "Mi cuenta" %}</a>
+                        {% trans "Mi cuenta" %}
+                    </a>
                     <a href="{% url 'account_logout' %}" class="auth-btn auth-btn--secondary">{% trans "Cerrar sesión" %}</a>
                     {% else %}
                     <a href="{% url 'account_login' %}" class="auth-btn auth-btn--primary">{% trans "Iniciar sesión" %}</a>
@@ -170,13 +169,10 @@
             <div class="header-v2__auth">
                 {% if user.is_authenticated %}
                 <a href="{% url 'dashboard' %}" class="header-v2__auth-link header-v2__auth-link--login">{% trans "Mi cuenta" %}</a>
-                <span class="header-v2__user">
-                    <span class="header-v2__user-icon">{{ user.email|first|upper }}</span>
-                    {{ user.email }}
-                    <a href="{% url 'account_logout' %}" class="header-v2__user-logout" aria-label="{% trans 'Cerrar sesión' %}">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                    </a>
-                </span>
+                <a href="{% url 'dashboard' %}" class="header-v2__user-icon" aria-label="{% trans 'Mi cuenta' %}">{{ user.email|first|upper }}</a>
+                <a href="{% url 'account_logout' %}" class="header-v2__user-logout" aria-label="{% trans 'Cerrar sesión' %}">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </a>
                 {% else %}
                 <a href="{% url 'account_login' %}" class="header-v2__auth-link header-v2__auth-link--login">{% trans "Iniciar sesión" %}</a>
                 {% endif %}

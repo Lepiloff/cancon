@@ -22,6 +22,14 @@ class CustomUserChangeForm(UserChangeForm):
         fields = ("email", "display_name")
 
 
+class DisplayNameForm(forms.Form):
+    display_name = forms.CharField(
+        required=False,
+        max_length=50,
+        label=_('Nombre público'),
+    )
+
+
 class ConsumptionNoteForm(forms.Form):
     date = forms.DateField(
         required=False,
@@ -52,7 +60,7 @@ class ConsumptionNoteForm(forms.Form):
     )
     method = forms.ChoiceField(
         required=False,
-        choices=ConsumptionNote.METHOD_CHOICES,
+        choices=[('', '---------')] + ConsumptionNote.METHOD_CHOICES,
     )
 
     def clean(self):

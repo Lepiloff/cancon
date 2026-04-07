@@ -10,7 +10,7 @@ from django.views.decorators.http import require_GET, require_POST
 
 from apps.strains.models import FavoriteStrain, Strain, StrainComment
 
-from .forms import ConsumptionNoteForm
+from .forms import ConsumptionNoteForm, DisplayNameForm
 from .models import ConsumptionNote
 
 
@@ -207,10 +207,20 @@ def dashboard_journal(request):
 
 @login_required
 def dashboard_settings(request):
+    if request.method == 'POST':
+        form = DisplayNameForm(request.POST)
+        if form.is_valid():
+            request.user.display_name = form.cleaned_data['display_name']
+            request.user.save(update_fields=['display_name'])
+            return redirect(reverse('dashboard_settings'))
+    else:
+        form = DisplayNameForm(initial={'display_name': request.user.display_name})
+
     context = {
         **_dashboard_counts(request.user),
         'dashboard_section': 'settings',
         'account_user': request.user,
+        'display_name_form': form,
     }
     return render(request, 'dashboard/settings.html', context)
 

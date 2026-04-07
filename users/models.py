@@ -52,12 +52,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 class ConsumptionNote(models.Model):
     METHOD_CHOICES = [
-        ('smoke', _('Smoke')),
-        ('vape', _('Vape')),
-        ('edible', _('Edible')),
-        ('tincture', _('Tincture')),
-        ('topical', _('Topical')),
-        ('other', _('Other')),
+        ('smoke', _('Fumar')),
+        ('vape', _('Vapear')),
+        ('edible', _('Comestible')),
+        ('tincture', _('Tintura')),
+        ('topical', _('Tópico')),
+        ('other', _('Otro')),
     ]
 
     user = models.ForeignKey(
@@ -99,7 +99,7 @@ class ConsumptionNote(models.Model):
     def strain_label(self):
         if self.strain:
             return self.strain.name
-        return self.strain_name_text or _('Untitled note')
+        return self.strain_name_text or _('Nota sin título')
 
     def __str__(self):
         return f"{self.user_id}:{self.strain_label}:{self.date}"
