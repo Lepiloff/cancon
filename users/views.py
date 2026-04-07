@@ -61,9 +61,6 @@ def _save_consumption_note(user, form, note=None):
     note.strain_name_text = form.cleaned_data['strain_name_text'] or (strain.name if strain else '')
     note.date = form.cleaned_data['date']
     note.notes = form.cleaned_data.get('notes', '')
-    note.mood_before = form.cleaned_data.get('mood_before')
-    note.mood_after = form.cleaned_data.get('mood_after')
-    note.method = form.cleaned_data.get('method', '')
     note.save()
     return note
 
@@ -114,9 +111,6 @@ def _journal_form_for_note(note=None):
             'strain_id': note.strain_id,
             'strain_name_text': note.strain_name_text or (note.strain.name if note.strain else ''),
             'notes': note.notes,
-            'mood_before': note.mood_before,
-            'mood_after': note.mood_after,
-            'method': note.method,
         }
     )
 

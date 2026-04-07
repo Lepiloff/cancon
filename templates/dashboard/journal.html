@@ -78,37 +78,6 @@
         </ul>
       {% endif %}
     </div>
-    <div class="dashboard-form__row">
-      <div class="dashboard-form__field">
-        <label for="{{ note_form.method.id_for_label }}">{% trans "Método" %}</label>
-        {{ note_form.method }}
-        {% if note_form.method.errors %}
-          <ul class="dashboard-form__errors">
-            {% for error in note_form.method.errors %}<li>{{ error }}</li>{% endfor %}
-          </ul>
-        {% endif %}
-      </div>
-      <div class="dashboard-form__field">
-        <label for="{{ note_form.mood_before.id_for_label }}">{% trans "Ánimo antes" %}</label>
-        {{ note_form.mood_before }}
-        {% if note_form.mood_before.errors %}
-          <ul class="dashboard-form__errors">
-            {% for error in note_form.mood_before.errors %}<li>{{ error }}</li>{% endfor %}
-          </ul>
-        {% endif %}
-      </div>
-    </div>
-    <div class="dashboard-form__row">
-      <div class="dashboard-form__field">
-        <label for="{{ note_form.mood_after.id_for_label }}">{% trans "Ánimo después" %}</label>
-        {{ note_form.mood_after }}
-        {% if note_form.mood_after.errors %}
-          <ul class="dashboard-form__errors">
-            {% for error in note_form.mood_after.errors %}<li>{{ error }}</li>{% endfor %}
-          </ul>
-        {% endif %}
-      </div>
-    </div>
     <div class="dashboard-form__footer">
       <button type="submit" class="auth-btn auth-btn--primary">
         {% if editing_note %}
@@ -139,9 +108,6 @@
             <h3 class="dashboard-note__title">{{ item.strain_label }}</h3>
             <div class="dashboard-note__meta">
               <span class="dashboard-chip">{{ item.date }}</span>
-              {% if item.method %}
-                <span class="dashboard-chip">{{ item.get_method_display }}</span>
-              {% endif %}
             </div>
           </div>
           <div class="dashboard-note__links">
@@ -155,14 +121,6 @@
         {% if item.notes %}
           <p class="dashboard-note__body">{{ item.notes }}</p>
         {% endif %}
-        <div class="dashboard-note__meta">
-          {% if item.mood_before %}
-            <span>{% trans "Ánimo antes" %}: {{ item.mood_before }}/5</span>
-          {% endif %}
-          {% if item.mood_after %}
-            <span>{% trans "Ánimo después" %}: {{ item.mood_after }}/5</span>
-          {% endif %}
-        </div>
       </article>
     {% empty %}
       <div class="dashboard-empty">

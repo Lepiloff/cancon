@@ -97,25 +97,83 @@ h1.sd-name:before {
     font-weight: 600;
 }
 
-.sd-comments-section__subtitle {
-    margin: 6px 0 0;
+/* --- Collapsible comments toggle --- */
+.sd-comments-section {
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background: var(--bg-card);
+}
+
+.sd-comments-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    cursor: pointer;
+    list-style: none;
     color: var(--text-secondary);
     font-size: 0.92rem;
+    transition: color 0.2s;
+}
+
+.sd-comments-toggle::-webkit-details-marker {
+    display: none;
+}
+
+.sd-comments-toggle:hover {
+    color: var(--text-primary);
+}
+
+.sd-comments-toggle__icon {
+    flex-shrink: 0;
+    color: var(--text-muted);
+}
+
+.sd-comments-toggle__label {
+    font-weight: 600;
+    color: inherit;
+}
+
+.sd-comments-toggle__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.06);
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.sd-comments-toggle__chevron {
+    margin-left: auto;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+    color: var(--text-muted);
+}
+
+.sd-comments-section[open] .sd-comments-toggle__chevron {
+    transform: rotate(180deg);
+}
+
+.sd-comments-body {
+    padding: 0 20px 20px;
 }
 
 .sd-comment-form-card,
 .sd-comment-guest-card,
 .sd-comment {
     border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-lg);
-    background: var(--bg-card);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.02);
 }
 
 .sd-comment-form-card,
 .sd-comment-guest-card {
-    padding: 22px;
-    margin-top: 18px;
+    padding: 18px;
 }
 
 .sd-comment-form-card__head {
@@ -123,20 +181,24 @@ h1.sd-name:before {
     justify-content: space-between;
     align-items: baseline;
     gap: 16px;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
 }
 
-.sd-comment-form-card__head h3,
-.sd-comment-guest-card h3 {
+.sd-comment-form-card__head h3 {
     margin: 0;
     font-family: var(--font-display);
+    font-size: 1rem;
     color: var(--text-primary);
+}
+
+.sd-comment-guest-card p {
+    margin: 0 0 12px;
 }
 
 .sd-comment-form-card__hint,
 .sd-comment-guest-card p {
     color: var(--text-secondary);
-    font-size: 0.92rem;
+    font-size: 0.88rem;
 }
 
 .sd-comment-status {
@@ -178,7 +240,7 @@ h1.sd-name:before {
 
 .sd-comment-form__field textarea {
     width: 100%;
-    min-height: 120px;
+    min-height: 90px;
     resize: vertical;
     padding: 12px 14px;
     border-radius: var(--radius-md);
@@ -240,19 +302,19 @@ h1.sd-name:before {
 
 .sd-comments-list {
     display: grid;
-    gap: 14px;
-    margin-top: 18px;
+    gap: 10px;
+    margin-top: 14px;
 }
 
 .sd-comment {
-    padding: 18px 20px;
+    padding: 14px 16px;
 }
 
 .sd-comment__head {
     display: flex;
     justify-content: space-between;
-    gap: 14px;
-    margin-bottom: 14px;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
 .sd-comment__meta {
@@ -292,8 +354,8 @@ h1.sd-name:before {
 }
 
 .sd-comment__block h3 {
-    margin: 0 0 6px;
-    font-size: 0.82rem;
+    margin: 0 0 4px;
+    font-size: 0.78rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--text-secondary);
@@ -302,12 +364,14 @@ h1.sd-name:before {
 .sd-comment__block p {
     margin: 0;
     color: var(--text-primary);
-    line-height: 1.6;
+    font-size: 0.92rem;
+    line-height: 1.5;
 }
 
 .sd-comments-empty {
-    margin-top: 18px;
-    padding: 14px 16px;
+    margin-top: 14px;
+    padding: 12px 14px;
+    font-size: 0.88rem;
     border-radius: var(--radius-md);
     background: rgba(255, 255, 255, 0.03);
     color: var(--text-secondary);

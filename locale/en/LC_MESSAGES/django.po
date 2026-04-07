@@ -974,6 +974,85 @@ msgstr "display name"
 msgid "Anonymous"
 msgstr "Anonymous"
 
+# -----------------------------------------------------------------------
+# Strain detail - comments section
+# -----------------------------------------------------------------------
+
+msgid "Comentarios de la Comunidad"
+msgstr "Community Comments"
+
+msgid "comentarios aprobados de usuarios registrados"
+msgstr "approved comments from registered users"
+
+msgid "Comparte tu experiencia"
+msgstr "Share your experience"
+
+msgid "Puedes actualizar tu comentario en cualquier momento."
+msgstr "You can update your comment anytime."
+
+msgid "Tu comentario está pendiente de revisión antes de aparecer públicamente."
+msgstr "Your comment is pending review before appearing publicly."
+
+msgid "Tu comentario no pudo publicarse. Ajusta el texto e inténtalo de nuevo."
+msgstr "Your comment couldn't be published. Adjust the text and try again."
+
+msgid "Tu comentario está publicado."
+msgstr "Your comment is published."
+
+msgid "Pros"
+msgstr "Pros"
+
+msgid "Contras"
+msgstr "Cons"
+
+msgid "¿Qué te gustó de esta variedad?"
+msgstr "What did you like about this strain?"
+
+msgid "¿Qué no te convenció o qué efectos negativos notaste?"
+msgstr "What didn't convince you or what negative effects did you notice?"
+
+msgid "Valoración rápida"
+msgstr "Quick rating"
+
+msgid "Pulgar arriba"
+msgstr "Thumbs up"
+
+msgid "Pulgar abajo"
+msgstr "Thumbs down"
+
+msgid "Enviar comentario"
+msgstr "Submit comment"
+
+msgid "Actualizar comentario"
+msgstr "Update comment"
+
+msgid "Todavía no hay comentarios aprobados para esta variedad."
+msgstr "There are no approved comments for this strain yet."
+
+msgid "Ver más comentarios"
+msgstr "See more comments"
+
+msgid "¿Quieres dejar tu comentario?"
+msgstr "Want to leave your comment?"
+
+msgid "Regístrate para publicar pros, contras y tu valoración rápida de esta variedad."
+msgstr "Sign up to post pros, cons, and your quick rating of this strain."
+
+msgid "Tu comentario ya está publicado."
+msgstr "Your comment is already published."
+
+msgid "Tu comentario se guardó y está pendiente de revisión."
+msgstr "Your comment was saved and is pending review."
+
+msgid "No se pudo guardar tu comentario. Inténtalo de nuevo."
+msgstr "Could not save your comment. Please try again."
+
+msgid "Añade pros o contras antes de enviar."
+msgstr "Add pros or cons before submitting."
+
+msgid "Añade pros, contras o ambos."
+msgstr "Add pros, cons, or both."
+
 #~ msgid "Catálogo de Variedades de Marihuana | Tu Guía Completa"
 #~ msgstr "Cannabis Strains Catalog | Your Complete Guide"
 

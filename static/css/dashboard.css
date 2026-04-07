@@ -419,6 +419,12 @@
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-primary);
   font: inherit;
+  color-scheme: dark;
+}
+
+.dashboard-form__field select option {
+  background: #1a2220;
+  color: #e8e8e8;
 }
 
 .dashboard-form__field textarea {

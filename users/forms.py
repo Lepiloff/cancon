@@ -4,7 +4,6 @@ from django.utils.translation import gettext_lazy as _
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
-from .models import ConsumptionNote
 from .models import CustomUser
 
 
@@ -45,22 +44,6 @@ class ConsumptionNoteForm(forms.Form):
         required=False,
         max_length=5000,
         widget=forms.Textarea(attrs={'rows': 5}),
-    )
-    mood_before = forms.IntegerField(
-        required=False,
-        min_value=1,
-        max_value=5,
-        widget=forms.NumberInput(attrs={'min': 1, 'max': 5}),
-    )
-    mood_after = forms.IntegerField(
-        required=False,
-        min_value=1,
-        max_value=5,
-        widget=forms.NumberInput(attrs={'min': 1, 'max': 5}),
-    )
-    method = forms.ChoiceField(
-        required=False,
-        choices=[('', '---------')] + ConsumptionNote.METHOD_CHOICES,
     )
 
     def clean(self):
