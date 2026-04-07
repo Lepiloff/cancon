@@ -15,6 +15,10 @@
 
   <div class="dashboard-grid dashboard-grid--two">
     <article class="dashboard-card">
+      <p class="dashboard-card__eyebrow">{% trans "Nombre público" %}</p>
+      <h3 class="dashboard-card__title">{{ account_user.get_display_name }}</h3>
+    </article>
+    <article class="dashboard-card">
       <p class="dashboard-card__eyebrow">{% trans "Correo" %}</p>
       <h3 class="dashboard-card__title">{{ account_user.email }}</h3>
     </article>

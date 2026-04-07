@@ -10,6 +10,7 @@ from .managers import CustomUserManager
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(_("email address"), unique=True)
+    display_name = models.CharField(_("display name"), max_length=50, blank=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(default=timezone.now)
@@ -24,6 +25,26 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
 
     objects = CustomUserManager()
+
+    def get_display_name(self):
+        display_name = (self.display_name or "").strip()
+        if display_name:
+            return display_name
+        return (self.email or "").split("@")[0]
+
+    def get_public_display_name(self):
+        display_name = (self.display_name or "").strip()
+        if display_name:
+            return display_name
+
+        local_part = (self.email or "").split("@")[0].strip()
+        if not local_part:
+            return _("Anonymous")
+        if len(local_part) <= 2:
+            return f"{local_part[:1]}***"
+        if len(local_part) <= 4:
+            return f"{local_part[:2]}***"
+        return f"{local_part[:2]}***{local_part[-1]}"
 
     def __str__(self):
         return self.email

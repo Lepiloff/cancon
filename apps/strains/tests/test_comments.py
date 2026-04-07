@@ -46,6 +46,47 @@ class StrainCommentsViewTest(TestCase):
         self.assertNotContains(response, 'Pending')
         self.assertEqual(response.context['approved_comments_count'], 1)
 
+    def test_strain_detail_uses_public_display_name_without_email_leak(self):
+        user = User.objects.create_user(
+            email='privacycheck@example.com',
+            password='testpass123',
+        )
+        StrainComment.objects.create(
+            user=user,
+            strain=self.strain,
+            pros='Relaxing',
+            cons='Dry mouth',
+            reaction='thumbs_up',
+            status='approved',
+        )
+
+        response = self.client.get(reverse('strain_detail', args=[self.strain.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'pr***k')
+        self.assertNotContains(response, 'privacycheck@example.com')
+
+    def test_strain_detail_uses_explicit_display_name_when_present(self):
+        user = User.objects.create_user(
+            email='named@example.com',
+            password='testpass123',
+            display_name='Lucia',
+        )
+        StrainComment.objects.create(
+            user=user,
+            strain=self.strain,
+            pros='Relaxing',
+            cons='Dry mouth',
+            reaction='thumbs_up',
+            status='approved',
+        )
+
+        response = self.client.get(reverse('strain_detail', args=[self.strain.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Lucia')
+        self.assertNotContains(response, 'named@example.com')
+
 
 class StrainCommentsApiTest(TestCase):
     def setUp(self):

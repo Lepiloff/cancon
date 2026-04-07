@@ -48,6 +48,24 @@ class UsersManagersTests(TestCase):
             User.objects.create_superuser(
                 email="super@user.com", password="foo", is_superuser=False)
 
+    def test_get_public_display_name_prefers_display_name(self):
+        User = get_user_model()
+        user = User.objects.create_user(
+            email="normal@user.com",
+            password="foo",
+            display_name="Juan",
+        )
+
+        self.assertEqual(user.get_display_name(), "Juan")
+        self.assertEqual(user.get_public_display_name(), "Juan")
+
+    def test_get_public_display_name_obfuscates_email_when_missing(self):
+        User = get_user_model()
+        user = User.objects.create_user(email="normaluser@user.com", password="foo")
+
+        self.assertEqual(user.get_display_name(), "normaluser")
+        self.assertEqual(user.get_public_display_name(), "no***r")
+
 
 class DashboardViewTests(TestCase):
 
