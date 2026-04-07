@@ -2863,9 +2863,9 @@ select:focus-visible,
 }
 
 .favorite-toggle.is-active {
-  background: rgba(0, 230, 118, 0.14);
-  border-color: rgba(0, 230, 118, 0.38);
-  color: #c9ffd9;
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #f87171;
 }
 
 .favorite-toggle__icon {

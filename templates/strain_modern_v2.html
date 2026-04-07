@@ -21,7 +21,7 @@
 {% block twitter_image %}{% if strain.img %}<meta name="twitter:image" content="{{ strain.img.url }}">{% else %}<meta name="twitter:image" content="{% static 'img/cannamente_bg_THC_CBD_1140x320.png' %}">{% endif %}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" type="text/css" href="{% static 'css/strain-detail-v2.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/strain-detail-v2.css' %}?v=2" />
 {% endblock %}
 
 {% block content %}
