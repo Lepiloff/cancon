@@ -1,5 +1,6 @@
 import json
 
+from django.db.models import Q
 from django.core.paginator import Paginator
 from django.http import Http404
 from django.http import JsonResponse
@@ -164,3 +165,33 @@ def comment_list(request):
         'has_more': page.has_next(),
         'next_page': page.next_page_number() if page.has_next() else None,
     })
+
+
+@require_GET
+def strain_autocomplete(request):
+    query = (request.GET.get('q') or '').strip()
+    if not query:
+        return JsonResponse({'results': []})
+
+    strains = (
+        Strain.objects.filter(active=True)
+        .filter(
+            Q(name__icontains=query)
+            | Q(slug__icontains=query)
+            | Q(alternative_names__name__icontains=query)
+        )
+        .distinct()
+        .order_by('name')[:10]
+    )
+
+    results = [
+        {
+            'id': strain.id,
+            'name': strain.name,
+            'slug': strain.slug,
+            'category': strain.category,
+            'label': f'{strain.name} ({strain.get_category_display()})',
+        }
+        for strain in strains
+    ]
+    return JsonResponse({'results': results})

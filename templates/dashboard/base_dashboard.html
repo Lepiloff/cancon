@@ -1,0 +1,74 @@
+{% extends "base_auth.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% block dashboard_page_title %}{% trans "Mi cuenta" %}{% endblock dashboard_page_title %} — Cannamente{% endblock title %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}" />
+{% endblock extra_css %}
+
+{% block content %}
+<section class="dashboard-page dashboard-page--{{ dashboard_section|default:'overview' }}">
+  <div class="dashboard-page__glow" aria-hidden="true"></div>
+  <div class="dashboard-page__inner">
+    <header class="dashboard-hero">
+      <span class="dashboard-hero__badge">{% trans "Área privada" %}</span>
+      <div class="dashboard-hero__grid">
+        <div class="dashboard-hero__copy">
+          <h1 class="dashboard-hero__title">{% block dashboard_title %}{% trans "Mi cuenta" %}{% endblock dashboard_title %}</h1>
+          <p class="dashboard-hero__subtitle">{% block dashboard_subtitle %}{% trans "Gestiona tus favoritos, comentarios y diario privado en un solo lugar." %}{% endblock dashboard_subtitle %}</p>
+        </div>
+        <div class="dashboard-hero__panel">
+          <span class="dashboard-hero__panel-label">{% trans "Cuenta" %}</span>
+          <strong class="dashboard-hero__panel-value">{{ user.email }}</strong>
+          <span class="dashboard-hero__panel-note">{% trans "Visible solo para ti" %}</span>
+        </div>
+      </div>
+      <div class="dashboard-hero__actions">
+        {% block dashboard_actions %}
+          <a class="auth-btn auth-btn--primary" href="{% url 'dashboard_journal' %}">{% trans "Ir al diario" %}</a>
+          <a class="auth-btn auth-btn--secondary" href="{% url 'account_logout' %}">{% trans "Cerrar sesión" %}</a>
+        {% endblock dashboard_actions %}
+      </div>
+    </header>
+
+    <div class="dashboard-layout">
+      <aside class="dashboard-nav" aria-label="{% trans 'Navegación del cabinet' %}">
+        <p class="dashboard-nav__label">{% trans "Secciones" %}</p>
+        <nav class="dashboard-nav__list" data-dashboard-nav>
+          <a href="{% url 'dashboard' %}" class="dashboard-nav__link{% if dashboard_section == 'overview' %} dashboard-nav__link--active{% endif %}"{% if dashboard_section == 'overview' %} aria-current="page"{% endif %}>
+            <span>{% trans "Resumen" %}</span>
+            <span class="dashboard-chip">{{ favorite_count|add:comment_count|add:note_count }}</span>
+          </a>
+          <a href="{% url 'dashboard_favorites' %}" class="dashboard-nav__link{% if dashboard_section == 'favorites' %} dashboard-nav__link--active{% endif %}"{% if dashboard_section == 'favorites' %} aria-current="page"{% endif %}>
+            <span>{% trans "Favoritos" %}</span>
+            <span class="dashboard-chip">{{ favorite_count }}</span>
+          </a>
+          <a href="{% url 'dashboard_comments' %}" class="dashboard-nav__link{% if dashboard_section == 'comments' %} dashboard-nav__link--active{% endif %}"{% if dashboard_section == 'comments' %} aria-current="page"{% endif %}>
+            <span>{% trans "Comentarios" %}</span>
+            <span class="dashboard-chip">{{ comment_count }}</span>
+          </a>
+          <a href="{% url 'dashboard_journal' %}" class="dashboard-nav__link{% if dashboard_section == 'journal' %} dashboard-nav__link--active{% endif %}"{% if dashboard_section == 'journal' %} aria-current="page"{% endif %}>
+            <span>{% trans "Diario" %}</span>
+            <span class="dashboard-chip">{{ note_count }}</span>
+          </a>
+          <a href="{% url 'dashboard_settings' %}" class="dashboard-nav__link{% if dashboard_section == 'settings' %} dashboard-nav__link--active{% endif %}"{% if dashboard_section == 'settings' %} aria-current="page"{% endif %}>
+            <span>{% trans "Ajustes" %}</span>
+          </a>
+        </nav>
+      </aside>
+
+      <div class="dashboard-panel">
+        {% block dashboard_content %}{% endblock dashboard_content %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock content %}
+
+{% block page_scripts %}
+{{ block.super }}
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock page_scripts %}

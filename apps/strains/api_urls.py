@@ -10,4 +10,5 @@ urlpatterns = [
     path('favorites/status/', api_views.favorite_status, name='favorite_status'),
     path('comments/submit/', api_views.comment_submit, name='comment_submit'),
     path('comments/list/', api_views.comment_list, name='comment_list'),
+    path('autocomplete/', api_views.strain_autocomplete, name='strain_autocomplete'),
 ]

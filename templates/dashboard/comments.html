@@ -1,0 +1,44 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% load i18n %}
+
+{% block dashboard_page_title %}{% trans "Comentarios" %}{% endblock %}
+{% block dashboard_title %}{% trans "Comentarios" %}{% endblock %}
+{% block dashboard_subtitle %}{% trans "Opiniones que dejaste sobre variedades." %}{% endblock %}
+
+{% block dashboard_content %}
+<section class="dashboard-section">
+  <div class="dashboard-section__head">
+    <div>
+      <h2 class="dashboard-section__title">{% trans "Tus comentarios" %}</h2>
+      <p class="dashboard-section__subtitle">{% trans "Incluye estados pendientes o rechazados para que puedas revisarlos." %}</p>
+    </div>
+  </div>
+
+  <div class="dashboard-list">
+    {% for item in comment_items %}
+      <article class="dashboard-list__item">
+        <div class="dashboard-note__head">
+          <div>
+            <h3 class="dashboard-note__title">{{ item.strain.name }}</h3>
+            <div class="dashboard-list__meta">
+              <span class="dashboard-status dashboard-status--{{ item.status }}">{{ item.get_status_display }}</span>
+              <span class="dashboard-chip">{{ item.get_reaction_display }}</span>
+            </div>
+          </div>
+        </div>
+        {% if item.pros %}
+          <p class="dashboard-note__body">{{ item.pros }}</p>
+        {% endif %}
+        {% if item.cons %}
+          <p class="dashboard-note__body">{{ item.cons }}</p>
+        {% endif %}
+      </article>
+    {% empty %}
+      <div class="dashboard-empty">
+        <h3 class="dashboard-empty__title">{% trans "Aún no has dejado comentarios." %}</h3>
+        <p class="dashboard-empty__text">{% trans "Cuando publiques una opinión, aparecerá aquí." %}</p>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

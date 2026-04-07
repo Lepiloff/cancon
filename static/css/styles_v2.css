@@ -2484,6 +2484,77 @@ select:focus-visible,
   color: var(--text-primary);
 }
 
+/* Header auth shortcuts */
+.header-v2__auth {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-v2__auth-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-light);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s var(--ease-out), border-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
+}
+
+.header-v2__auth-link:hover {
+  border-color: rgba(0, 230, 118, 0.35);
+  background: rgba(0, 230, 118, 0.08);
+  color: var(--accent-green);
+}
+
+.header-v2__auth-link--cabinet {
+  white-space: nowrap;
+}
+
+.header-v2__user {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.header-v2__user-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(0, 230, 118, 0.12);
+  color: var(--accent-green);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.header-v2__user-logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  transition: background 0.2s var(--ease-out), color 0.2s var(--ease-out);
+}
+
+.header-v2__user-logout:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
 /* Hero mascot avatar */
 .hero-v2__mascot {
   width: 60px;
@@ -3569,6 +3640,13 @@ body.mobile-nav-open {
   gap: 4px;
 }
 
+.header-v2__mobile-auth {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
 /* Search dropdown */
 .header-v2__search-wrapper {
   position: relative;
@@ -3708,6 +3786,11 @@ body.mobile-nav-open {
 
   .header-v2__actions {
     display: none;
+  }
+
+  .header-v2__mobile-dashboard-link {
+    width: 100%;
+    text-align: center;
   }
 
   .hero-v2__mascot {

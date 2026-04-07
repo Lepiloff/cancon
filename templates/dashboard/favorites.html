@@ -1,0 +1,36 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% load i18n %}
+
+{% block dashboard_page_title %}{% trans "Favoritos" %}{% endblock %}
+{% block dashboard_title %}{% trans "Favoritos" %}{% endblock %}
+{% block dashboard_subtitle %}{% trans "Las variedades que guardaste para volver a ellas después." %}{% endblock %}
+
+{% block dashboard_content %}
+<section class="dashboard-section">
+  <div class="dashboard-section__head">
+    <div>
+      <h2 class="dashboard-section__title">{% trans "Tus favoritos" %}</h2>
+      <p class="dashboard-section__subtitle">{% trans "Solo tú puedes ver esta lista." %}</p>
+    </div>
+  </div>
+
+  <div class="dashboard-list">
+    {% for item in favorite_items %}
+      <article class="dashboard-list__item">
+        <h3 class="dashboard-list__title">{{ item.strain.name }}</h3>
+        <div class="dashboard-list__meta">
+          <span class="dashboard-chip">{{ item.strain.get_category_display }}</span>
+          {% if item.created_at %}
+            <span>{{ item.created_at }}</span>
+          {% endif %}
+        </div>
+      </article>
+    {% empty %}
+      <div class="dashboard-empty">
+        <h3 class="dashboard-empty__title">{% trans "Aún no tienes favoritos." %}</h3>
+        <p class="dashboard-empty__text">{% trans "Marca una variedad como favorita para verla aquí." %}</p>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

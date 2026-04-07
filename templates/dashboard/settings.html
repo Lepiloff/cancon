@@ -1,0 +1,33 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% load i18n %}
+
+{% block dashboard_page_title %}{% trans "Configuración" %}{% endblock %}
+{% block dashboard_title %}{% trans "Configuración" %}{% endblock %}
+{% block dashboard_subtitle %}{% trans "Resumen de tu cuenta y preferencias básicas." %}{% endblock %}
+
+{% block dashboard_content %}
+<section class="dashboard-section">
+  <div class="dashboard-section__head">
+    <div>
+      <h2 class="dashboard-section__title">{% trans "Cuenta" %}</h2>
+    </div>
+  </div>
+
+  <div class="dashboard-grid dashboard-grid--two">
+    <article class="dashboard-card">
+      <p class="dashboard-card__eyebrow">{% trans "Correo" %}</p>
+      <h3 class="dashboard-card__title">{{ account_user.email }}</h3>
+    </article>
+    <article class="dashboard-card">
+      <p class="dashboard-card__eyebrow">{% trans "Consentimiento de cookies" %}</p>
+      <h3 class="dashboard-card__title">
+        {% if account_user.cookie_consent_date %}
+          {{ account_user.cookie_consent_date }}
+        {% else %}
+          {% trans "No registrado" %}
+        {% endif %}
+      </h3>
+    </article>
+  </div>
+</section>
+{% endblock %}

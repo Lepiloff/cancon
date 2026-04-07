@@ -1,0 +1,103 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% load i18n %}
+
+{% block dashboard_page_title %}{% trans "Panel" %}{% endblock %}
+{% block dashboard_title %}{% trans "Panel" %}{% endblock %}
+{% block dashboard_subtitle %}{% trans "Resumen rápido de favoritos, comentarios y diario privado." %}{% endblock %}
+
+{% block dashboard_content %}
+<section class="dashboard-section">
+  <div class="dashboard-section__head">
+    <div>
+      <h2 class="dashboard-section__title">{% trans "Resumen" %}</h2>
+      <p class="dashboard-section__subtitle">{% trans "Vista rápida de tu actividad privada." %}</p>
+    </div>
+  </div>
+
+  <div class="dashboard-stats">
+    <article class="dashboard-stat">
+      <span class="dashboard-stat__label">{% trans "Favoritos" %}</span>
+      <span class="dashboard-stat__value">{{ favorite_count }}</span>
+      <span class="dashboard-stat__hint">{% trans "Variedades guardadas" %}</span>
+    </article>
+    <article class="dashboard-stat">
+      <span class="dashboard-stat__label">{% trans "Comentarios" %}</span>
+      <span class="dashboard-stat__value">{{ comment_count }}</span>
+      <span class="dashboard-stat__hint">{% trans "Opiniones publicadas o en revisión" %}</span>
+    </article>
+    <article class="dashboard-stat">
+      <span class="dashboard-stat__label">{% trans "Notas" %}</span>
+      <span class="dashboard-stat__value">{{ note_count }}</span>
+      <span class="dashboard-stat__hint">{% trans "Entradas privadas del diario" %}</span>
+    </article>
+  </div>
+</section>
+
+<section class="dashboard-section dashboard-section--split">
+  <div>
+    <div class="dashboard-section__head">
+      <div>
+        <h2 class="dashboard-section__title">{% trans "Favoritos recientes" %}</h2>
+      </div>
+    </div>
+    <div class="dashboard-grid dashboard-grid--two">
+      {% for favorite in recent_favorites %}
+        <article class="dashboard-card">
+          <p class="dashboard-card__eyebrow">{% trans "Favorito" %}</p>
+          <h3 class="dashboard-card__title">{{ favorite.strain.name }}</h3>
+          <div class="dashboard-card__meta">
+            <span class="dashboard-chip">{{ favorite.strain.get_category_display }}</span>
+          </div>
+        </article>
+      {% empty %}
+        <div class="dashboard-empty">
+          <h3 class="dashboard-empty__title">{% trans "Aún no tienes favoritos." %}</h3>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div>
+    <div class="dashboard-section__head">
+      <div>
+        <h2 class="dashboard-section__title">{% trans "Comentarios recientes" %}</h2>
+      </div>
+    </div>
+    <div class="dashboard-list">
+      {% for comment in recent_comments %}
+        <article class="dashboard-list__item">
+          <h3 class="dashboard-list__title">{{ comment.strain.name }}</h3>
+          <div class="dashboard-list__meta">
+            <span class="dashboard-status dashboard-status--{{ comment.status }}">{{ comment.get_status_display }}</span>
+            <span class="dashboard-chip">{{ comment.get_reaction_display }}</span>
+          </div>
+        </article>
+      {% empty %}
+        <div class="dashboard-empty">
+          <h3 class="dashboard-empty__title">{% trans "Aún no has dejado comentarios." %}</h3>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div>
+    <div class="dashboard-section__head">
+      <div>
+        <h2 class="dashboard-section__title">{% trans "Notas recientes" %}</h2>
+      </div>
+    </div>
+    <div class="dashboard-list">
+      {% for note in recent_notes %}
+        <article class="dashboard-list__item">
+          <h3 class="dashboard-list__title">{{ note.strain_label }}</h3>
+          <p class="dashboard-note__body">{{ note.date }}</p>
+        </article>
+      {% empty %}
+        <div class="dashboard-empty">
+          <h3 class="dashboard-empty__title">{% trans "Aún no has creado notas." %}</h3>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
