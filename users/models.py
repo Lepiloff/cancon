@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -75,16 +74,6 @@ class ConsumptionNote(models.Model):
     strain_name_text = models.CharField(max_length=255, blank=True)
     date = models.DateField()
     notes = models.TextField(max_length=5000, blank=True)
-    mood_before = models.PositiveSmallIntegerField(
-        null=True,
-        blank=True,
-        validators=[MinValueValidator(1), MaxValueValidator(5)],
-    )
-    mood_after = models.PositiveSmallIntegerField(
-        null=True,
-        blank=True,
-        validators=[MinValueValidator(1), MaxValueValidator(5)],
-    )
     method = models.CharField(max_length=20, choices=METHOD_CHOICES, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

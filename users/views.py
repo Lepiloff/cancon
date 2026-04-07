@@ -39,8 +39,6 @@ def _serialize_note(note):
         'strain_name_text': note.strain_name_text,
         'strain_label': note.strain_label,
         'notes': note.notes,
-        'mood_before': note.mood_before,
-        'mood_after': note.mood_after,
         'method': note.method,
         'created_at': note.created_at.isoformat() if note.created_at else None,
         'updated_at': note.updated_at.isoformat() if note.updated_at else None,

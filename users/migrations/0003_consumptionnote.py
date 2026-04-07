@@ -3,7 +3,6 @@
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 class Migration(migrations.Migration):
@@ -30,32 +29,16 @@ class Migration(migrations.Migration):
                 ("date", models.DateField()),
                 ("notes", models.TextField(blank=True, max_length=5000)),
                 (
-                    "mood_before",
-                    models.PositiveSmallIntegerField(
-                        blank=True,
-                        null=True,
-                        validators=[MinValueValidator(1), MaxValueValidator(5)],
-                    ),
-                ),
-                (
-                    "mood_after",
-                    models.PositiveSmallIntegerField(
-                        blank=True,
-                        null=True,
-                        validators=[MinValueValidator(1), MaxValueValidator(5)],
-                    ),
-                ),
-                (
                     "method",
                     models.CharField(
                         blank=True,
                         choices=[
-                            ("smoke", "Smoke"),
-                            ("vape", "Vape"),
-                            ("edible", "Edible"),
-                            ("tincture", "Tincture"),
-                            ("topical", "Topical"),
-                            ("other", "Other"),
+                            ("smoke", "Fumar"),
+                            ("vape", "Vapear"),
+                            ("edible", "Comestible"),
+                            ("tincture", "Tintura"),
+                            ("topical", "Tópico"),
+                            ("other", "Otro"),
                         ],
                         max_length=20,
                     ),

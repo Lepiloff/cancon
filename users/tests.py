@@ -170,11 +170,12 @@ class DashboardEmptyStateTests(TestCase):
             ("dashboard_journal", "Aún no has creado notas."),
         ]
 
-        for name, text in pages:
-            with self.subTest(name=name, text=text):
-                response = self.client.get(reverse(name))
-                self.assertEqual(response.status_code, 200)
-                self.assertContains(response, text)
+        with override("es"):
+            for name, text in pages:
+                with self.subTest(name=name, text=text):
+                    response = self.client.get(reverse(name))
+                    self.assertEqual(response.status_code, 200)
+                    self.assertContains(response, text)
 
 
 class ConsumptionNoteViewTests(TestCase):
@@ -207,8 +208,6 @@ class ConsumptionNoteViewTests(TestCase):
                 "date": timezone.localdate().isoformat(),
                 "notes": "Relaxed and focused",
                 "method": "vape",
-                "mood_before": 2,
-                "mood_after": 4,
             },
         )
 
