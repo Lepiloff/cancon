@@ -386,6 +386,8 @@ class RegistrationBannerMiddleware:
         '/registration-banner-dismiss/',
         '/robots.txt',
         '/sitemap.xml',
+        '/static/',
+        '/media/',
     )
 
     EXCLUDED_FIRST_SEGMENTS = {
@@ -433,7 +435,7 @@ class RegistrationBannerMiddleware:
 
         if (
             request.session.get(REGISTRATION_BANNER_ARMED_SESSION_KEY)
-            and self._is_internal_navigation(request, current_path)
+            and self._is_next_eligible_pageview(request, current_path)
             and self._cookie_banner_hidden(request)
         ):
             request._show_registration_banner = True
@@ -502,10 +504,7 @@ class RegistrationBannerMiddleware:
 
         return 'external'
 
-    def _is_internal_navigation(self, request, current_path):
-        if self._classify_source(request) != 'internal':
-            return False
-
+    def _is_next_eligible_pageview(self, request, current_path):
         entry_path = request.session.get(REGISTRATION_BANNER_ENTRY_PATH_SESSION_KEY)
         return bool(entry_path and entry_path != current_path)
 

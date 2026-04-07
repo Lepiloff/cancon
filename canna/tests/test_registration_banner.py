@@ -42,11 +42,24 @@ class RegistrationBannerFunnelTest(TestCase):
 
         response = self.client.get(
             reverse('strain_list'),
-            HTTP_REFERER='http://testserver/',
         )
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['show_registration_banner'])
+
+    def test_banner_does_not_show_on_same_page_refresh(self):
+        self._set_cookie_consent()
+
+        landing = self.client.get(
+            reverse('main_page'),
+            HTTP_REFERER='https://www.google.com/search?q=cannamente',
+        )
+        self.assertFalse(landing.context['show_registration_banner'])
+
+        refresh = self.client.get(reverse('main_page'))
+
+        self.assertEqual(refresh.status_code, 200)
+        self.assertFalse(refresh.context['show_registration_banner'])
 
     def test_no_banner_for_authenticated_users(self):
         self._set_cookie_consent()
