@@ -40,9 +40,11 @@
     }
 
     const endpoint = form.dataset.strainAutocompleteUrl;
+    const emptyText = form.dataset.autocompleteEmptyText || '';
     const textInput = form.querySelector('input[name="strain_name_text"]');
     const hiddenInput = form.querySelector('input[name="strain_id"]');
     const results = form.querySelector('[data-autocomplete-results]');
+    const clearButton = form.querySelector('[data-clear-strain]');
 
     if (!endpoint || !textInput || !hiddenInput || !results) {
       return;
@@ -50,15 +52,25 @@
 
     let activeController = null;
     let lastQuery = '';
+    let debounceTimer = null;
 
     const closeResults = () => {
       results.innerHTML = '';
       results.hidden = true;
     };
 
+    const syncClearButton = () => {
+      if (!clearButton) {
+        return;
+      }
+
+      clearButton.hidden = !(hiddenInput.value || textInput.value.trim());
+    };
+
     const applyChoice = (item) => {
       textInput.value = item.name;
       hiddenInput.value = item.id;
+      syncClearButton();
       closeResults();
     };
 
@@ -66,7 +78,11 @@
       results.innerHTML = '';
 
       if (!items.length) {
-        closeResults();
+        const emptyState = document.createElement('div');
+        emptyState.className = 'dashboard-autocomplete__empty';
+        emptyState.textContent = emptyText;
+        results.appendChild(emptyState);
+        results.hidden = false;
         return;
       }
 
@@ -91,16 +107,7 @@
       results.hidden = false;
     };
 
-    textInput.addEventListener('input', () => {
-      const query = textInput.value.trim();
-      hiddenInput.value = '';
-
-      if (query.length < 2) {
-        lastQuery = '';
-        closeResults();
-        return;
-      }
-
+    const requestResults = (query) => {
       if (query === lastQuery) {
         return;
       }
@@ -139,6 +146,29 @@
           }
           closeResults();
         });
+    };
+
+    textInput.addEventListener('input', () => {
+      const query = textInput.value.trim();
+      hiddenInput.value = '';
+      syncClearButton();
+
+      if (query.length < 2) {
+        lastQuery = '';
+        if (debounceTimer) {
+          window.clearTimeout(debounceTimer);
+        }
+        closeResults();
+        return;
+      }
+
+      if (debounceTimer) {
+        window.clearTimeout(debounceTimer);
+      }
+
+      debounceTimer = window.setTimeout(() => {
+        requestResults(query);
+      }, 180);
     });
 
     document.addEventListener('click', (event) => {
@@ -152,8 +182,35 @@
         closeResults();
       }
     });
+
+    if (clearButton) {
+      clearButton.addEventListener('click', () => {
+        textInput.value = '';
+        hiddenInput.value = '';
+        lastQuery = '';
+        syncClearButton();
+        closeResults();
+        textInput.focus();
+      });
+    }
+
+    syncClearButton();
+  };
+
+  const initConfirmForms = () => {
+    const forms = document.querySelectorAll('[data-confirm-form]');
+
+    forms.forEach((form) => {
+      form.addEventListener('submit', (event) => {
+        const message = form.dataset.confirmMessage || '';
+        if (!window.confirm(message)) {
+          event.preventDefault();
+        }
+      });
+    });
   };
 
   initNav();
   initJournalAutocomplete();
+  initConfirmForms();
 })();
