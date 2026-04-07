@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.utils.translation import override
 from django.utils import timezone
 
 from apps.strains.factories import StrainFactory
@@ -119,6 +120,61 @@ class DashboardViewTests(TestCase):
         self.assertEqual(response.context["dashboard_section"], "journal")
         self.assertIn("strain_autocomplete_url", response.context)
         self.assertContains(response, "data-strain-autocomplete-url")
+
+    def test_private_dashboard_pages_render_under_en_prefix(self):
+        self.client.login(email="dashboard@example.com", password="foo12345")
+
+        with override("en"):
+            urls = [
+                reverse("dashboard"),
+                reverse("dashboard_favorites"),
+                reverse("dashboard_comments"),
+                reverse("dashboard_journal"),
+                reverse("dashboard_settings"),
+            ]
+
+        for url in urls:
+            with self.subTest(url=url):
+                self.assertTrue(url.startswith("/en/"))
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, "noindex, nofollow")
+
+    def test_dashboard_journal_uses_non_localized_service_endpoint_in_en(self):
+        self.client.login(email="dashboard@example.com", password="foo12345")
+
+        with override("en"):
+            response = self.client.get(reverse("dashboard_journal"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["strain_autocomplete_url"], "/api/strains/autocomplete/")
+
+
+class DashboardEmptyStateTests(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.user = get_user_model().objects.create_user(
+            email="empty-dashboard@example.com",
+            password="foo12345",
+        )
+
+    def test_empty_state_pages_render_expected_messages(self):
+        self.client.login(email="empty-dashboard@example.com", password="foo12345")
+        pages = [
+            ("dashboard", "Aún no tienes favoritos."),
+            ("dashboard", "Aún no has dejado comentarios."),
+            ("dashboard", "Aún no has creado notas."),
+            ("dashboard_favorites", "Aún no tienes favoritos."),
+            ("dashboard_comments", "Aún no has dejado comentarios."),
+            ("dashboard_journal", "Aún no has creado notas."),
+        ]
+
+        for name, text in pages:
+            with self.subTest(name=name, text=text):
+                response = self.client.get(reverse(name))
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, text)
 
 
 class ConsumptionNoteViewTests(TestCase):

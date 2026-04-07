@@ -1,5 +1,6 @@
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.utils.translation import override
 
 from apps.strains.factories import StrainFactory
 
@@ -24,3 +25,9 @@ class StrainAutocompleteApiTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['results'], [])
+
+    def test_reverse_remains_non_localized_under_en_language(self):
+        with override('en'):
+            url = reverse('strains_api:strain_autocomplete')
+
+        self.assertEqual(url, '/api/strains/autocomplete/')
