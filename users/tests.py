@@ -1,7 +1,8 @@
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.test import Client, TestCase
 from django.urls import reverse
-from django.utils.translation import override
+from django.utils.translation import activate, override
 from django.utils import timezone
 
 from apps.strains.factories import StrainFactory
@@ -71,6 +72,7 @@ class UsersManagersTests(TestCase):
 class DashboardViewTests(TestCase):
 
     def setUp(self):
+        activate(settings.LANGUAGE_CODE)
         self.client = Client()
         self.user = get_user_model().objects.create_user(
             email="dashboard@example.com",
@@ -93,6 +95,9 @@ class DashboardViewTests(TestCase):
             date=timezone.localdate(),
             notes="Private note",
         )
+
+    def tearDown(self):
+        activate(settings.LANGUAGE_CODE)
 
     def test_dashboard_requires_login(self):
         response = self.client.get(reverse("dashboard"))
@@ -153,11 +158,15 @@ class DashboardViewTests(TestCase):
 class DashboardEmptyStateTests(TestCase):
 
     def setUp(self):
+        activate(settings.LANGUAGE_CODE)
         self.client = Client()
         self.user = get_user_model().objects.create_user(
             email="empty-dashboard@example.com",
             password="foo12345",
         )
+
+    def tearDown(self):
+        activate(settings.LANGUAGE_CODE)
 
     def test_empty_state_pages_render_expected_messages(self):
         self.client.login(email="empty-dashboard@example.com", password="foo12345")
@@ -181,6 +190,7 @@ class DashboardEmptyStateTests(TestCase):
 class ConsumptionNoteViewTests(TestCase):
 
     def setUp(self):
+        activate(settings.LANGUAGE_CODE)
         self.client = Client()
         self.user = get_user_model().objects.create_user(
             email="journal@example.com",
@@ -197,6 +207,9 @@ class ConsumptionNoteViewTests(TestCase):
             strain_name_text=self.strain.name,
             date=timezone.localdate(),
         )
+
+    def tearDown(self):
+        activate(settings.LANGUAGE_CODE)
 
     def test_journal_create_creates_note(self):
         self.client.login(email="journal@example.com", password="foo12345")
