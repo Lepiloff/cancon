@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.utils import timezone
 import uuid
 
@@ -175,3 +176,24 @@ class ChatRateLimit(models.Model):
 
     def __str__(self):
         return f"RateLimit: {self.ip_address} ({self.request_count} requests)"
+
+
+class ChatRateLimitUser(models.Model):
+    """Track rate limiting for chat requests by authenticated user."""
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='chat_rate_limit',
+    )
+    request_count = models.PositiveIntegerField(default=0)
+    window_start = models.DateTimeField(auto_now_add=True)
+    last_exceeded_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Chat User Rate Limit'
+        verbose_name_plural = 'Chat User Rate Limits'
+        ordering = ['-window_start']
+
+    def __str__(self):
+        return f"UserRateLimit: {self.user_id} ({self.request_count} requests)"

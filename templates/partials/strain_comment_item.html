@@ -1,0 +1,30 @@
+{% load i18n %}
+<article class="sd-comment" data-comment-id="{{ comment.id }}">
+    <div class="sd-comment__head">
+        <div class="sd-comment__meta">
+            <span class="sd-comment__author">{{ comment.user.get_public_display_name }}</span>
+            <time class="sd-comment__date" datetime="{{ comment.created_at|date:'c' }}">{{ comment.created_at|date:"d/m/Y" }}</time>
+        </div>
+        <span class="sd-comment__reaction sd-comment__reaction--{{ comment.reaction }}">
+            {% if comment.reaction == 'thumbs_up' %}
+            {% trans "Pulgar arriba" %}
+            {% else %}
+            {% trans "Pulgar abajo" %}
+            {% endif %}
+        </span>
+    </div>
+    <div class="sd-comment__body">
+        {% if comment.pros %}
+        <div class="sd-comment__block">
+            <h3>{% trans "Pros" %}</h3>
+            <p>{{ comment.pros|linebreaksbr }}</p>
+        </div>
+        {% endif %}
+        {% if comment.cons %}
+        <div class="sd-comment__block">
+            <h3>{% trans "Contras" %}</h3>
+            <p>{{ comment.cons|linebreaksbr }}</p>
+        </div>
+        {% endif %}
+    </div>
+</article>

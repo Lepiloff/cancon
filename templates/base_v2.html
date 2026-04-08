@@ -58,9 +58,10 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- New dark theme styles -->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/styles_v2.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles_v2.css' %}?v=2" />
     <link rel="stylesheet" type="text/css" href="{% static 'css/auth.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'css/cookie-consent.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/registration-banner.css' %}" />
 
     {% block extra_css %}{% endblock %}
 </head>
@@ -122,10 +123,10 @@
                 </div>
                 <div class="header-v2__mobile-auth">
                     {% if user.is_authenticated %}
-                    <span class="header-v2__user">
+                    <a href="{% url 'dashboard' %}" class="auth-btn auth-btn--secondary header-v2__mobile-dashboard-link">
                         <span class="header-v2__user-icon">{{ user.email|first|upper }}</span>
-                        {{ user.email }}
-                    </span>
+                        {% trans "Mi cuenta" %}
+                    </a>
                     <a href="{% url 'account_logout' %}" class="auth-btn auth-btn--secondary">{% trans "Cerrar sesión" %}</a>
                     {% else %}
                     <a href="{% url 'account_login' %}" class="auth-btn auth-btn--primary">{% trans "Iniciar sesión" %}</a>
@@ -167,12 +168,11 @@
 
             <div class="header-v2__auth">
                 {% if user.is_authenticated %}
-                <span class="header-v2__user">
-                    <span class="header-v2__user-icon">{{ user.email|first|upper }}</span>
-                    <a href="{% url 'account_logout' %}" class="header-v2__user-logout" aria-label="{% trans 'Cerrar sesión' %}">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                    </a>
-                </span>
+                <a href="{% url 'dashboard' %}" class="header-v2__auth-link header-v2__auth-link--login">{% trans "Mi cuenta" %}</a>
+                <a href="{% url 'dashboard' %}" class="header-v2__user-icon" aria-label="{% trans 'Mi cuenta' %}">{{ user.email|first|upper }}</a>
+                <a href="{% url 'account_logout' %}" class="header-v2__user-logout" aria-label="{% trans 'Cerrar sesión' %}">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </a>
                 {% else %}
                 <a href="{% url 'account_login' %}" class="header-v2__auth-link header-v2__auth-link--login">{% trans "Iniciar sesión" %}</a>
                 {% endif %}
@@ -231,6 +231,29 @@
         <div class="cookie-consent__actions">
             <button class="cookie-consent__btn cookie-consent__btn--accept" id="cookie-consent-accept" type="button">{% trans "Aceptar todas" %}</button>
             <button class="cookie-consent__btn cookie-consent__btn--decline" id="cookie-consent-decline" type="button">{% trans "Solo necesarias" %}</button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if show_registration_banner and not show_cookie_banner %}
+<div class="registration-banner" id="registration-banner" role="region" aria-label="{% trans 'Crear cuenta' %}">
+    <div class="registration-banner__card">
+        <div class="registration-banner__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M19 8v6"/>
+                <path d="M16 11h6"/>
+            </svg>
+        </div>
+        <div class="registration-banner__body">
+            <p class="registration-banner__eyebrow">{% trans "Solo para usuarios registrados" %}</p>
+            <p class="registration-banner__text">{% trans "Crea una cuenta para guardar favoritos, desbloquear el diario privado y subir el límite del chat a 10 mensajes por hora." %}</p>
+        </div>
+        <div class="registration-banner__actions">
+            <a class="registration-banner__btn registration-banner__btn--primary" href="{% url 'account_signup' %}">{% trans "Crear cuenta" %}</a>
+            <button class="registration-banner__btn registration-banner__btn--secondary" id="registration-banner-dismiss" type="button">{% trans "Ahora no" %}</button>
         </div>
     </div>
 </div>
@@ -304,10 +327,46 @@
     </script>
     <script src="{% static 'js/cookie-consent.js' %}"></script>
 
+    <script>
+        window.FavoritesConfig = {
+            toggleUrl: '{% url "strains_api:favorite_toggle" %}',
+            statusUrl: '{% url "strains_api:favorite_status" %}',
+            isAuthenticated: {{ user.is_authenticated|yesno:"true,false" }},
+            addLabel: '{% trans "Guardar en favoritos" %}',
+            removeLabel: '{% trans "Quitar de favoritos" %}',
+            defaultText: '{% trans "Favorito" %}',
+            activeText: '{% trans "En favoritos" %}',
+            errorText: '{% trans "No se pudo actualizar favoritos. Inténtalo de nuevo." %}'
+        };
+    </script>
+    <script src="{% static 'js/favorites.js' %}"></script>
+
+    <script>
+        window.RegistrationBannerConfig = {
+            showBanner: {{ show_registration_banner|yesno:"true,false" }},
+            cookieBannerVisible: {{ show_cookie_banner|yesno:"true,false" }},
+            signupUrl: '{% url "account_signup" %}',
+            dismissUrl: '{% url "registration_banner_dismiss" %}',
+            dismissCookieName: 'reg_banner_dismissed',
+            dismissCookieAgeSeconds: 604800,
+            defaultText: '{% trans "Crea una cuenta para guardar favoritos, desbloquear el diario privado y subir el límite del chat a 10 mensajes por hora." %}',
+            ctaLabel: '{% trans "Crear cuenta" %}',
+            dismissLabel: '{% trans "Ahora no" %}',
+            errorText: '{% trans "No se pudo actualizar la promoción. Inténtalo de nuevo." %}'
+        };
+    </script>
+    <script src="{% static 'js/registration-banner.js' %}"></script>
+
     {% if ENABLE_AI_CHAT %}
     <script>
         window.ChatFullscreenConfig = {
+            chatUrl: '{% url "chat_bot:chat" %}',
+            streamUrl: '{% url "chat_bot:stream" %}',
+            signupUrl: '{% url "account_signup" %}',
+            isAuthenticated: {{ user.is_authenticated|yesno:"true,false" }},
             errRateLimit: '{% trans "Has alcanzado el límite de mensajes. Por favor, inténtalo más tarde." %}',
+            errRateLimitCta: '{% trans "Crea una cuenta para seguir chateando." %}',
+            errRateLimitCtaLabel: '{% trans "Crear cuenta" %}',
             errUnavailable: '{% trans "El servicio no está disponible en este momento. Inténtalo más tarde." %}',
             errServer: '{% trans "Error del servidor. Por favor, inténtalo de nuevo." %}',
             errConnection: '{% trans "Error de conexión. Inténtalo de nuevo." %}',

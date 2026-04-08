@@ -1,15 +1,16 @@
 """
-Middleware for language URL management and cookie consent.
+Middleware for language URL management, cookie consent, and banner state.
 
 Ensures that language and URL prefix are always consistent:
 - EN language → must be on /en/ path
 - ES language → must be on path without /en/
 - Admin panel → always English (regardless of LANGUAGE_CODE)
 
-Also handles restoring cookie consent on login.
+Also handles restoring cookie consent on login and the anonymous registration banner funnel.
 """
 
 import json
+from urllib.parse import urlparse
 
 from django.shortcuts import redirect
 from django.utils import translation
@@ -17,7 +18,28 @@ from django.conf import settings
 import logging
 import geoip2.database
 
-from canna.views import COOKIE_CONSENT_MAX_AGE
+from canna.context_processors import cookie_consent
+from canna.views import (
+    COOKIE_CONSENT_MAX_AGE,
+    REGISTRATION_BANNER_DISMISS_COOKIE,
+)
+
+
+REGISTRATION_BANNER_ARMED_SESSION_KEY = '_reg_banner_armed'
+REGISTRATION_BANNER_ENTRY_PATH_SESSION_KEY = '_reg_banner_entry_path'
+REGISTRATION_BANNER_ENTRY_SOURCE_SESSION_KEY = '_reg_banner_entry_source'
+REGISTRATION_BANNER_CONSUMED_SESSION_KEY = '_reg_banner_consumed'
+
+SEARCH_ENGINE_MARKERS = (
+    'google.',
+    'bing.',
+    'search.yahoo.',
+    'duckduckgo.',
+    'yandex.',
+    'ecosia.',
+    'search.brave.',
+    'startpage.',
+)
 
 
 class AdminEnglishMiddleware:
@@ -341,3 +363,159 @@ class CookieConsentMiddleware:
             )
 
         return response
+
+
+class RegistrationBannerMiddleware:
+    """
+    Track anonymous entry funnel and decide whether to show the signup banner.
+
+    Flow:
+    - qualifying first visit from direct/search/external arms the funnel
+    - first internal navigation to another public page shows the banner
+    - cookie-consent visibility suppresses display but does not destroy the funnel
+    - dismiss cooldown cookie suppresses the funnel entirely
+    """
+
+    EXCLUDED_PREFIXES = (
+        '/api/',
+        '/manage-canna/',
+        '/tinymce/',
+        '/i18n/',
+        '/jsi18n/',
+        '/cookie-consent/',
+        '/registration-banner-dismiss/',
+        '/robots.txt',
+        '/sitemap.xml',
+        '/static/',
+        '/media/',
+    )
+
+    EXCLUDED_FIRST_SEGMENTS = {
+        'accounts',
+        'manage-canna',
+        'api',
+        'tinymce',
+        'i18n',
+        'jsi18n',
+    }
+
+    BOT_USER_AGENTS = GeoLanguageMiddleware.BOT_USER_AGENTS
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        request._show_registration_banner = False
+        self._prepare_registration_banner_state(request)
+        return self.get_response(request)
+
+    def _prepare_registration_banner_state(self, request):
+        if not hasattr(request, 'session'):
+            return
+
+        if self._is_bot(request):
+            return
+
+        if getattr(request, 'user', None) and request.user.is_authenticated:
+            self._clear_funnel_state(request)
+            return
+
+        if not self._is_eligible_request(request):
+            return
+
+        if request.COOKIES.get(REGISTRATION_BANNER_DISMISS_COOKIE):
+            self._clear_funnel_state(request)
+            return
+
+        if request.session.get(REGISTRATION_BANNER_CONSUMED_SESSION_KEY):
+            return
+
+        current_path = request.path_info or '/'
+        source = self._classify_source(request)
+
+        if (
+            request.session.get(REGISTRATION_BANNER_ARMED_SESSION_KEY)
+            and self._is_next_eligible_pageview(request, current_path)
+            and self._cookie_banner_hidden(request)
+        ):
+            request._show_registration_banner = True
+            self._consume_funnel(request)
+            return
+
+        if source in {'direct', 'search', 'external'}:
+            request.session[REGISTRATION_BANNER_ARMED_SESSION_KEY] = True
+            request.session[REGISTRATION_BANNER_ENTRY_PATH_SESSION_KEY] = current_path
+            request.session[REGISTRATION_BANNER_ENTRY_SOURCE_SESSION_KEY] = source
+
+    def _is_eligible_request(self, request):
+        if request.method != 'GET':
+            return False
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return False
+
+        return self._is_public_page_path(request.path_info or '/')
+
+    def _is_public_page_path(self, path):
+        if not path.startswith('/'):
+            path = f'/{path}'
+
+        for prefix in self.EXCLUDED_PREFIXES:
+            if path.startswith(prefix):
+                return False
+
+        path_without_lang = path
+        if path_without_lang.startswith('/en/'):
+            path_without_lang = path_without_lang[3:]
+        elif path_without_lang == '/en':
+            path_without_lang = '/'
+
+        first_segment = path_without_lang.strip('/').split('/', 1)[0]
+        if first_segment in self.EXCLUDED_FIRST_SEGMENTS:
+            return False
+
+        return True
+
+    def _cookie_banner_hidden(self, request):
+        return not cookie_consent(request)['show_cookie_banner']
+
+    def _is_bot(self, request):
+        ua = request.META.get('HTTP_USER_AGENT', '').lower()
+        return any(bot in ua for bot in self.BOT_USER_AGENTS)
+
+    def _classify_source(self, request):
+        referrer = request.META.get('HTTP_REFERER', '')
+        if not referrer:
+            return 'direct'
+
+        parsed = urlparse(referrer)
+        referrer_host = (parsed.hostname or '').lower()
+        current_host = request.get_host().split(':', 1)[0].lower()
+
+        if not referrer_host:
+            return 'direct'
+
+        if referrer_host == current_host:
+            return 'internal'
+
+        for marker in SEARCH_ENGINE_MARKERS:
+            if marker in referrer_host:
+                return 'search'
+
+        return 'external'
+
+    def _is_next_eligible_pageview(self, request, current_path):
+        entry_path = request.session.get(REGISTRATION_BANNER_ENTRY_PATH_SESSION_KEY)
+        return bool(entry_path and entry_path != current_path)
+
+    def _consume_funnel(self, request):
+        request.session[REGISTRATION_BANNER_CONSUMED_SESSION_KEY] = True
+        request.session.pop(REGISTRATION_BANNER_ARMED_SESSION_KEY, None)
+        request.session.pop(REGISTRATION_BANNER_ENTRY_PATH_SESSION_KEY, None)
+        request.session.pop(REGISTRATION_BANNER_ENTRY_SOURCE_SESSION_KEY, None)
+
+    def _clear_funnel_state(self, request):
+        request.session.pop(REGISTRATION_BANNER_ARMED_SESSION_KEY, None)
+        request.session.pop(REGISTRATION_BANNER_ENTRY_PATH_SESSION_KEY, None)
+        request.session.pop(REGISTRATION_BANNER_ENTRY_SOURCE_SESSION_KEY, None)
+        request.session.pop(REGISTRATION_BANNER_CONSUMED_SESSION_KEY, None)

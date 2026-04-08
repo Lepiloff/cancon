@@ -1,12 +1,17 @@
 /**
  * Fullscreen Chat for AI Budtender.
  *
- * Requires window.ChatFullscreenConfig with translated error strings:
- *   { errRateLimit, errUnavailable, errServer, errConnection, errNoInternet,
- *     resumeChat }
+ * Requires window.ChatFullscreenConfig with translated error strings and URLs:
+ *   { chatUrl, streamUrl, signupUrl, isAuthenticated, errRateLimit,
+ *     errRateLimitCta, errRateLimitCtaLabel, errUnavailable, errServer,
+ *     errConnection, errNoInternet, resumeChat }
  */
 (function() {
     var cfg = window.ChatFullscreenConfig || {};
+    var chatUrl = cfg.chatUrl || '';
+    var streamUrl = cfg.streamUrl || '';
+    var signupUrl = cfg.signupUrl || '';
+    var isAuthenticated = !!cfg.isAuthenticated;
 
     var fullscreen = document.getElementById('chat-fullscreen');
     var fsMessages = document.getElementById('chat-fullscreen-messages');
@@ -260,9 +265,38 @@
         var msg = document.createElement('div');
         msg.className = 'chat-fullscreen__msg chat-fullscreen__msg--error';
         msg.innerHTML = '<div class="chat-fullscreen__msg-text chat-fullscreen__msg-error-text">' +
-            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
-            '<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg> ' +
-            escapeHtml(text) + '</div>';
+            '<div class="chat-fullscreen__msg-error-copy">' +
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                '<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>' +
+                '<span>' + escapeHtml(text) + '</span>' +
+            '</div>' +
+            '</div>';
+        fsMessages.appendChild(msg);
+        fsMessages.scrollTop = fsMessages.scrollHeight;
+    }
+
+    function addRateLimitMessage() {
+        var ctaHtml = '';
+        var ctaCopyHtml = '';
+        if (!isAuthenticated && signupUrl) {
+            ctaHtml = '<a class="chat-fullscreen__error-cta" href="' + escapeHtml(signupUrl) + '">' +
+                escapeHtml(cfg.errRateLimitCtaLabel || 'Crear cuenta') +
+                '</a>';
+            ctaCopyHtml = '<div class="chat-fullscreen__msg-error-cta-copy">' +
+                escapeHtml(cfg.errRateLimitCta || 'Create an account to keep chatting.') +
+                '</div>';
+        }
+        var msg = document.createElement('div');
+        msg.className = 'chat-fullscreen__msg chat-fullscreen__msg--error';
+        msg.innerHTML = '<div class="chat-fullscreen__msg-text chat-fullscreen__msg-error-text">' +
+            '<div class="chat-fullscreen__msg-error-copy">' +
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                '<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>' +
+                '<span>' + escapeHtml(cfg.errRateLimit || 'Rate limit reached') + '</span>' +
+            '</div>' +
+            (ctaCopyHtml ? ctaCopyHtml : '') +
+            (ctaHtml ? '<div class="chat-fullscreen__msg-error-cta-wrap">' + ctaHtml + '</div>' : '') +
+            '</div>';
         fsMessages.appendChild(msg);
         fsMessages.scrollTop = fsMessages.scrollHeight;
     }
@@ -428,6 +462,14 @@
         fsInput.style.height = 'auto';
 
         var typingEl = showTypingIndicator();
+        function unlockSend() { setSendingState(false); }
+
+        if (!chatUrl || !streamUrl) {
+            typingEl.remove();
+            addErrorMessage(cfg.errServer || 'Server error');
+            unlockSend();
+            return;
+        }
 
         var payload = {
             message: message,
@@ -443,11 +485,9 @@
             'X-CSRFToken': getCookie('csrftoken') || ''
         };
 
-        function unlockSend() { setSendingState(false); }
-
         function handleBlockingFallback(onDone) {
             var fbTyping = showTypingIndicator();
-            fetch('/api/chat/chat/', {
+            fetch(chatUrl, {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(payload)
@@ -474,14 +514,14 @@
             });
         }
 
-        fetch('/api/chat/stream/', {
+        fetch(streamUrl, {
             method: 'POST',
             headers: headers,
             body: JSON.stringify(payload)
         }).then(function(response) {
             if (response.status === 429) {
                 typingEl.remove();
-                addErrorMessage(cfg.errRateLimit || 'Rate limit reached');
+                addRateLimitMessage();
                 unlockSend();
                 return;
             }

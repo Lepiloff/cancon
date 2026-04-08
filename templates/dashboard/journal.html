@@ -1,0 +1,133 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% load i18n %}
+
+{% block dashboard_page_title %}{% trans "Diario" %}{% endblock %}
+{% block dashboard_title %}{% trans "Diario" %}{% endblock %}
+{% block dashboard_subtitle %}{% trans "Notas privadas sobre tu experiencia de consumo." %}{% endblock %}
+
+{% block dashboard_content %}
+<section class="dashboard-section" id="journal-form">
+  <div class="dashboard-section__head">
+    <div>
+      <h2 class="dashboard-section__title">
+        {% if editing_note %}
+          {% trans "Editar nota" %}
+        {% else %}
+          {% trans "Nueva nota" %}
+        {% endif %}
+      </h2>
+      <p class="dashboard-section__subtitle">{% trans "Puedes guardar el nombre de la variedad manualmente o elegir una coincidencia desde autocomplete." %}</p>
+    </div>
+  </div>
+
+  {% if note_form.non_field_errors %}
+    <div class="dashboard-empty dashboard-empty--compact">
+      {{ note_form.non_field_errors }}
+    </div>
+  {% endif %}
+
+  <form
+    method="post"
+    action="{% if editing_note %}{% url 'journal_update' editing_note.id %}{% else %}{% url 'journal_create' %}{% endif %}"
+    class="dashboard-form"
+    data-strain-autocomplete-url="{{ strain_autocomplete_url }}"
+    data-default-date="{{ note_form.date.value|default:'' }}"
+    data-autocomplete-empty-text="{% trans 'No se encontraron coincidencias.' %}"
+    data-dashboard-journal-form
+  >
+    {% csrf_token %}
+    {{ note_form.strain_id }}
+    <div class="dashboard-form__row">
+      <div class="dashboard-form__field">
+        <label for="{{ note_form.strain_name_text.id_for_label }}">{% trans "Variedad" %}</label>
+        <div class="dashboard-form__input-group">
+          {{ note_form.strain_name_text }}
+          <button
+            type="button"
+            class="dashboard-form__clear-btn"
+            data-clear-strain
+            {% if not note_form.strain_id.value %}hidden{% endif %}
+          >
+            {% trans "Limpiar" %}
+          </button>
+        </div>
+        <div class="dashboard-autocomplete" data-autocomplete-results hidden></div>
+        <p class="dashboard-form__hint">{% trans "Escribe al menos 2 letras para ver coincidencias." %}</p>
+        {% if note_form.strain_name_text.errors %}
+          <ul class="dashboard-form__errors">
+            {% for error in note_form.strain_name_text.errors %}<li>{{ error }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+      <div class="dashboard-form__field">
+        <label for="{{ note_form.date.id_for_label }}">{% trans "Fecha" %}</label>
+        {{ note_form.date }}
+        {% if note_form.date.errors %}
+          <ul class="dashboard-form__errors">
+            {% for error in note_form.date.errors %}<li>{{ error }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+    </div>
+    <div class="dashboard-form__field">
+      <label for="{{ note_form.notes.id_for_label }}">{% trans "Notas" %}</label>
+      {{ note_form.notes }}
+      {% if note_form.notes.errors %}
+        <ul class="dashboard-form__errors">
+          {% for error in note_form.notes.errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+    <div class="dashboard-form__footer">
+      <button type="submit" class="auth-btn auth-btn--primary">
+        {% if editing_note %}
+          {% trans "Actualizar nota" %}
+        {% else %}
+          {% trans "Guardar nota" %}
+        {% endif %}
+      </button>
+      {% if editing_note %}
+        <a class="auth-btn auth-btn--secondary" href="{% url 'dashboard_journal' %}">{% trans "Cancelar edición" %}</a>
+      {% endif %}
+    </div>
+  </form>
+</section>
+
+<section class="dashboard-section">
+  <div class="dashboard-section__head">
+    <div>
+      <h2 class="dashboard-section__title">{% trans "Entradas" %}</h2>
+    </div>
+  </div>
+
+  <div class="dashboard-list">
+    {% for item in note_items %}
+      <article class="dashboard-note">
+        <div class="dashboard-note__head">
+          <div>
+            <h3 class="dashboard-note__title">{{ item.strain_label }}</h3>
+            <div class="dashboard-note__meta">
+              <span class="dashboard-chip">{{ item.date }}</span>
+            </div>
+          </div>
+          <div class="dashboard-note__links">
+            <a class="dashboard-note__link" href="{% url 'dashboard_journal' %}?edit={{ item.id }}#journal-form">{% trans "Editar" %}</a>
+            <form method="post" action="{% url 'journal_delete' item.id %}" class="dashboard-note__delete-form" data-confirm-form data-confirm-message="{% trans '¿Eliminar esta nota privada?' %}">
+              {% csrf_token %}
+              <button type="submit" class="dashboard-note__link dashboard-note__link--danger">{% trans "Eliminar" %}</button>
+            </form>
+          </div>
+        </div>
+        {% if item.notes %}
+          <p class="dashboard-note__body">{{ item.notes }}</p>
+        {% endif %}
+      </article>
+    {% empty %}
+      <div class="dashboard-empty">
+        <h3 class="dashboard-empty__title">{% trans "Aún no has creado notas." %}</h3>
+        <p class="dashboard-empty__text">{% trans "Tus notas privadas aparecerán aquí y solo serán visibles para ti." %}</p>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

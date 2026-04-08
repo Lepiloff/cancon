@@ -52,3 +52,11 @@ def cookie_consent(request):
         'restore_cookie_consent': restore,
     }
 
+
+def registration_banner(request):
+    """
+    Expose registration banner state prepared by middleware.
+    """
+    return {
+        'show_registration_banner': getattr(request, '_show_registration_banner', False),
+    }

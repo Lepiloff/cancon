@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.utils.decorators import method_decorator
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.models import AnonymousUser
 from django.views import View
 from django.conf import settings
 from django.utils import timezone
@@ -56,6 +57,38 @@ def authenticate_api_key(request):
     return None
 
 
+def _can_reuse_chat_session(session, request, client_ip):
+    """Check whether a session_id can be safely reused for this request."""
+    user = getattr(request, 'user', AnonymousUser())
+
+    if user.is_authenticated:
+        if session.user_id == user.id:
+            return True
+        return session.user_id is None and session.ip_address == client_ip
+
+    return session.user_id is None and session.ip_address == client_ip
+
+
+def _get_reusable_chat_session(request, session_id, client_ip):
+    """Return a safe reusable chat session or None."""
+    if not session_id:
+        return None
+
+    try:
+        session = ChatSession.objects.get(session_id=session_id, is_active=True)
+    except (ChatSession.DoesNotExist, ValidationError):
+        return None
+
+    if not _can_reuse_chat_session(session, request, client_ip):
+        return None
+
+    if request.user.is_authenticated and session.user_id is None:
+        session.user = request.user
+        session.save(update_fields=['user'])
+
+    return session
+
+
 @method_decorator(csrf_exempt, name='dispatch')
 class ChatConfigView(View):
     """Get current chat configuration for frontend"""
@@ -88,7 +121,10 @@ class ChatProxyView(View):
             # Check rate limit by IP address
             client_ip = get_client_ip(request)
             try:
-                check_rate_limit(client_ip)
+                check_rate_limit(
+                    client_ip,
+                    request.user if request.user.is_authenticated else None,
+                )
             except RateLimitExceeded as e:
                 response = JsonResponse({
                     'error': 'Rate limit exceeded. Please try again later.',
@@ -128,13 +164,7 @@ class ChatProxyView(View):
             # Get or create chat session (client_ip already retrieved for rate limiting)
             user_agent = request.META.get('HTTP_USER_AGENT', '')
             
-            if session_id:
-                try:
-                    session = ChatSession.objects.get(session_id=session_id, is_active=True)
-                except (ChatSession.DoesNotExist, ValidationError):
-                    session = None
-            else:
-                session = None
+            session = _get_reusable_chat_session(request, session_id, client_ip)
 
             if not session:
                 session = ChatSession.objects.create(
@@ -266,7 +296,10 @@ class ChatStreamView(View):
 
             client_ip = get_client_ip(request)
             try:
-                check_rate_limit(client_ip)
+                check_rate_limit(
+                    client_ip,
+                    request.user if request.user.is_authenticated else None,
+                )
             except RateLimitExceeded as e:
                 retry_after = e.retry_after_seconds  # capture before Python 3 deletes 'e'
                 def _rate_limited():
@@ -291,13 +324,7 @@ class ChatStreamView(View):
 
             # Create / retrieve Django session for analytics
             user_agent = request.META.get('HTTP_USER_AGENT', '')
-            if session_id:
-                try:
-                    django_session = ChatSession.objects.get(session_id=session_id, is_active=True)
-                except (ChatSession.DoesNotExist, ValidationError):
-                    django_session = None
-            else:
-                django_session = None
+            django_session = _get_reusable_chat_session(request, session_id, client_ip)
 
             if not django_session:
                 django_session = ChatSession.objects.create(

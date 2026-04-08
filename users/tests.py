@@ -1,5 +1,14 @@
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.conf import settings
+from django.test import Client, TestCase
+from django.urls import reverse
+from django.utils.translation import activate, override
+from django.utils import timezone
+
+from apps.strains.factories import StrainFactory
+from apps.strains.models import FavoriteStrain, StrainComment
+
+from .models import ConsumptionNote
 
 
 class UsersManagersTests(TestCase):
@@ -40,3 +49,227 @@ class UsersManagersTests(TestCase):
         with self.assertRaises(ValueError):
             User.objects.create_superuser(
                 email="super@user.com", password="foo", is_superuser=False)
+
+    def test_get_public_display_name_prefers_display_name(self):
+        User = get_user_model()
+        user = User.objects.create_user(
+            email="normal@user.com",
+            password="foo",
+            display_name="Juan",
+        )
+
+        self.assertEqual(user.get_display_name(), "Juan")
+        self.assertEqual(user.get_public_display_name(), "Juan")
+
+    def test_get_public_display_name_obfuscates_email_when_missing(self):
+        User = get_user_model()
+        user = User.objects.create_user(email="normaluser@user.com", password="foo")
+
+        self.assertEqual(user.get_display_name(), "normaluser")
+        self.assertEqual(user.get_public_display_name(), "no***r")
+
+
+class DashboardViewTests(TestCase):
+
+    def setUp(self):
+        activate(settings.LANGUAGE_CODE)
+        self.client = Client()
+        self.user = get_user_model().objects.create_user(
+            email="dashboard@example.com",
+            password="foo12345",
+        )
+        self.strain = StrainFactory.create(active=True)
+        FavoriteStrain.objects.create(user=self.user, strain=self.strain)
+        StrainComment.objects.create(
+            user=self.user,
+            strain=self.strain,
+            pros="Calming",
+            cons="Dry mouth",
+            reaction="thumbs_up",
+            status="approved",
+        )
+        ConsumptionNote.objects.create(
+            user=self.user,
+            strain=self.strain,
+            strain_name_text=self.strain.name,
+            date=timezone.localdate(),
+            notes="Private note",
+        )
+
+    def tearDown(self):
+        activate(settings.LANGUAGE_CODE)
+
+    def test_dashboard_requires_login(self):
+        response = self.client.get(reverse("dashboard"))
+
+        self.assertEqual(response.status_code, 302)
+
+    def test_dashboard_shows_counts_for_authenticated_user(self):
+        self.client.login(email="dashboard@example.com", password="foo12345")
+
+        response = self.client.get(reverse("dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["favorite_count"], 1)
+        self.assertEqual(response.context["comment_count"], 1)
+        self.assertEqual(response.context["note_count"], 1)
+        self.assertEqual(response.context["dashboard_section"], "overview")
+        self.assertContains(response, "noindex, nofollow")
+
+    def test_dashboard_journal_renders_autocomplete_context(self):
+        self.client.login(email="dashboard@example.com", password="foo12345")
+
+        response = self.client.get(reverse("dashboard_journal"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["dashboard_section"], "journal")
+        self.assertIn("strain_autocomplete_url", response.context)
+        self.assertContains(response, "data-strain-autocomplete-url")
+
+    def test_private_dashboard_pages_render_under_en_prefix(self):
+        self.client.login(email="dashboard@example.com", password="foo12345")
+
+        with override("en"):
+            urls = [
+                reverse("dashboard"),
+                reverse("dashboard_favorites"),
+                reverse("dashboard_comments"),
+                reverse("dashboard_journal"),
+                reverse("dashboard_settings"),
+            ]
+
+        for url in urls:
+            with self.subTest(url=url):
+                self.assertTrue(url.startswith("/en/"))
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, "noindex, nofollow")
+
+    def test_dashboard_journal_uses_non_localized_service_endpoint_in_en(self):
+        self.client.login(email="dashboard@example.com", password="foo12345")
+
+        with override("en"):
+            response = self.client.get(reverse("dashboard_journal"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["strain_autocomplete_url"], "/api/strains/autocomplete/")
+
+
+class DashboardEmptyStateTests(TestCase):
+
+    def setUp(self):
+        activate(settings.LANGUAGE_CODE)
+        self.client = Client()
+        self.user = get_user_model().objects.create_user(
+            email="empty-dashboard@example.com",
+            password="foo12345",
+        )
+
+    def tearDown(self):
+        activate(settings.LANGUAGE_CODE)
+
+    def test_empty_state_pages_render_expected_messages(self):
+        self.client.login(email="empty-dashboard@example.com", password="foo12345")
+        pages = [
+            ("dashboard", "Aún no tienes favoritos."),
+            ("dashboard", "Aún no has dejado comentarios."),
+            ("dashboard", "Aún no has creado notas."),
+            ("dashboard_favorites", "Aún no tienes favoritos."),
+            ("dashboard_comments", "Aún no has dejado comentarios."),
+            ("dashboard_journal", "Aún no has creado notas."),
+        ]
+
+        with override("es"):
+            for name, text in pages:
+                with self.subTest(name=name, text=text):
+                    response = self.client.get(reverse(name))
+                    self.assertEqual(response.status_code, 200)
+                    self.assertContains(response, text)
+
+
+class ConsumptionNoteViewTests(TestCase):
+
+    def setUp(self):
+        activate(settings.LANGUAGE_CODE)
+        self.client = Client()
+        self.user = get_user_model().objects.create_user(
+            email="journal@example.com",
+            password="foo12345",
+        )
+        self.other_user = get_user_model().objects.create_user(
+            email="other@example.com",
+            password="foo12345",
+        )
+        self.strain = StrainFactory.create(active=True)
+        self.other_note = ConsumptionNote.objects.create(
+            user=self.other_user,
+            strain=self.strain,
+            strain_name_text=self.strain.name,
+            date=timezone.localdate(),
+        )
+
+    def tearDown(self):
+        activate(settings.LANGUAGE_CODE)
+
+    def test_journal_create_creates_note(self):
+        self.client.login(email="journal@example.com", password="foo12345")
+
+        response = self.client.post(
+            reverse("journal_create"),
+            {
+                "strain_name_text": "Manual strain",
+                "date": timezone.localdate().isoformat(),
+                "notes": "Relaxed and focused",
+                "method": "vape",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(
+            ConsumptionNote.objects.filter(
+                user=self.user,
+                strain_name_text="Manual strain",
+            ).exists()
+        )
+
+    def test_journal_json_returns_owner_note(self):
+        note = ConsumptionNote.objects.create(
+            user=self.user,
+            strain=self.strain,
+            strain_name_text=self.strain.name,
+            date=timezone.localdate(),
+            notes="Private note",
+        )
+        self.client.login(email="journal@example.com", password="foo12345")
+
+        response = self.client.get(reverse("journal_json", args=[note.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["note"]["id"], note.id)
+
+    def test_journal_json_rejects_other_user_note(self):
+        self.client.login(email="journal@example.com", password="foo12345")
+
+        response = self.client.get(reverse("journal_json", args=[self.other_note.id]))
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_journal_update_rejects_other_user_note(self):
+        self.client.login(email="journal@example.com", password="foo12345")
+
+        response = self.client.post(
+            reverse("journal_update", args=[self.other_note.id]),
+            {
+                "strain_name_text": "Updated",
+                "date": timezone.localdate().isoformat(),
+            },
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_journal_delete_rejects_other_user_note(self):
+        self.client.login(email="journal@example.com", password="foo12345")
+
+        response = self.client.post(reverse("journal_delete", args=[self.other_note.id]))
+
+        self.assertEqual(response.status_code, 404)

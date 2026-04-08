@@ -10,7 +10,9 @@ from apps.strains.models import (
     Article,
     ArticleCategory,
     ArticleImage,
+    FavoriteStrain,
     Strain,
+    StrainComment,
     Feeling,
     Negative,
     HelpsWith,
@@ -379,6 +381,14 @@ class TaxonomyAdmin(TranslationAdmin):
     name_display.short_description = 'Name'
 
 
+@admin.register(StrainComment)
+class StrainCommentAdmin(admin.ModelAdmin):
+    list_display = ('strain', 'user', 'status', 'reaction', 'created_at')
+    list_filter = ('status', 'reaction', 'created_at')
+    search_fields = ('strain__name', 'user__email', 'pros', 'cons')
+    raw_id_fields = ('strain', 'user')
+
+
 admin.site.register(Strain, StrainAdmin)
 admin.site.register(Article, ArticleAdmin)
 admin.site.register(Terpene, TerpeneAdmin)
@@ -387,3 +397,4 @@ admin.site.register(Feeling, TaxonomyAdmin)
 admin.site.register(Negative, TaxonomyAdmin)
 admin.site.register(HelpsWith, TaxonomyAdmin)
 admin.site.register(Flavor, TaxonomyAdmin)
+admin.site.register(FavoriteStrain)

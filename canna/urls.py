@@ -24,7 +24,11 @@ from django.views.i18n import JavaScriptCatalog
 from django.urls import path, include
 
 from canna.sitemaps import StrainSitemap, ArticleSitemap, TerpeneSitemap, StaticPageSitemap
-from canna.views import robots_txt, cookie_consent_view
+from canna.views import (
+    cookie_consent_view,
+    registration_banner_dismiss_view,
+    robots_txt,
+)
 
 
 sitemaps = {
@@ -42,8 +46,15 @@ urlpatterns = [
     path('manage-canna/', admin.site.urls),
     path('tinymce/', include('tinymce.urls')),
     path('i18n/', include('django.conf.urls.i18n')),  # Language switcher endpoint
+    path('api/chat/', include('apps.chat_bot.urls')),
+    path('api/strains/', include('apps.strains.api_urls')),
     path('robots.txt', robots_txt, name='robots_txt'),  # SEO: robots.txt
     path('cookie-consent/', cookie_consent_view, name='cookie_consent'),
+    path(
+        'registration-banner-dismiss/',
+        registration_banner_dismiss_view,
+        name='registration_banner_dismiss',
+    ),
     path('sitemap.xml', sitemap, {
         'sitemaps': sitemaps,
         'template_name': 'sitemap.xml',  # Custom template with hreflang support
@@ -56,9 +67,9 @@ urlpatterns = [
 urlpatterns += i18n_patterns(
     path('jsi18n/', JavaScriptCatalog.as_view(domain='django'), name='javascript-catalog'),
     path('accounts/', include('allauth.urls')),
+    path('', include('users.urls')),
     path('', include('apps.strains.urls')),
     path('store/', include('apps.store.urls')),
-    path('api/chat/', include('apps.chat_bot.urls')),
     prefix_default_language=False,  # Spanish WITHOUT prefix - CRITICAL for SEO!
 )
 

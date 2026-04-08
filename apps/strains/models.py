@@ -1,11 +1,13 @@
 from bs4 import BeautifulSoup
 from tinymce.models import HTMLField
 
+from django.conf import settings
 from django.db import models
 
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.template.defaultfilters import slugify
+from django.utils.translation import gettext_lazy as _
 
 from apps.strains.mixins import TranslationMixin
 
@@ -15,6 +17,17 @@ CATEGORY_CHOICES = [
     ('Hybrid', 'Hybrid'),
     ('Sativa', 'Sativa'),
     ('Indica', 'Indica'),
+]
+
+COMMENT_REACTION_CHOICES = [
+    ('thumbs_up', _('Me gusta')),
+    ('thumbs_down', _('No me gusta')),
+]
+
+COMMENT_STATUS_CHOICES = [
+    ('approved', _('Aprobado')),
+    ('pending', _('Pendiente')),
+    ('rejected', _('Rechazado')),
 ]
 
 
@@ -256,6 +269,63 @@ class AlternativeStrainName(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class FavoriteStrain(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='favorite_strains',
+    )
+    strain = models.ForeignKey(
+        Strain,
+        on_delete=models.CASCADE,
+        related_name='favorited_by',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'strain'], name='unique_favorite_strain'),
+        ]
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user_id}:{self.strain_id}"
+
+
+class StrainComment(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='strain_comments',
+    )
+    strain = models.ForeignKey(
+        Strain,
+        on_delete=models.CASCADE,
+        related_name='comments',
+    )
+    pros = models.TextField(blank=True)
+    cons = models.TextField(blank=True)
+    reaction = models.CharField(max_length=20, choices=COMMENT_REACTION_CHOICES)
+    status = models.CharField(
+        max_length=20,
+        choices=COMMENT_STATUS_CHOICES,
+        default='pending',
+        db_index=True,
+    )
+    moderation_reason = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'strain'], name='unique_strain_comment'),
+        ]
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user_id}:{self.strain_id}:{self.status}"
 
 
 class Article(BaseText, TranslationMixin):

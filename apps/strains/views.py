@@ -9,9 +9,19 @@ from django.http import HttpResponse
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from apps.strains.forms import StrainFilterForm
-from apps.strains.models import Article, ArticleCategory, ArticleImage, Strain, Terpene
+from apps.strains.forms import StrainCommentForm, StrainFilterForm
+from apps.strains.models import (
+    Article,
+    ArticleCategory,
+    ArticleImage,
+    FavoriteStrain,
+    Strain,
+    StrainComment,
+    Terpene,
+)
 from apps.strains.utils import get_related_strains, get_filtered_strains, is_ajax_request
+
+STRAIN_COMMENTS_PAGE_SIZE = 5
 
 
 def _extract_headings(html_content):
@@ -132,6 +142,15 @@ def strain_detail(request, slug):
     for t in strain.other_terpenes.all():
         t.article_slug = terpene_slugs.get(t.id)
 
+    approved_comments = list(
+        StrainComment.objects.select_related('user')
+        .filter(strain=strain, status='approved')
+        .order_by('-created_at')[:STRAIN_COMMENTS_PAGE_SIZE]
+    )
+    comments_count = StrainComment.objects.filter(strain=strain, status='approved').count()
+    user_comment = None
+    comment_form = None
+
     context = {
         'strain': strain,
         'strains': related_strains,
@@ -139,7 +158,34 @@ def strain_detail(request, slug):
         'max_cbd': cann_max['max_cbd'] or 1,
         'max_cbg': cann_max['max_cbg'] or 1,
         'meta_description': _build_strain_meta_description(strain),
+        'is_favorited': False,
+        'comment_form': None,
+        'user_comment': None,
+        'approved_comments': approved_comments,
+        'approved_comments_count': comments_count,
+        'comments_has_more': comments_count > len(approved_comments),
+        'comments_next_page': 2,
     }
+
+    if request.user.is_authenticated:
+        context['is_favorited'] = FavoriteStrain.objects.filter(
+            user=request.user,
+            strain=strain,
+        ).exists()
+        user_comment = StrainComment.objects.filter(
+            user=request.user,
+            strain=strain,
+        ).first()
+        initial = None
+        if user_comment:
+            initial = {
+                'pros': user_comment.pros,
+                'cons': user_comment.cons,
+                'reaction': user_comment.reaction,
+            }
+        comment_form = StrainCommentForm(initial=initial)
+        context['user_comment'] = user_comment
+        context['comment_form'] = comment_form
 
     return render(request, 'strain_modern_v2.html', context)
 
@@ -504,4 +550,3 @@ def terpene_detail(request, slug):
             'related_terpenes': related_terpenes,
         }
     )
-
