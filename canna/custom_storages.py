@@ -1,9 +1,8 @@
-from storages.backends.s3boto3 import S3Boto3Storage, S3ManifestStaticStorage
+from storages.backends.s3boto3 import S3Boto3Storage
 
 
-class StaticStorage(S3ManifestStaticStorage):
+class StaticStorage(S3Boto3Storage):
     location = 'static'
-    manifest_strict = False
 
 
 class MediaStorage(S3Boto3Storage):
