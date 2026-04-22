@@ -52,16 +52,15 @@
     <meta name="twitter:description" content="{% block twitter_description %}{% endblock %}">
     {% block twitter_image %}<meta name="twitter:image" content="{% static 'img/cannamente_bg_THC_CBD_1140x320.png' %}">{% endblock %}
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Preconnect to media/static S3 origin to speed up LCP image fetch -->
+    <link rel="preconnect" href="https://cancon.s3.amazonaws.com" crossorigin>
 
-    <!-- New dark theme styles -->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/styles_v2.css' %}?v=2" />
-    <link rel="stylesheet" type="text/css" href="{% static 'css/auth.css' %}" />
-    <link rel="stylesheet" type="text/css" href="{% static 'css/cookie-consent.css' %}" />
-    <link rel="stylesheet" type="text/css" href="{% static 'css/registration-banner.css' %}" />
+    <!-- Per-page LCP asset preloads (strain hero image, etc.) -->
+    {% block preload %}{% endblock %}
+
+    <!-- Styles bundle (fonts + theme + auth + cookie/registration banners).
+         Produced by: manage.py build_css_bundle. -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bundle_v2.css' %}?v=2" />
 
     {% block extra_css %}{% endblock %}
 </head>
@@ -299,21 +298,21 @@
 {% endif %}
 
 {% block common_scripts %}
-    <script src="{% static 'js/jquery-3.2.0.min.js' %}"></script>
-    <script src="{% static 'js/jquery.raty.js' %}"></script>
-    <script src="{% static 'js/util.js' %}"></script>
-    <script src="{% static 'js/collapse.js' %}"></script>
-    <script src="{% static 'js/modal.js' %}"></script>
-    <script src="{% static 'js/owl.carousel.min.js' %}"></script>
-    <script src="{% static 'js/search-dropdown.js' %}"></script>
+    <script defer src="{% static 'js/jquery-3.2.0.min.js' %}"></script>
+    <script defer src="{% static 'js/jquery.raty.js' %}"></script>
+    <script defer src="{% static 'js/util.js' %}"></script>
+    <script defer src="{% static 'js/collapse.js' %}"></script>
+    <script defer src="{% static 'js/modal.js' %}"></script>
+    <script defer src="{% static 'js/owl.carousel.min.js' %}"></script>
+    <script defer src="{% static 'js/search-dropdown.js' %}"></script>
     <script type="text/javascript">
         var starOnUrl = "{% static 'img/raty_on.svg' %}";
         var starOffUrl = "{% static 'img/raty_off.svg' %}";
         var starHalfUrl = "{% static 'img/star_half.svg' %}";
     </script>
-    <script src="{% static 'js/script.js' %}"></script>
-    <script src="{% static 'js/lang_toggle.js' %}"></script>
-    <script src="{% static 'js/header-v2.js' %}"></script>
+    <script defer src="{% static 'js/script.js' %}"></script>
+    <script defer src="{% static 'js/lang_toggle.js' %}"></script>
+    <script defer src="{% static 'js/header-v2.js' %}"></script>
 
     <!-- Cookie consent -->
     {{ cookie_consent|json_script:"cookie-consent-data" }}
@@ -325,7 +324,7 @@
             csrfToken: '{{ csrf_token }}'
         };
     </script>
-    <script src="{% static 'js/cookie-consent.js' %}"></script>
+    <script defer src="{% static 'js/cookie-consent.js' %}"></script>
 
     <script>
         window.FavoritesConfig = {
@@ -339,7 +338,7 @@
             errorText: '{% trans "No se pudo actualizar favoritos. Inténtalo de nuevo." %}'
         };
     </script>
-    <script src="{% static 'js/favorites.js' %}"></script>
+    <script defer src="{% static 'js/favorites.js' %}"></script>
 
     <script>
         window.RegistrationBannerConfig = {
@@ -355,7 +354,7 @@
             errorText: '{% trans "No se pudo actualizar la promoción. Inténtalo de nuevo." %}'
         };
     </script>
-    <script src="{% static 'js/registration-banner.js' %}"></script>
+    <script defer src="{% static 'js/registration-banner.js' %}"></script>
 
     {% if ENABLE_AI_CHAT %}
     <script>
@@ -374,7 +373,7 @@
             resumeChat: '{% trans "Continuar chat" %}'
         };
     </script>
-    <script src="{% static 'js/chat-fullscreen.js' %}"></script>
+    <script defer src="{% static 'js/chat-fullscreen.js' %}"></script>
     {% endif %}
 {% endblock common_scripts %}
 

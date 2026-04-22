@@ -20,6 +20,10 @@
 {% block twitter_description %}{{ meta_description }}{% endblock %}
 {% block twitter_image %}{% if strain.img %}<meta name="twitter:image" content="{{ strain.img.url }}">{% else %}<meta name="twitter:image" content="{% static 'img/cannamente_bg_THC_CBD_1140x320.png' %}">{% endif %}{% endblock %}
 
+{% block preload %}
+{% if strain.img %}<link rel="preload" as="image" href="{{ strain.img.url }}" fetchpriority="high">{% endif %}
+{% endblock %}
+
 {% block extra_css %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/strain-detail-v2.css' %}?v=2" />
 {% endblock %}
@@ -78,7 +82,7 @@
             <div class="sd-top__image">
                 {% if strain.img %}
                 <a href="#" data-fancybox="gallery1" class="tovar_imgwrap">
-                    <img src="{{ strain.img.url }}" alt="{{ strain.img_alt_text }}" width="500" height="500" class="tovar_img">
+                    <img src="{{ strain.img.url }}" alt="{{ strain.img_alt_text }}" width="500" height="500" class="tovar_img" fetchpriority="high" decoding="async">
                 </a>
                 {% else %}
                 <a href="#" data-fancybox="gallery1" class="tovar_imgwrap">
@@ -432,7 +436,7 @@
 
 {% block page_scripts %}
 {% if strain.parents.all %}
-<script src="{% static 'js/genetics-tree.js' %}"></script>
+<script defer src="{% static 'js/genetics-tree.js' %}"></script>
 {% endif %}
 <script>
     window.StrainCommentsConfig = {
@@ -448,5 +452,5 @@
         emptyError: '{% trans "Añade pros o contras antes de enviar." %}'
     };
 </script>
-<script src="{% static 'js/strain-comments.js' %}"></script>
+<script defer src="{% static 'js/strain-comments.js' %}"></script>
 {% endblock page_scripts %}
