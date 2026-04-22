@@ -26,7 +26,7 @@ services:
     build: .
     container_name: canna-web
     restart: unless-stopped
-    command: sh -c "python manage.py migrate && python manage.py compilemessages && gunicorn --access-logfile - --error-logfile - --bind 0.0.0.0:8000 --worker-class ${GUNICORN_WORKER_CLASS:-gthread} --workers ${GUNICORN_WORKERS:-2} --threads ${GUNICORN_THREADS:-2} --timeout ${GUNICORN_TIMEOUT:-120} --graceful-timeout ${GUNICORN_GRACEFUL_TIMEOUT:-30} --keep-alive ${GUNICORN_KEEPALIVE:-5} --max-requests ${GUNICORN_MAX_REQUESTS:-800} --max-requests-jitter ${GUNICORN_MAX_REQUESTS_JITTER:-80} canna.wsgi:application"
+    command: sh -c "python manage.py build_css_bundle && python manage.py migrate && python manage.py compilemessages && gunicorn --access-logfile - --error-logfile - --bind 0.0.0.0:8000 --worker-class ${GUNICORN_WORKER_CLASS:-gthread} --workers ${GUNICORN_WORKERS:-2} --threads ${GUNICORN_THREADS:-2} --timeout ${GUNICORN_TIMEOUT:-120} --graceful-timeout ${GUNICORN_GRACEFUL_TIMEOUT:-30} --keep-alive ${GUNICORN_KEEPALIVE:-5} --max-requests ${GUNICORN_MAX_REQUESTS:-800} --max-requests-jitter ${GUNICORN_MAX_REQUESTS_JITTER:-80} canna.wsgi:application"
     volumes:
       - .:/app
       - static_volume:/app/staticfiles

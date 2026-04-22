@@ -59,4 +59,5 @@ jobs:
           LOG_PATH: "/tmp/app_logs.log"
         run: |
           python manage.py migrate
+          python manage.py build_css_bundle
           pytest
