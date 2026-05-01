@@ -358,6 +358,30 @@
 
     {% if ENABLE_AI_CHAT %}
     <script>
+        // Shared placeholders for all chat components
+        window.ChatPlaceholders = {
+            es: [
+                '{% trans "Necesito algo para relajación y creatividad..." %}',
+                '{% trans "Busco una variedad que me ayude a dormir mejor..." %}',
+                '{% trans "Quiero algo energético para el día..." %}',
+                '{% trans "Necesito alivio del dolor sin mucha psicoactividad..." %}',
+                '{% trans "Busco una cepa para concentrarme en el trabajo..." %}',
+                '{% trans "Quiero algo para socializar y estar feliz..." %}',
+                '{% trans "Necesito algo suave para principiantes..." %}',
+                '{% trans "Busco una variedad con sabor frutal..." %}'
+            ],
+            en: [
+                '{% trans "I need something for relaxation and creativity..." %}',
+                '{% trans "Looking for a strain to help me sleep better..." %}',
+                '{% trans "I want something energizing for the day..." %}',
+                '{% trans "Need pain relief without much psychoactivity..." %}',
+                '{% trans "Looking for a strain to focus at work..." %}',
+                '{% trans "Want something for socializing and happiness..." %}',
+                '{% trans "Need something mild for beginners..." %}',
+                '{% trans "Looking for a strain with fruity flavor..." %}'
+            ]
+        };
+
         window.ChatFullscreenConfig = {
             chatUrl: '{% url "chat_bot:chat" %}',
             streamUrl: '{% url "chat_bot:stream" %}',
@@ -373,6 +397,7 @@
             resumeChat: '{% trans "Continuar chat" %}'
         };
     </script>
+    <script defer src="{% static 'js/chat-placeholders.js' %}"></script>
     <script defer src="{% static 'js/chat-fullscreen.js' %}"></script>
     {% endif %}
 {% endblock common_scripts %}

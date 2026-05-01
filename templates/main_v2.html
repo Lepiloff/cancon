@@ -58,8 +58,7 @@
             <div class="hero-chat">
                 <div class="hero-chat__input-wrapper">
                     <label for="hero-chat-input" class="sr-only">{% trans "Pregunta al AI Budtender" %}</label>
-                    <input type="text" class="hero-chat__input" id="hero-chat-input"
-                           placeholder="{% trans 'Necesito algo para relajación y creatividad...' %}">
+                    <input type="text" class="hero-chat__input" id="hero-chat-input">
                     <button class="hero-chat__send" id="hero-chat-send" aria-label="{% trans 'Enviar' %}">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4z"/><path d="m22 2-11 11"/></svg>
                     </button>
@@ -213,5 +212,5 @@
 {% endblock %}
 
 {% block page_scripts %}
-<script src="{% static 'js/hero-chat.js' %}"></script>
+<script defer src="{% static 'js/hero-chat.js' %}"></script>
 {% endblock page_scripts %}

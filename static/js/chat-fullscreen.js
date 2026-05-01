@@ -33,6 +33,8 @@
     var previouslyFocused = null;
     var historyRestored = false;
 
+    var stopPlaceholderRotation = null;
+
     function openFullscreenChat(prefillText) {
         previouslyFocused = document.activeElement;
 
@@ -45,6 +47,16 @@
         fullscreen.classList.add('chat-fullscreen--active');
         fullscreen.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
+
+        // Start rotating placeholder while chat is open and input is empty
+        if (window.ChatPlaceholderRotator && !stopPlaceholderRotation) {
+            stopPlaceholderRotation = window.ChatPlaceholderRotator.attach(fsInput, {
+                isActive: function() {
+                    return fullscreen.classList.contains('chat-fullscreen--active');
+                }
+            });
+        }
+
         if (prefillText && fsInput) {
             fsInput.value = prefillText;
             fsInput.focus();
@@ -64,6 +76,10 @@
         fullscreen.classList.remove('chat-fullscreen--active');
         fullscreen.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
+        if (stopPlaceholderRotation) {
+            stopPlaceholderRotation();
+            stopPlaceholderRotation = null;
+        }
         if (previouslyFocused && previouslyFocused.focus) {
             previouslyFocused.focus();
         }
@@ -80,8 +96,9 @@
         }
     });
 
-    // Expose for other scripts (hero section, strains page CTA)
+    // Expose for other scripts (hero section, strains page CTA) and notify listeners
     window.openFullscreenChat = openFullscreenChat;
+    document.dispatchEvent(new Event('chat-fullscreen:ready'));
 
     // --- Helpers -----------------------------------------------------------------
 

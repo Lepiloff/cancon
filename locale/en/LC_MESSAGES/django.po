@@ -1192,3 +1192,49 @@ msgstr "Add pros, cons, or both."
 
 #~ msgid "FILTROS"
 #~ msgstr "FILTERS"
+
+# Chat placeholder translations
+msgid "Busco una variedad que me ayude a dormir mejor..."
+msgstr "Looking for a strain to help me sleep better..."
+
+msgid "Quiero algo energético para el día..."
+msgstr "I want something energizing for the day..."
+
+msgid "Necesito alivio del dolor sin mucha psicoactividad..."
+msgstr "Need pain relief without much psychoactivity..."
+
+msgid "Busco una cepa para concentrarme en el trabajo..."
+msgstr "Looking for a strain to focus at work..."
+
+msgid "Quiero algo para socializar y estar feliz..."
+msgstr "Want something for socializing and happiness..."
+
+msgid "Necesito algo suave para principiantes..."
+msgstr "Need something mild for beginners..."
+
+msgid "Busco una variedad con sabor frutal..."
+msgstr "Looking for a strain with fruity flavor..."
+
+msgid "I need something for relaxation and creativity..."
+msgstr "I need something for relaxation and creativity..."
+
+msgid "Looking for a strain to help me sleep better..."
+msgstr "Looking for a strain to help me sleep better..."
+
+msgid "I want something energizing for the day..."
+msgstr "I want something energizing for the day..."
+
+msgid "Need pain relief without much psychoactivity..."
+msgstr "Need pain relief without much psychoactivity..."
+
+msgid "Looking for a strain to focus at work..."
+msgstr "Looking for a strain to focus at work..."
+
+msgid "Want something for socializing and happiness..."
+msgstr "Want something for socializing and happiness..."
+
+msgid "Need something mild for beginners..."
+msgstr "Need something mild for beginners..."
+
+msgid "Looking for a strain with fruity flavor..."
+msgstr "Looking for a strain with fruity flavor..."

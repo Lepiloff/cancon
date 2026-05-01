@@ -4,36 +4,25 @@
 
     if (!heroInput) return;
 
-    function waitForChatFunction(callback) {
-        if (window.openFullscreenChat) {
-            callback();
-            return;
-        }
+    // Rotate placeholder every 5s while input is empty
+    if (window.ChatPlaceholderRotator) {
+        window.ChatPlaceholderRotator.attach(heroInput);
+    }
 
-        var attempts = 0;
-        var maxAttempts = 50;
-        var checkInterval = setInterval(function() {
-            attempts++;
-            if (window.openFullscreenChat || attempts >= maxAttempts) {
-                clearInterval(checkInterval);
-                if (window.openFullscreenChat) {
-                    callback();
-                }
-            }
-        }, 100);
+    function openChatWithQuery(query) {
+        if (!window.openFullscreenChat) return;
+        window.openFullscreenChat(query);
+        setTimeout(function() {
+            var fsSend = document.getElementById('chat-fullscreen-send');
+            if (fsSend) fsSend.click();
+        }, 300);
     }
 
     function sendHeroMessage() {
-        if (!heroInput.value.trim()) return;
         var query = heroInput.value.trim();
+        if (!query) return;
         heroInput.value = '';
-        waitForChatFunction(function() {
-            window.openFullscreenChat(query);
-            setTimeout(function() {
-                var fsSend = document.getElementById('chat-fullscreen-send');
-                if (fsSend) fsSend.click();
-            }, 300);
-        });
+        openChatWithQuery(query);
     }
 
     if (heroSend) {
@@ -50,14 +39,7 @@
     var chips = document.querySelectorAll('.hero-chips__item');
     for (var i = 0; i < chips.length; i++) {
         chips[i].addEventListener('click', function() {
-            var query = this.getAttribute('data-query');
-            waitForChatFunction(function() {
-                window.openFullscreenChat(query);
-                setTimeout(function() {
-                    var fsSend = document.getElementById('chat-fullscreen-send');
-                    if (fsSend) fsSend.click();
-                }, 300);
-            });
+            openChatWithQuery(this.getAttribute('data-query'));
         });
     }
 })();
