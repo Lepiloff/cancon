@@ -234,12 +234,31 @@
 {% if ENABLE_AI_CHAT %}
 <script>
 (function() {
-    var cta = document.getElementById('strains-chat-cta');
-    if (cta && window.openFullscreenChat) {
-        cta.addEventListener('click', function() {
-            window.openFullscreenChat('');
-        });
+    function bindChatCta() {
+        var cta = document.getElementById('strains-chat-cta');
+        if (cta && window.openFullscreenChat) {
+            cta.addEventListener('click', function() {
+                window.openFullscreenChat('');
+            });
+            return true;
+        }
+        return false;
     }
+
+    // Try to bind immediately
+    if (bindChatCta()) {
+        return;
+    }
+
+    // If not available yet, wait for the chat script to load
+    var attempts = 0;
+    var maxAttempts = 50; // 5 seconds max
+    var checkInterval = setInterval(function() {
+        attempts++;
+        if (bindChatCta() || attempts >= maxAttempts) {
+            clearInterval(checkInterval);
+        }
+    }, 100);
 })();
 </script>
 {% endif %}

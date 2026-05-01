@@ -4,17 +4,36 @@
 
     if (!heroInput) return;
 
+    function waitForChatFunction(callback) {
+        if (window.openFullscreenChat) {
+            callback();
+            return;
+        }
+
+        var attempts = 0;
+        var maxAttempts = 50;
+        var checkInterval = setInterval(function() {
+            attempts++;
+            if (window.openFullscreenChat || attempts >= maxAttempts) {
+                clearInterval(checkInterval);
+                if (window.openFullscreenChat) {
+                    callback();
+                }
+            }
+        }, 100);
+    }
+
     function sendHeroMessage() {
         if (!heroInput.value.trim()) return;
         var query = heroInput.value.trim();
         heroInput.value = '';
-        if (window.openFullscreenChat) {
+        waitForChatFunction(function() {
             window.openFullscreenChat(query);
             setTimeout(function() {
                 var fsSend = document.getElementById('chat-fullscreen-send');
                 if (fsSend) fsSend.click();
             }, 300);
-        }
+        });
     }
 
     if (heroSend) {
@@ -32,13 +51,13 @@
     for (var i = 0; i < chips.length; i++) {
         chips[i].addEventListener('click', function() {
             var query = this.getAttribute('data-query');
-            if (window.openFullscreenChat) {
+            waitForChatFunction(function() {
                 window.openFullscreenChat(query);
                 setTimeout(function() {
                     var fsSend = document.getElementById('chat-fullscreen-send');
                     if (fsSend) fsSend.click();
                 }, 300);
-            }
+            });
         });
     }
 })();
