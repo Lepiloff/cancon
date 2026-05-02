@@ -77,6 +77,11 @@
             return;
         }
 
+        var requestedIds = {};
+        for (var k = 0; k < ids.length; k++) {
+            requestedIds[String(ids[k])] = true;
+        }
+
         fetch(statusUrl + '?strain_ids=' + encodeURIComponent(ids.join(',')), {
             credentials: 'same-origin',
             headers: {
@@ -100,10 +105,11 @@
                 var buttons = getButtons(root);
                 for (var j = 0; j < buttons.length; j++) {
                     var button = buttons[j];
-                    if (!button.dataset.strainId) {
+                    var strainId = button.dataset.strainId;
+                    if (!strainId || !requestedIds[strainId]) {
                         continue;
                     }
-                    setButtonState(button, !!favorites[button.dataset.strainId]);
+                    setButtonState(button, !!favorites[strainId]);
                 }
             })
             .catch(function() {
