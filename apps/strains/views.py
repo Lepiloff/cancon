@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.urls import reverse
+from django.template.defaultfilters import slugify
 from django.utils.translation import gettext as _
 
 from apps.strains.forms import StrainCommentForm, StrainFilterForm
@@ -62,12 +63,13 @@ def _get_terpene_article_slugs(terpenes):
     if not terpenes:
         return {}
 
-    # Collect candidate prefixes: first word of each terpene name (lowercased)
-    terpene_prefixes = {}  # prefix -> terpene.id
+    # Match against the explicit English name so Spanish pages still link to
+    # English-slug terpene articles.
+    terpene_prefixes = []
     for terpene in terpenes:
-        if terpene.name:
-            prefix = terpene.name.split()[0].lower()
-            terpene_prefixes[prefix] = terpene.id
+        prefix = _get_terpene_article_prefix(terpene)
+        if prefix:
+            terpene_prefixes.append((prefix, terpene.id))
 
     if not terpene_prefixes:
         return {}
@@ -80,12 +82,20 @@ def _get_terpene_article_slugs(terpenes):
 
     # Match each terpene prefix against article slugs
     slugs = {}
-    for prefix, terpene_id in terpene_prefixes.items():
+    for prefix, terpene_id in terpene_prefixes:
         for article_slug in terpene_articles:
             if article_slug.startswith(prefix):
                 slugs[terpene_id] = article_slug
                 break
     return slugs
+
+
+def _get_terpene_article_prefix(terpene):
+    name = getattr(terpene, 'name_en', None) or terpene.name
+    if not name:
+        return ''
+    first_word = re.sub(r'\s*\(.*?\)', '', name).split()[0]
+    return slugify(first_word)
 
 
 def _build_strain_meta_description(strain):
@@ -471,28 +481,31 @@ def terpene_list(request):
     return render(request, 'terpene_list_v2.html', {'terpenes_with_images': terpenes_with_images})
 
 
-def _find_terpene_for_article(article: Article):
-    """Match an Article (terpene page) to its corresponding Terpene model entry.
+def _find_terpenes_for_article(article: Article):
+    """Match an Article (terpene page) to corresponding Terpene model entries.
 
     Strategy: use the article slug (e.g. "linalool", "caryophyllene") to find
-    a Terpene whose name starts with that slug (case-insensitive).
+    Terpenes whose English name starts with that slug (case-insensitive).
     Falls back to matching by first word of the article title.
     No hardcoded mapping needed.
     """
+    lookups = Q()
+
     # Try matching by slug first (most reliable — slugs are stable identifiers)
     if article.slug:
-        match = Terpene.objects.filter(name__istartswith=article.slug).first()
-        if match:
-            return match
+        lookups |= Q(name_en__istartswith=article.slug)
+        lookups |= Q(name__istartswith=article.slug)
 
     # Fallback: match by first word of title
     first_word = article.title.split(':')[0].split()[0].strip() if article.title else ''
     if first_word:
-        match = Terpene.objects.filter(name__istartswith=first_word).first()
-        if match:
-            return match
+        lookups |= Q(name_en__istartswith=first_word)
+        lookups |= Q(name__istartswith=first_word)
 
-    return None
+    if not lookups:
+        return []
+
+    return list(Terpene.objects.filter(lookups).distinct())
 
 
 def _get_related_terpenes(terpene_article, limit=3):
@@ -517,21 +530,23 @@ def terpene_detail(request, slug):
     headings = _extract_headings(terpene.text_content)
 
     terpene_strains = []
-    matched_terpene = _find_terpene_for_article(terpene)
-    if matched_terpene:
+    matched_terpenes = _find_terpenes_for_article(terpene)
+    if matched_terpenes:
         limit = 8
         # Prioritize strains where this is the dominant terpene
         dominant = list(
-            Strain.objects.filter(dominant_terpene=matched_terpene, active=True)
-            .order_by('-rating')[:limit]
+            Strain.objects.filter(dominant_terpene__in=matched_terpenes, active=True)
+            .order_by('-rating')
+            .distinct()[:limit]
         )
         if len(dominant) < limit:
             # Fill remaining with strains that have it as other terpene
             exclude_ids = {s.pk for s in dominant}
             filler = list(
-                Strain.objects.filter(other_terpenes=matched_terpene, active=True)
+                Strain.objects.filter(other_terpenes__in=matched_terpenes, active=True)
                 .exclude(pk__in=exclude_ids)
-                .order_by('-rating')[:(limit - len(dominant))]
+                .order_by('-rating')
+                .distinct()[:(limit - len(dominant))]
             )
             terpene_strains = dominant + filler
         else:

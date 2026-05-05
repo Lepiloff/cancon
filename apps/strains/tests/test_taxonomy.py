@@ -8,8 +8,18 @@ from django.core.management import call_command
 from django.utils.translation import override
 
 from apps.strains.leafly_import import StrainPersister
-from apps.strains.models import Flavor, Feeling, HelpsWith, Negative, Strain
+from apps.strains.models import (
+    Article,
+    ArticleCategory,
+    Flavor,
+    Feeling,
+    HelpsWith,
+    Negative,
+    Strain,
+    Terpene,
+)
 from apps.strains.taxonomy import get_or_create_taxonomy_term
+from apps.strains.views import _find_terpenes_for_article, _get_terpene_article_slugs
 
 
 @pytest.mark.django_db
@@ -98,6 +108,51 @@ def test_leafly_taxonomy_resolution_canonicalizes_helps_with_accents():
 
 
 @pytest.mark.django_db
+def test_get_or_create_taxonomy_term_canonicalizes_terpene_aliases():
+    existing = Terpene.objects.create(
+        name='Myrcene',
+        name_en='Myrcene',
+        name_es='Mirceno',
+    )
+
+    term, created = get_or_create_taxonomy_term(Terpene, 'Mirceno (herbal)')
+
+    assert term == existing
+    assert created is False
+    assert Terpene.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_terpene_article_matching_uses_english_names_for_spanish_variants():
+    category = ArticleCategory.objects.create(name='Terpenes')
+    article = Article.objects.create(
+        title='Myrcene: properties',
+        text_content='Terpene content.',
+        description='Myrcene description',
+        keywords='myrcene',
+        slug='myrcene',
+    )
+    article.category.add(category)
+    spanish_variant = Terpene.objects.create(
+        name='Mirceno (herbal)',
+        name_en='Myrcene (herbal)',
+        name_es='Mirceno (herbal)',
+    )
+    pure_variant = Terpene.objects.create(
+        name='Myrcene',
+        name_en='Myrcene',
+        name_es='Mirceno',
+    )
+
+    slugs = _get_terpene_article_slugs([spanish_variant, pure_variant])
+    matches = _find_terpenes_for_article(article)
+
+    assert slugs[spanish_variant.id] == 'myrcene'
+    assert slugs[pure_variant.id] == 'myrcene'
+    assert set(matches) == {spanish_variant, pure_variant}
+
+
+@pytest.mark.django_db
 def test_import_strains_reuses_existing_taxonomy_terms_case_insensitively(tmp_path):
     feeling = Feeling.objects.create(name='Happy', name_en='Happy', name_es='Feliz')
     negative = Negative.objects.create(
@@ -169,3 +224,60 @@ def test_merge_negative_anxiety_migration_moves_links_and_deletes_duplicate():
         assert list(strain.negatives.all()) == [anxious]
         assert Negative.objects.filter(name__iexact='Anxiety').exists() is False
         assert Negative.objects.filter(name__iexact='Anxious').count() == 1
+
+
+@pytest.mark.django_db
+def test_consolidate_terpene_variants_migration_moves_links_and_preserves_content():
+    migration_module = importlib.import_module(
+        'apps.strains.migrations.0026_consolidate_terpene_variants'
+    )
+
+    with override('en'):
+        source = Terpene.objects.create(
+            name='Mirceno (herbal)',
+            name_en='Myrcene (herbal)',
+            name_es='Mirceno (herbal)',
+            description='Source description',
+        )
+        target = Terpene.objects.create(
+            name='Myrcene',
+            name_en='Myrcene',
+            name_es='Myrcene',
+            description='',
+        )
+        dominant_strain = Strain.objects.create(
+            name='Dominant Terpene Strain',
+            title='Dominant Terpene Strain',
+            text_content='Content',
+            description='Description',
+            keywords='terpene',
+            category='Hybrid',
+            slug='dominant-terpene-strain',
+            active=True,
+            dominant_terpene=source,
+        )
+        other_strain = Strain.objects.create(
+            name='Other Terpene Strain',
+            title='Other Terpene Strain',
+            text_content='Content',
+            description='Description',
+            keywords='terpene',
+            category='Hybrid',
+            slug='other-terpene-strain',
+            active=True,
+        )
+        other_strain.other_terpenes.add(source, target)
+
+        migration_module.consolidate_terpene_variants(django_apps, None)
+
+        dominant_strain.refresh_from_db()
+        other_strain.refresh_from_db()
+        target.refresh_from_db()
+        assert dominant_strain.dominant_terpene == target
+        assert set(other_strain.other_terpenes.all()) == {target}
+        assert other_strain.other_terpenes.count() == 1
+        assert target.name == 'Myrcene'
+        assert target.name_en == 'Myrcene'
+        assert target.name_es == 'Mirceno'
+        assert target.description == 'Source description'
+        assert Terpene.objects.filter(name__iexact='Mirceno (herbal)').exists() is False

@@ -1,18 +1,10 @@
 from django.db import models
 from django.db.models import Q
 
+from apps.strains.taxonomy_aliases import TAXONOMY_NAME_ALIASES
+
 
 TRANSLATED_NAME_FIELDS = ('name', 'name_en', 'name_es')
-TAXONOMY_NAME_ALIASES = {
-    'strains.Negative': {
-        'anxiety': 'Anxious',
-        'ansiedad': 'Anxious',
-    },
-    'strains.HelpsWith': {
-        'inflamacion': 'Inflamación',
-        'presion ocular': 'Presión ocular',
-    },
-}
 
 
 def normalize_taxonomy_name(name: str) -> str:
