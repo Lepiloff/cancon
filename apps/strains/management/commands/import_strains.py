@@ -11,6 +11,7 @@ from apps.strains.models import (
     HelpsWith,
     Flavor,
 )
+from apps.strains.taxonomy import get_or_create_taxonomy_term
 
 from PIL import Image, ImageEnhance, ImageFilter
 from io import BytesIO
@@ -86,19 +87,19 @@ class Command(BaseCommand):
                     self.style.WARNING(f'Skipped duplicate {strain_data["strain_name"]}'))
 
             for feeling_name in strain_data['feelings']:
-                feeling, _ = Feeling.objects.get_or_create(name=feeling_name)
+                feeling, _ = get_or_create_taxonomy_term(Feeling, feeling_name)
                 strain.feelings.add(feeling)
 
             for negative_name in strain_data['negatives']:
-                negative, _ = Negative.objects.get_or_create(name=negative_name)
+                negative, _ = get_or_create_taxonomy_term(Negative, negative_name)
                 strain.negatives.add(negative)
 
             # for helps_with_name in strain_data['helps_with']:
-            #     helps_with, _ = HelpsWith.objects.get_or_create(name=helps_with_name)
+            #     helps_with, _ = get_or_create_taxonomy_term(HelpsWith, helps_with_name)
             #     strain.helps_with.add(helps_with)
 
             for flavor_name in strain_data['flavors']:
-                flavor, _ = Flavor.objects.get_or_create(name=flavor_name)
+                flavor, _ = get_or_create_taxonomy_term(Flavor, flavor_name)
                 strain.flavors.add(flavor)
 
             # Download and save the image
