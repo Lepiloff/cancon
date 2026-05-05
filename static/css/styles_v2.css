@@ -2051,10 +2051,18 @@ select:focus-visible,
 }
 
 /* === Terpene Detail === */
+/* Note: nested .breadcrumb-v2 has its own padding-top zeroed out
+   (see breadcrumb-v2 override), so this provides full header clearance. */
 .terpene-detail-v2 {
-  padding-top: 80px;
+  padding-top: 120px;
   background: var(--bg-primary);
   min-height: 100vh;
+}
+
+@media screen and (max-width: 768px) {
+  .terpene-detail-v2 {
+    padding-top: 88px;
+  }
 }
 
 .terpene-detail-v2__container {
@@ -3883,10 +3891,37 @@ body.mobile-nav-open {
 .breadcrumb-v2 {
   max-width: var(--container-max);
   margin: 0 auto;
-  padding: 80px 24px 16px;
+  /* Top padding only clears the fixed header on pages that don't already
+     provide their own padding-top (see .sd-page-v2 / .terpene-detail-v2
+     overrides below). Horizontal padding aligns with --section-pad-x so
+     the breadcrumb's left edge matches the rest of the page content. */
+  padding: 80px var(--section-pad-x) 16px;
   font-family: var(--font-body);
   font-size: 0.85rem;
   color: var(--text-muted);
+}
+
+/* When breadcrumb is nested inside a page wrapper that already provides
+   top clearance for the fixed header, drop its own large top padding so
+   the gap below the header stays natural rather than stacking. */
+.sd-page-v2 > .breadcrumb-v2,
+.terpene-detail-v2 > .breadcrumb-v2 {
+  padding-top: 0;
+}
+
+/* sd-page-v2 already applies --section-pad-x on its own wrapper, so the
+   breadcrumb's horizontal padding would stack and misalign it. Drop it. */
+.sd-page-v2 > .breadcrumb-v2 {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Mobile: keep the standalone breadcrumb closer to the fixed header. */
+@media screen and (max-width: 768px) {
+  .breadcrumb-v2 {
+    padding-top: 24px;
+    padding-bottom: 12px;
+  }
 }
 
 .breadcrumb-v2 a {

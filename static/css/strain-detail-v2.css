@@ -4,6 +4,8 @@
    ========================================================================== */
 
 /* --- Page wrapper for fixed header clearance --- */
+/* Note: nested .breadcrumb-v2 has its own top/side padding zeroed out
+   (see styles_v2.css), so this is the single source of clearance. */
 .sd-page-v2 {
     padding-top: 120px;
     max-width: var(--container-max);
@@ -13,6 +15,14 @@
     padding-bottom: 60px;
     font-family: var(--font-body);
     color: var(--text-primary);
+}
+
+/* Tighter top spacing on mobile so the breadcrumb sits naturally below
+   the fixed header instead of leaving a large dead zone. */
+@media screen and (max-width: 768px) {
+    .sd-page-v2 {
+        padding-top: 88px;
+    }
 }
 
 /* --- Header: Name + Meta inline --- */
@@ -912,8 +922,11 @@ h1.sd-name:before {
     }
 
     .favorite-toggle--detail {
-        width: 100%;
-        justify-content: center;
+        width: auto;
+        align-self: flex-start;
+        padding: 0 16px;
+        min-height: 34px;
+        font-size: 12px;
     }
 
     .sd-top {
