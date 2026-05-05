@@ -31,6 +31,7 @@ from apps.strains.llm_output import (
     normalize_ascii_punctuation as shared_normalize_ascii_punctuation,
     strip_code_fences as shared_strip_code_fences,
 )
+from apps.strains.taxonomy import canonical_taxonomy_name
 
 
 def _strip_code_fences(content: str) -> str:
@@ -1351,6 +1352,7 @@ class StrainPersister:
         resolved = []
         missing = []
         for name in names:
+            name = canonical_taxonomy_name(model, name)
             key = name.lower()
             obj = cache.get(key)
             if obj:
