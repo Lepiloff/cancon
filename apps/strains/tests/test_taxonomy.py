@@ -1,12 +1,14 @@
 import importlib
 import json
+from unittest.mock import Mock
 
 import pytest
 from django.apps import apps as django_apps
 from django.core.management import call_command
 from django.utils.translation import override
 
-from apps.strains.models import Flavor, Feeling, Negative, Strain
+from apps.strains.leafly_import import StrainPersister
+from apps.strains.models import Flavor, Feeling, HelpsWith, Negative, Strain
 from apps.strains.taxonomy import get_or_create_taxonomy_term
 
 
@@ -58,6 +60,41 @@ def test_get_or_create_taxonomy_term_canonicalizes_negative_anxiety_alias():
     assert term == existing
     assert created is False
     assert Negative.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_get_or_create_taxonomy_term_canonicalizes_helps_with_accents():
+    existing = HelpsWith.objects.create(
+        name='Inflamación',
+        name_en='Inflamación',
+        name_es='Inflamación',
+    )
+
+    term, created = get_or_create_taxonomy_term(HelpsWith, 'Inflamacion')
+
+    assert term == existing
+    assert created is False
+    assert HelpsWith.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_leafly_taxonomy_resolution_canonicalizes_helps_with_accents():
+    existing = HelpsWith.objects.create(
+        name='Inflamación',
+        name_en='Inflamación',
+        name_es='Inflamación',
+    )
+    translator = Mock()
+    persister = StrainPersister(translator)
+
+    resolved = persister._resolve_taxonomy(
+        ['Inflamacion'],
+        HelpsWith,
+        persister.helps_with_cache,
+    )
+
+    assert resolved == [existing]
+    translator.translate_terms.assert_not_called()
 
 
 @pytest.mark.django_db

@@ -8,6 +8,10 @@ TAXONOMY_NAME_ALIASES = {
         'anxiety': 'Anxious',
         'ansiedad': 'Anxious',
     },
+    'strains.HelpsWith': {
+        'inflamacion': 'Inflamación',
+        'presion ocular': 'Presión ocular',
+    },
 }
 
 
