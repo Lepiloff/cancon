@@ -8,8 +8,18 @@ from django.core.management import call_command
 from django.utils.translation import override
 
 from apps.strains.leafly_import import StrainPersister
-from apps.strains.models import Flavor, Feeling, HelpsWith, Negative, Strain
+from apps.strains.models import (
+    Article,
+    ArticleCategory,
+    Flavor,
+    Feeling,
+    HelpsWith,
+    Negative,
+    Strain,
+    Terpene,
+)
 from apps.strains.taxonomy import get_or_create_taxonomy_term
+from apps.strains.views import _find_terpenes_for_article, _get_terpene_article_slugs
 
 
 @pytest.mark.django_db
@@ -95,6 +105,51 @@ def test_leafly_taxonomy_resolution_canonicalizes_helps_with_accents():
 
     assert resolved == [existing]
     translator.translate_terms.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_get_or_create_taxonomy_term_canonicalizes_terpene_aliases():
+    existing = Terpene.objects.create(
+        name='Myrcene',
+        name_en='Myrcene',
+        name_es='Mirceno',
+    )
+
+    term, created = get_or_create_taxonomy_term(Terpene, 'Mirceno (herbal)')
+
+    assert term == existing
+    assert created is False
+    assert Terpene.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_terpene_article_matching_uses_english_names_for_spanish_variants():
+    category = ArticleCategory.objects.create(name='Terpenes')
+    article = Article.objects.create(
+        title='Myrcene: properties',
+        text_content='Terpene content.',
+        description='Myrcene description',
+        keywords='myrcene',
+        slug='myrcene',
+    )
+    article.category.add(category)
+    spanish_variant = Terpene.objects.create(
+        name='Mirceno (herbal)',
+        name_en='Myrcene (herbal)',
+        name_es='Mirceno (herbal)',
+    )
+    pure_variant = Terpene.objects.create(
+        name='Myrcene',
+        name_en='Myrcene',
+        name_es='Mirceno',
+    )
+
+    slugs = _get_terpene_article_slugs([spanish_variant, pure_variant])
+    matches = _find_terpenes_for_article(article)
+
+    assert slugs[spanish_variant.id] == 'myrcene'
+    assert slugs[pure_variant.id] == 'myrcene'
+    assert set(matches) == {spanish_variant, pure_variant}
 
 
 @pytest.mark.django_db

@@ -12,6 +12,26 @@ TAXONOMY_NAME_ALIASES = {
         'inflamacion': 'Inflamación',
         'presion ocular': 'Presión ocular',
     },
+    'strains.Terpene': {
+        'cariofileno': 'Caryophyllene',
+        'cariofileno (picante)': 'Caryophyllene',
+        'humuleno': 'Humulene',
+        'humuleno (terroso)': 'Humulene',
+        'limoneno': 'Limonene',
+        'limoneno (citrus)': 'Limonene',
+        'limoneno (cítrico)': 'Limonene',
+        'linalool (floral)': 'Linalool',
+        'mirceno': 'Myrcene',
+        'mirceno (herbal)': 'Myrcene',
+        'ocimeno': 'Ocimene',
+        'ocimeno (dulce)': 'Ocimene',
+        'ocimeno (floral)': 'Ocimene',
+        'pineno': 'Pinene',
+        'pineno (amaderado)': 'Pinene',
+        'pineno (woody)': 'Pinene',
+        'terpinoleno': 'Terpinolene',
+        'terpinoleno (floral)': 'Terpinolene',
+    },
 }
 
 
