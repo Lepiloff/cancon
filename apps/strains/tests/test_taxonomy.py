@@ -224,3 +224,60 @@ def test_merge_negative_anxiety_migration_moves_links_and_deletes_duplicate():
         assert list(strain.negatives.all()) == [anxious]
         assert Negative.objects.filter(name__iexact='Anxiety').exists() is False
         assert Negative.objects.filter(name__iexact='Anxious').count() == 1
+
+
+@pytest.mark.django_db
+def test_consolidate_terpene_variants_migration_moves_links_and_preserves_content():
+    migration_module = importlib.import_module(
+        'apps.strains.migrations.0026_consolidate_terpene_variants'
+    )
+
+    with override('en'):
+        source = Terpene.objects.create(
+            name='Mirceno (herbal)',
+            name_en='Myrcene (herbal)',
+            name_es='Mirceno (herbal)',
+            description='Source description',
+        )
+        target = Terpene.objects.create(
+            name='Myrcene',
+            name_en='Myrcene',
+            name_es='Myrcene',
+            description='',
+        )
+        dominant_strain = Strain.objects.create(
+            name='Dominant Terpene Strain',
+            title='Dominant Terpene Strain',
+            text_content='Content',
+            description='Description',
+            keywords='terpene',
+            category='Hybrid',
+            slug='dominant-terpene-strain',
+            active=True,
+            dominant_terpene=source,
+        )
+        other_strain = Strain.objects.create(
+            name='Other Terpene Strain',
+            title='Other Terpene Strain',
+            text_content='Content',
+            description='Description',
+            keywords='terpene',
+            category='Hybrid',
+            slug='other-terpene-strain',
+            active=True,
+        )
+        other_strain.other_terpenes.add(source, target)
+
+        migration_module.consolidate_terpene_variants(django_apps, None)
+
+        dominant_strain.refresh_from_db()
+        other_strain.refresh_from_db()
+        target.refresh_from_db()
+        assert dominant_strain.dominant_terpene == target
+        assert set(other_strain.other_terpenes.all()) == {target}
+        assert other_strain.other_terpenes.count() == 1
+        assert target.name == 'Myrcene'
+        assert target.name_en == 'Myrcene'
+        assert target.name_es == 'Mirceno'
+        assert target.description == 'Source description'
+        assert Terpene.objects.filter(name__iexact='Mirceno (herbal)').exists() is False
