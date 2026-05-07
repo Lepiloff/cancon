@@ -1,18 +1,32 @@
 """Re-encode Strain hero images on S3 in-place to reduce file size.
 
-Strategy (option A — safe defaults):
-- Iterates S3 objects under the `media/strains/images/` prefix directly, so it
-  works regardless of the local DB (prod vs staging vs local dev may differ).
-- Re-encodes each file in its current actual format (detected by Pillow, not by
-  extension): WebP -> WebP q=80, JPEG -> JPEG q=85 progressive, PNG -> optimised
-  PNG (palette when safe). The S3 key name is preserved; no DB update needed.
-- Skips files below --min-kb (default 200) and files that would not shrink.
-- Writes back with Cache-Control "public, max-age=31536000, immutable" so
-  browsers/CDN cache the new version for a long time. Bucket versioning +
-  lifecycle policy (14-day noncurrent retention) give a 14-day rollback window.
+Two modes:
+
+1. Default (re-encode mode):
+   - Iterates S3 objects under the `media/strains/images/` prefix directly, so
+     it works regardless of the local DB (prod vs staging vs local dev may
+     differ).
+   - Re-encodes each file in its current actual format (detected by Pillow,
+     not by extension): WebP -> WebP q=80, JPEG -> JPEG q=85 progressive,
+     PNG -> optimised PNG (palette when safe). The S3 key name is preserved;
+     no DB update needed.
+   - Skips files below --min-kb (default 200) and files that would not shrink.
+   - Writes back with Cache-Control "public, max-age=31536000, immutable" so
+     browsers/CDN cache the new version for a long time.
+
+2. --cache-control-only:
+   - Does not re-encode; only rewrites object metadata via S3 CopyObject with
+     MetadataDirective=REPLACE. Used to retroactively apply long-cache headers
+     to files that were uploaded before compress_strain_images was introduced
+     (i.e. files with empty or short Cache-Control). Defaults to --min-kb 0.
+   - Idempotent: HEADs each object first and skips if Cache-Control already
+     matches the target. Pass --force to rewrite anyway.
+
+Bucket versioning + lifecycle policy (14-day noncurrent retention) give a
+14-day rollback window for both modes.
 
 Run with `--dry-run` first. Add `--slug foo` or `--key foo.webp` to test a
-single file.
+single file. Pass `--prefix media/articles/images/` to target other folders.
 """
 
 import io
@@ -111,8 +125,27 @@ class Command(BaseCommand):
         parser.add_argument(
             "--min-kb",
             type=int,
-            default=200,
-            help="Only touch files of at least this size (KB). Default 200.",
+            default=None,
+            help=(
+                "Only touch files of at least this size (KB). Default 200 in "
+                "re-encode mode, 0 in --cache-control-only mode."
+            ),
+        )
+        parser.add_argument(
+            "--cache-control-only",
+            action="store_true",
+            help=(
+                "Skip re-encoding; only rewrite Cache-Control metadata to "
+                f"'{LONG_CACHE}' via S3 CopyObject. Idempotent."
+            ),
+        )
+        parser.add_argument(
+            "--force",
+            action="store_true",
+            help=(
+                "With --cache-control-only, also rewrite objects whose "
+                "Cache-Control already matches the target."
+            ),
         )
         parser.add_argument(
             "--key",
@@ -143,6 +176,13 @@ class Command(BaseCommand):
         if not getattr(settings, "AWS_STORAGE_BUCKET_NAME", None):
             raise CommandError("AWS_STORAGE_BUCKET_NAME not set; enable USE_S3.")
 
+        if options["force"] and not options["cache_control_only"]:
+            raise CommandError("--force only applies with --cache-control-only.")
+
+        cache_only = options["cache_control_only"]
+        if options["min_kb"] is None:
+            options["min_kb"] = 0 if cache_only else 200
+
         bucket = settings.AWS_STORAGE_BUCKET_NAME
         s3 = _s3_client()
         dry = options["dry_run"]
@@ -156,14 +196,27 @@ class Command(BaseCommand):
         candidates = [c for c in candidates if c["size"] >= min_bytes]
         below_threshold = before_count - len(candidates)
 
+        mode_label = (
+            "CACHE-CONTROL-ONLY (DRY-RUN)" if cache_only and dry
+            else "CACHE-CONTROL-ONLY" if cache_only
+            else "DRY-RUN" if dry
+            else "WRITE"
+        )
         self.stdout.write(
-            f"Mode: {'DRY-RUN' if dry else 'WRITE'}  |  "
+            f"Mode: {mode_label}  |  "
+            f"prefix: {options['prefix']}  |  "
             f"min-kb: {options['min_kb']}  |  "
             f"candidates: {len(candidates)} "
             f"(below threshold and skipped: {below_threshold})"
         )
         self.stdout.write("-" * 80)
 
+        if cache_only:
+            self._run_cache_only(s3, bucket, candidates, options)
+        else:
+            self._run_reencode(s3, bucket, candidates, dry, limit)
+
+    def _run_reencode(self, s3, bucket, candidates, dry, limit):
         stats = {
             "processed": 0,
             "skipped_bigger": 0,
@@ -173,7 +226,7 @@ class Command(BaseCommand):
         }
 
         started = time.time()
-        for idx, cand in enumerate(candidates, start=1):
+        for cand in candidates:
             if limit and stats["processed"] >= limit:
                 break
             self._process_one(s3, bucket, cand, stats, dry)
@@ -200,6 +253,35 @@ class Command(BaseCommand):
                     f"(saved {saved // 1024} KB, -{pct:.0f}%)"
                 )
             )
+
+    def _run_cache_only(self, s3, bucket, candidates, options):
+        dry = options["dry_run"]
+        limit = options["limit"]
+        force = options["force"]
+
+        stats = {
+            "updated": 0,
+            "already_ok": 0,
+            "skipped_error": 0,
+        }
+
+        started = time.time()
+        for cand in candidates:
+            if limit and stats["updated"] >= limit:
+                break
+            self._process_cache_only(s3, bucket, cand, stats, dry, force)
+
+        elapsed = time.time() - started
+
+        self.stdout.write("-" * 80)
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"{'Would update' if dry else 'Updated'}: {stats['updated']}  |  "
+                f"already OK: {stats['already_ok']}  |  "
+                f"errors: {stats['skipped_error']}  |  "
+                f"elapsed: {elapsed:.1f}s"
+            )
+        )
 
     def _collect_candidates(self, s3, bucket, options):
         """Return list of {'key': str, 'size': int} to consider."""
@@ -289,3 +371,92 @@ class Command(BaseCommand):
             stats["total_before"] -= size
             stats["total_after"] -= new_size
             stats["processed"] -= 1
+
+    def _process_cache_only(self, s3, bucket, cand, stats, dry, force):
+        """Rewrite Cache-Control via S3 CopyObject without re-encoding the body.
+
+        HEADs the object first to (a) preserve the existing ContentType when
+        copying with MetadataDirective=REPLACE, and (b) skip files that already
+        have the target Cache-Control unless --force was passed.
+        """
+        key = cand["key"]
+        short = key.split("/")[-1]
+
+        try:
+            head = s3.head_object(Bucket=bucket, Key=key)
+        except ClientError as exc:
+            self.stderr.write(f"  [error] HEAD {short}: {exc}")
+            stats["skipped_error"] += 1
+            return
+
+        current_cc = head.get("CacheControl") or ""
+        ct = head.get("ContentType") or _guess_content_type(key)
+
+        if not force and _normalize_cc(current_cc) == _normalize_cc(LONG_CACHE):
+            self.stdout.write(f"  [keep]  {short:<60}  cc='{current_cc}'")
+            stats["already_ok"] += 1
+            return
+
+        self.stdout.write(
+            f"  [{'dry' if dry else 'ok '}]  {short:<60}  "
+            f"cc='{current_cc or '<none>'}' -> '{LONG_CACHE}'  ct='{ct}'"
+        )
+
+        if dry:
+            stats["updated"] += 1
+            return
+
+        copy_kwargs = {
+            "CopySource": {"Bucket": bucket, "Key": key},
+            "Bucket": bucket,
+            "Key": key,
+            "MetadataDirective": "REPLACE",
+            "CacheControl": LONG_CACHE,
+            "ContentType": ct,
+        }
+        # Preserve a few related headers when present so they aren't dropped by
+        # MetadataDirective=REPLACE.
+        for src_field, dst_field in (
+            ("ContentDisposition", "ContentDisposition"),
+            ("ContentEncoding", "ContentEncoding"),
+            ("ContentLanguage", "ContentLanguage"),
+        ):
+            value = head.get(src_field)
+            if value:
+                copy_kwargs[dst_field] = value
+        user_meta = head.get("Metadata") or {}
+        if user_meta:
+            copy_kwargs["Metadata"] = user_meta
+
+        try:
+            s3.copy_object(**copy_kwargs)
+        except ClientError as exc:
+            self.stderr.write(f"  [error] COPY {short}: {exc}")
+            stats["skipped_error"] += 1
+            return
+
+        stats["updated"] += 1
+
+
+_EXT_TO_CT = {
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".webp": "image/webp",
+    ".gif": "image/gif",
+    ".svg": "image/svg+xml",
+}
+
+
+def _guess_content_type(key: str) -> str:
+    suffix = Path(key).suffix.lower()
+    return _EXT_TO_CT.get(suffix, "application/octet-stream")
+
+
+def _normalize_cc(value: str) -> str:
+    """Normalize Cache-Control for idempotent comparison.
+
+    'public, max-age=31536000, immutable' and 'public,max-age=31536000,immutable'
+    are equivalent — strip whitespace around commas and lowercase.
+    """
+    return ",".join(part.strip().lower() for part in value.split(",") if part.strip())
