@@ -26,6 +26,22 @@ services:
       timeout: 3s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: canna-redis-local
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - canna-network-local
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   web:
     build: .
     container_name: canna-web-local
@@ -38,11 +54,34 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     env_file:
       - .env
     environment:
       USE_S3: ${USE_S3}
       POSTGRES_HOST: db
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
+    networks:
+      - canna-network-local
+
+  celery-worker:
+    build: .
+    container_name: canna-celery-worker-local
+    command: celery -A canna worker --loglevel=info --concurrency=${CELERY_WORKER_CONCURRENCY:-2}
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      USE_S3: ${USE_S3}
+      POSTGRES_HOST: db
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - canna-network-local
 
@@ -62,3 +101,4 @@ services:
 volumes:
   postgres_data:
   static_volume:
+  redis_data:

@@ -22,6 +22,21 @@ services:
       retries: 5
       start_period: 30s
 
+  redis:
+    image: redis:7-alpine
+    container_name: canna-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - canna-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
   web:
     build: .
     container_name: canna-web
@@ -41,6 +56,33 @@ services:
       POSTGRES_HOST: db
     depends_on:
       db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - canna-network
+
+  celery-worker:
+    build: .
+    container_name: canna-celery-worker
+    restart: unless-stopped
+    command: celery -A canna worker --loglevel=info --concurrency=${CELERY_WORKER_CONCURRENCY:-2}
+    volumes:
+      - .:/app
+      - ./logs:/app/logs
+    env_file:
+      - .env
+    environment:
+      USE_S3: ${USE_S3}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME}
+      POSTGRES_HOST: db
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - canna-network
@@ -77,3 +119,4 @@ services:
 volumes:
   static_volume:
   postgres_data:
+  redis_data:
