@@ -295,9 +295,17 @@ ANYMAIL = {
 }
 
 # Celery
+# When the console email backend is in use (the dev fallback), default to running
+# tasks eagerly so signup / password-reset work without needing a Redis broker.
+# Override explicitly with CELERY_TASK_ALWAYS_EAGER=True/False if you want to
+# exercise the broker locally with the console backend, or vice versa.
+_celery_eager_default = 'console' in EMAIL_BACKEND
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/0')
 CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', '')
-CELERY_TASK_ALWAYS_EAGER = os.environ.get('CELERY_TASK_ALWAYS_EAGER', 'False') == 'True'
+CELERY_TASK_ALWAYS_EAGER = os.environ.get(
+    'CELERY_TASK_ALWAYS_EAGER',
+    'True' if _celery_eager_default else 'False',
+) == 'True'
 CELERY_TASK_EAGER_PROPAGATES = True
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
