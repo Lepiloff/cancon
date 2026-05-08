@@ -39,3 +39,6 @@ typing_extensions>=4.11
 urllib3==2.6.3
 django-allauth[socialaccount]==65.4.1
 sentry-sdk[django]==2.25.1
+celery[redis]==5.4.0
+redis==5.2.1
+django-anymail[brevo]==12.0

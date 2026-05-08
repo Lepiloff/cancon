@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     'storages',
     'tinymce',
     'django_json_ld',
+    'anymail',
 ]
 
 SITE_ID = 1
@@ -256,10 +257,12 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_LOGIN_METHODS = {'email'}
-ACCOUNT_EMAIL_VERIFICATION = 'optional'
+ACCOUNT_EMAIL_VERIFICATION = os.environ.get('ACCOUNT_EMAIL_VERIFICATION', 'mandatory')
+ACCOUNT_EMAIL_VERIFICATION_BY_CODE_ENABLED = True
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
+ACCOUNT_ADAPTER = 'users.adapters.AccountAdapter'
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
@@ -277,8 +280,39 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-# Email backend (console for development, override in production)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Email backend
+# Production: anymail.backends.brevo.EmailBackend (HTTP API via BREVO_API_KEY)
+# Development: django.core.mail.backends.console.EmailBackend
+EMAIL_BACKEND = os.environ.get(
+    'EMAIL_BACKEND',
+    'django.core.mail.backends.console.EmailBackend',
+)
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Cannamente <noreply@cannamente.com>')
+SERVER_EMAIL = os.environ.get('SERVER_EMAIL', DEFAULT_FROM_EMAIL)
+
+ANYMAIL = {
+    'BREVO_API_KEY': os.environ.get('BREVO_API_KEY', ''),
+}
+
+# Celery
+# When the console email backend is in use (the dev fallback), default to running
+# tasks eagerly so signup / password-reset work without needing a Redis broker.
+# Override explicitly with CELERY_TASK_ALWAYS_EAGER=True/False if you want to
+# exercise the broker locally with the console backend, or vice versa.
+_celery_eager_default = 'console' in EMAIL_BACKEND
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', '')
+CELERY_TASK_ALWAYS_EAGER = os.environ.get(
+    'CELERY_TASK_ALWAYS_EAGER',
+    'True' if _celery_eager_default else 'False',
+) == 'True'
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+CELERY_TASK_TIME_LIMIT = 60
+CELERY_TASK_SOFT_TIME_LIMIT = 45
 
 TINYMCE_DEFAULT_CONFIG = {
     "height": "320px",

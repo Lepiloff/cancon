@@ -1,0 +1,67 @@
+{% extends "base_auth.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Confirmar correo" %} — Cannamente{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/auth.css' %}" />
+{% endblock %}
+
+{% block content %}
+<section class="auth-page">
+  <div class="auth-card">
+    <a href="/" class="auth-card__close" aria-label="{% trans 'Cerrar' %}">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </a>
+
+    <div class="auth-card__header">
+      <h1 class="auth-card__title">{% trans "Confirma tu correo" %}</h1>
+      <p class="auth-card__subtitle">
+        {% blocktranslate %}Hemos enviado un código a <strong>{{ email }}</strong>. Introdúcelo a continuación para activar tu cuenta.{% endblocktranslate %}
+      </p>
+    </div>
+
+    {% if form.non_field_errors %}
+    <div class="auth-errors">
+      <ul>
+        {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    {% url 'account_email_verification_sent' as action_url %}
+    <form method="post" action="{{ action_url }}" class="auth-form">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label for="{{ form.code.id_for_label }}">{% trans "Código de verificación" %}</label>
+        {{ form.code }}
+        {% if form.code.errors %}
+        <ul class="errorlist">
+          {% for error in form.code.errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+
+      {{ redirect_field }}
+
+      <button type="submit" class="auth-btn auth-btn--primary">{% trans "Confirmar" %}</button>
+    </form>
+
+    <p class="auth-card__subtitle" style="margin-top:1rem">
+      {% trans "¿No recibiste el código? Revisa tu carpeta de spam o vuelve a intentarlo en unos minutos." %}
+    </p>
+
+    {% if not cancel_url %}
+    <form id="logout-from-stage" method="post" action="{% url 'account_logout' %}" style="margin-top:0.75rem">
+      <input type="hidden" name="next" value="{% url 'account_login' %}">
+      {% csrf_token %}
+      <button type="submit" class="auth-btn auth-btn--link">{% trans "Cancelar" %}</button>
+    </form>
+    {% else %}
+    <a href="{{ cancel_url }}" class="auth-btn auth-btn--link" style="margin-top:0.75rem;display:inline-block">{% trans "Cancelar" %}</a>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
