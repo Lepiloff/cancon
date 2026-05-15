@@ -133,6 +133,12 @@ DATABASES = {
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
         'HOST': os.environ.get('POSTGRES_HOST'),
         'PORT': os.environ.get('POSTGRES_PORT'),
+        # Persistent connections: each gunicorn worker reuses the same
+        # Postgres connection for up to 60s instead of opening a new one
+        # per request. Eliminates ~10ms connect overhead under normal load
+        # and prevents multi-second connect stalls when Postgres is saturated.
+        'CONN_MAX_AGE': 60,
+        'CONN_HEALTH_CHECKS': True,
     }
 }
 
