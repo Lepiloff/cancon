@@ -6,11 +6,22 @@ Contains views that don't belong to specific apps.
 
 import json
 
-from django.http import HttpResponse, JsonResponse
 from django.conf import settings
+from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+
+
+BLOCKED_ROBOTS_USER_AGENTS = (
+    "DataForSeoBot",
+    "PetalBot",
+    "AhrefsBot",
+    "MJ12bot",
+    "DotBot",
+    "SemrushBot",
+    "TerraCotta",
+)
 
 
 def robots_txt(request):
@@ -18,8 +29,8 @@ def robots_txt(request):
     Serve robots.txt dynamically.
 
     Returns:
-        - User-agent: * (allow all bots)
-        - Allow: / (allow all pages)
+        - User-agent: * (allow search and AI discovery bots)
+        - Disallow: known high-volume SEO crawlers
         - Sitemap: link to sitemap.xml
 
     This helps search engines find and index the site correctly.
@@ -30,12 +41,19 @@ def robots_txt(request):
     lines = [
         "User-agent: *",
         "Allow: /",
-        "",
         "Disallow: /accounts/",
         "Disallow: /en/accounts/",
         "",
-        f"Sitemap: {protocol}://{domain}/sitemap.xml",
     ]
+
+    for user_agent in BLOCKED_ROBOTS_USER_AGENTS:
+        lines.extend([
+            f"User-agent: {user_agent}",
+            "Disallow: /",
+            "",
+        ])
+
+    lines.append(f"Sitemap: {protocol}://{domain}/sitemap.xml")
     return HttpResponse("\n".join(lines), content_type="text/plain")
 
 
