@@ -6,13 +6,27 @@
 {% load static %}
 <head>
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HTGQ1DC07H"></script>
+    {% block analytics %}
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-HTGQ1DC07H');
+      function loadGtag(){
+        if (window.__gtagLoaded) return;
+        window.__gtagLoaded = true;
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-HTGQ1DC07H';
+        document.head.appendChild(script);
+        gtag('js', new Date());
+        gtag('config', 'G-HTGQ1DC07H');
+      }
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGtag, { timeout: 5000 });
+      } else {
+        window.addEventListener('load', function(){ setTimeout(loadGtag, 3000); }, { once: true });
+      }
     </script>
+    {% endblock analytics %}
     <meta charset="utf-8" />
     <title>{% block title %}{% endblock %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
@@ -58,9 +72,13 @@
     <!-- Per-page LCP asset preloads (strain hero image, etc.) -->
     {% block preload %}{% endblock %}
 
+    {% block critical_css %}{% endblock %}
+
     <!-- Styles bundle (fonts + theme + auth + cookie/registration banners).
          Produced by: manage.py build_css_bundle. -->
+    {% block global_css %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/bundle_v2.css' %}" />
+    {% endblock global_css %}
 
     {% block extra_css %}{% endblock %}
 </head>
@@ -298,12 +316,14 @@
 {% endif %}
 
 {% block common_scripts %}
+    {% block legacy_vendor_scripts %}
     <script defer src="{% static 'js/jquery-3.2.0.min.js' %}"></script>
     <script defer src="{% static 'js/jquery.raty.js' %}"></script>
     <script defer src="{% static 'js/util.js' %}"></script>
     <script defer src="{% static 'js/collapse.js' %}"></script>
     <script defer src="{% static 'js/modal.js' %}"></script>
     <script defer src="{% static 'js/owl.carousel.min.js' %}"></script>
+    {% endblock legacy_vendor_scripts %}
     <script defer src="{% static 'js/search-dropdown.js' %}"></script>
     <script type="text/javascript">
         var starOnUrl = "{% static 'img/raty_on.svg' %}";
@@ -397,8 +417,83 @@
             resumeChat: '{% trans "Continuar chat" %}'
         };
     </script>
-    <script defer src="{% static 'js/chat-placeholders.js' %}"></script>
-    <script defer src="{% static 'js/chat-fullscreen.js' %}"></script>
+    <script>
+        (function() {
+            var loaded = false;
+            var loading = null;
+            var queue = [];
+
+            function loadScript(src) {
+                return new Promise(function(resolve, reject) {
+                    var script = document.createElement('script');
+                    script.src = src;
+                    script.defer = true;
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.body.appendChild(script);
+                });
+            }
+
+            function flushQueue() {
+                var pending = queue.slice();
+                queue.length = 0;
+                pending.forEach(function(args) {
+                    if (window.openFullscreenChat) {
+                        window.openFullscreenChat.apply(window, args);
+                    }
+                });
+            }
+
+            window.loadFullscreenChat = function() {
+                if (loaded) {
+                    return Promise.resolve();
+                }
+                if (!loading) {
+                    loading = loadScript("{% static 'js/chat-placeholders.js' %}")
+                        .then(function() {
+                            return loadScript("{% static 'js/chat-fullscreen.js' %}");
+                        })
+                        .then(function() {
+                            loaded = true;
+                            flushQueue();
+                        });
+                }
+                return loading;
+            };
+
+            window.openFullscreenChat = function() {
+                queue.push(Array.prototype.slice.call(arguments));
+                window.loadFullscreenChat();
+            };
+
+            function hasActiveChatSession() {
+                try {
+                    var timestamp = localStorage.getItem('ai-budtender-chat-ts');
+                    if (!timestamp) return false;
+                    var age = Date.now() - parseInt(timestamp, 10);
+                    return age >= 0 && age < 60 * 60 * 1000;
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            function showResumeFabIfNeeded() {
+                var resumeFab = document.getElementById('chat-resume-fab');
+                if (resumeFab && hasActiveChatSession()) {
+                    resumeFab.classList.add('chat-resume-fab--visible');
+                }
+            }
+
+            showResumeFabIfNeeded();
+
+            document.addEventListener('click', function(event) {
+                var trigger = event.target.closest('#chat-resume-fab, [data-chat-trigger]');
+                if (!trigger || loaded) return;
+                event.preventDefault();
+                window.openFullscreenChat('');
+            }, true);
+        })();
+    </script>
     {% endif %}
 {% endblock common_scripts %}
 

@@ -10,12 +10,15 @@
     }
 
     function openChatWithQuery(query) {
-        if (!window.openFullscreenChat) return;
-        window.openFullscreenChat(query);
-        setTimeout(function() {
-            var fsSend = document.getElementById('chat-fullscreen-send');
-            if (fsSend) fsSend.click();
-        }, 300);
+        var ready = window.loadFullscreenChat ? window.loadFullscreenChat() : Promise.resolve();
+        ready.then(function() {
+            if (!window.openFullscreenChat) return;
+            window.openFullscreenChat(query);
+            setTimeout(function() {
+                var fsSend = document.getElementById('chat-fullscreen-send');
+                if (fsSend) fsSend.click();
+            }, 300);
+        });
     }
 
     function sendHeroMessage() {
